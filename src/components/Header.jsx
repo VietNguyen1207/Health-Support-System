@@ -33,13 +33,7 @@ const Header = () => {
             <i className="fas fa-home"></i>
             <span>Home</span>
           </Link>
-          <Link
-            to="/about"
-            className={`nav-link ${
-              location.pathname === "/about" ? "active" : ""
-            }`}
-            onClick={() => setIsMenuOpen(false)}
-          >
+          <Link to="/about">
             <i className="fas fa-info-circle"></i>
             <span>About</span>
           </Link>
