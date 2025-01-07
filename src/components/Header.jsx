@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../theme/Header.css";
 
@@ -19,8 +19,7 @@ const Header = () => {
         <button
           className="mobile-menu-button"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu"
-        >
+          aria-label="Toggle menu">
           <span className="hamburger-icon"></span>
         </button>
 
@@ -28,8 +27,7 @@ const Header = () => {
           <Link
             to="/"
             className={`nav-link ${location.pathname === "/" ? "active" : ""}`}
-            onClick={() => setIsMenuOpen(false)}
-          >
+            onClick={() => setIsMenuOpen(false)}>
             <i className="fas fa-home"></i>
             <span>Home</span>
           </Link>
@@ -38,8 +36,7 @@ const Header = () => {
             className={`nav-link ${
               location.pathname === "/about" ? "active" : ""
             }`}
-            onClick={() => setIsMenuOpen(false)}
-          >
+            onClick={() => setIsMenuOpen(false)}>
             <i className="fas fa-info-circle"></i>
             <span>About</span>
           </Link>
@@ -48,8 +45,7 @@ const Header = () => {
             className={`nav-link ${
               location.pathname === "/services" ? "active" : ""
             }`}
-            onClick={() => setIsMenuOpen(false)}
-          >
+            onClick={() => setIsMenuOpen(false)}>
             <i className="fas fa-hands-helping"></i>
             <span>Services</span>
           </Link>
@@ -58,8 +54,7 @@ const Header = () => {
             className={`nav-link ${
               location.pathname === "/dashboard" ? "active" : ""
             }`}
-            onClick={() => setIsMenuOpen(false)}
-          >
+            onClick={() => setIsMenuOpen(false)}>
             <i className="fas fa-chart-line"></i>
             <span>Dashboard</span>
           </Link>
@@ -68,8 +63,7 @@ const Header = () => {
             className={`nav-link book-now ${
               location.pathname === "/book-appointment" ? "active" : ""
             }`}
-            onClick={() => setIsMenuOpen(false)}
-          >
+            onClick={() => setIsMenuOpen(false)}>
             <i className="fas fa-calendar-check"></i>
             <span>Book Now</span>
           </Link>
@@ -78,8 +72,7 @@ const Header = () => {
             className={`nav-link ${
               location.pathname === "/contact" ? "active" : ""
             }`}
-            onClick={() => setIsMenuOpen(false)}
-          >
+            onClick={() => setIsMenuOpen(false)}>
             <i className="fas fa-envelope"></i>
             <span>Contact</span>
           </Link>

@@ -1,36 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Home() {
   const [resources, setResources] = useState([]);
   const [counselors, setCounselors] = useState([]);
-
-  useEffect(() => {
-    const initializePage = async () => {
-      try {
-        const fetchedResources = await MentalHealthDB.getResources();
-        const fetchedCounselors = await MentalHealthDB.getCounselors();
-        setResources(fetchedResources);
-        setCounselors(fetchedCounselors);
-      } catch (error) {
-        console.error("Error initializing page:", error);
-      }
-    };
-
-    initializePage();
-  }, []);
-
-  const handleSearch = async (e) => {
-    const searchQuery = e.target.value;
-    const searchResults = await MentalHealthDB.searchResources(searchQuery);
-    setResources(searchResults);
-  };
-
-  const handleCategoryFilter = async (e) => {
-    const category = e.target.value;
-    const filteredResources = await MentalHealthDB.filterByCategory(category);
-    setResources(filteredResources);
-  };
 
   return (
     <>
