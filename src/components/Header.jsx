@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../theme/Header.css";
 
@@ -31,7 +31,12 @@ const Header = () => {
             <i className="fas fa-home"></i>
             <span>Home</span>
           </Link>
-          <Link to="/about">
+          <Link
+            to="/about"
+            className={`nav-link ${
+              location.pathname === "/about" ? "active" : ""
+            }`}
+            onClick={() => setIsMenuOpen(false)}>
             <i className="fas fa-info-circle"></i>
             <span>About</span>
           </Link>
