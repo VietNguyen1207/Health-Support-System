@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Home from "./pages/Home";
 import "./App.css";
 import About from "./pages/About";
+import Service from "./pages/Service";
 import Footer from "./components/Footer";
 import Contact from "./pages/Contact";
 import Register from "./auth/Register";
@@ -18,6 +19,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/services" element={<Service />} />
       </Routes>
       <Footer />
     </Router>
