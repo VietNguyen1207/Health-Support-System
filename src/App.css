@@ -186,19 +186,19 @@ body::-webkit-scrollbar {
 }
 /* Footer */
 .footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: var(--matcha-dark);
   color: var(--white);
   padding: 1rem 0;
   width: 100%;
-  height: auto;
-  position: relative;
-  bottom: 0;
-  overflow: hidden;
-  z-index: 1;
+  z-index: 10;
 }
 
 .footer-container {
-  max-width: 1200px;
+  max-width: 90%;
   margin: 0 auto;
   padding: 0 2rem;
 }
@@ -386,11 +386,8 @@ body.is-student .student-only {
 
 /* Main Content Styles */
 .main-wrapper {
-  margin-top: 92px; /* Match navbar height */
-  flex: 1; /* Take remaining space */
-  width: 100%;
   position: relative;
-  z-index: 1;
+  min-height: fit-content;
 }
 
 #mainContent {
@@ -416,12 +413,10 @@ body.is-student .student-only {
 
 /* Page Content Padding */
 .page-content {
-  min-height: calc(
-    100vh - 92px - 48px
-  ); /* Viewport height minus navbar and footer */
   padding: 2rem;
   width: 100%;
   margin: 0 auto;
+  padding-bottom: 200px;
 }
 
 /* Adjust hero section bottom spacing */

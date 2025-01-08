@@ -6,7 +6,7 @@ export default function Home() {
   const [counselors, setCounselors] = useState([]);
 
   return (
-    <>
+    <div className="main-wrapper">
       <div className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">Mental Health Resources</h1>
@@ -114,6 +114,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
