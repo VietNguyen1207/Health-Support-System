@@ -1,6 +1,6 @@
 export default function About() {
   return (
-    <div>
+    <div className="main-wrapper general-wrapper">
       <div className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">About MindCare</h1>

@@ -23,58 +23,60 @@ export default function Register() {
   };
 
   return (
-    <div className="container content">
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit} className="mt-4">
-        <div className="form-group">
-          <label className="form-label">Username</label>
-          <input
-            type="text"
-            name="username"
-            className="form-control"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Email</label>
-          <input
-            type="email"
-            name="email"
-            className="form-control"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Password</label>
-          <input
-            type="password"
-            name="password"
-            className="form-control"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">User Type</label>
-          <select
-            className="form-control"
-            name="userType"
-            value={formData.userType}
-            onChange={handleChange}
-            required>
-            <option value="student">Student</option>
-            <option value="parent">Parent</option>
-          </select>
-        </div>
-        <button type="submit" className="btn">
-          Register
-        </button>
-      </form>
+    <div className="main-wrapper general-wrapper">
+      <div className="container page-content">
+        <h2>Register</h2>
+        <form onSubmit={handleSubmit} className="mt-4">
+          <div className="form-group">
+            <label className="form-label">Username</label>
+            <input
+              type="text"
+              name="username"
+              className="form-control"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              name="email"
+              className="form-control"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Password</label>
+            <input
+              type="password"
+              name="password"
+              className="form-control"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">User Type</label>
+            <select
+              className="form-control"
+              name="userType"
+              value={formData.userType}
+              onChange={handleChange}
+              required>
+              <option value="student">Student</option>
+              <option value="parent">Parent</option>
+            </select>
+          </div>
+          <button type="submit" className="btn">
+            Register
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
