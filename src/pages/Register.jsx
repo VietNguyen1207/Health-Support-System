@@ -4,9 +4,11 @@ import "../style/Register.css";
 export default function Register() {
   // Add state management
   const [formData, setFormData] = useState({
-    username: "",
+    fullname: "",
     email: "",
     password: "",
+    rePassword: "",
+    dateOfBirth: "",
     userType: "student",
   });
 
@@ -32,9 +34,9 @@ export default function Register() {
             <label className="form-label">Full Name</label>
             <input
               type="text"
-              name="username"
+              name="fullname"
               className="form-control"
-              value={formData.username}
+              value={formData.fullname}
               onChange={handleChange}
               required
             />
@@ -46,6 +48,17 @@ export default function Register() {
               name="email"
               className="form-control"
               value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Date of Birth</label>
+            <input
+              type="datetime-local"
+              name="date-of-birth"
+              className="form-control"
+              value={formData.password}
               onChange={handleChange}
               required
             />
@@ -65,9 +78,9 @@ export default function Register() {
             <label className="form-label">Confirm Password</label>
             <input
               type="password"
-              name="password"
+              name="re-password"
               className="form-control"
-              value={formData.password}
+              value={formData.rePassword}
               onChange={handleChange}
               required
             />
