@@ -52,6 +52,12 @@
   margin-bottom: 1rem;
 }
 
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .login-button {
   width: 100%;
   padding: 0.75rem;

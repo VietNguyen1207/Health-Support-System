@@ -68,11 +68,12 @@ const Login = () => {
               checked={formData.rememberMe}
               onChange={handleChange}
             />
+
             <label htmlFor="rememberMe">Remember me</label>
           </div>
 
           <button type="submit" className="login-button">
-            Login
+            Sign In
           </button>
         </form>
 
