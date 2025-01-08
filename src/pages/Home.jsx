@@ -6,7 +6,7 @@ export default function Home() {
   const [counselors, setCounselors] = useState([]);
 
   return (
-    <div className="main-wrapper general-wrapper">
+    <div className="general-wrapper">
       <div className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">Mental Health Resources</h1>

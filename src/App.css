@@ -26,7 +26,7 @@ body {
   color: var(--text-dark);
   line-height: 1.6;
   overflow: scroll;
-  height: calc(100vh + 120px); /* Full viewport height */
+  height: 100vh; /* Full viewport height */
   display: flex;
   place-items: unset;
   flex-direction: column;
@@ -133,7 +133,6 @@ body {
   padding: 4rem 2rem 2rem;
   text-align: center;
   margin-bottom: 2rem;
-  margin-top: 4rem;
 }
 
 .hero-content {
@@ -348,7 +347,6 @@ body.is-student .student-only {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
   padding: 2rem;
-  margin-top: 0;
 }
 
 .service-card {
@@ -417,8 +415,7 @@ body.is-student .student-only {
   padding: 2rem;
   width: 100%;
   margin: 0 auto;
-  padding-top: 0.5rem;
-  padding-bottom: 200px;
+  /* padding-bottom: 200px;    */
 }
 
 /* Adjust hero section bottom spacing */
@@ -973,5 +970,6 @@ h3 {
 
 /* padding bottom */
 .general-wrapper {
-  padding-bottom: 100px;
+  padding-bottom: 80px;
+  margin-top: 4rem;
 }

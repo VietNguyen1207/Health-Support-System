@@ -9,7 +9,7 @@ import {
 
 const Service = () => {
   return (
-    <div className="main-wrapper general-wrapper">
+    <div className="general-wrapper">
       <div className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">Our Services</h1>
