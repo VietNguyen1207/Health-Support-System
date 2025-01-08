@@ -1,0 +1,283 @@
+{
+    "mental_health_resources": [
+        {
+            "id": 1,
+            "title": "Stress Management Guide",
+            "category": "Self Help",
+            "description": "Learn effective techniques for managing academic stress",
+            "type": "Article",
+            "recommended_for": ["students", "parents"]
+        },
+        {
+            "id": 2,
+            "title": "Anxiety Support Group",
+            "category": "Support Groups",
+            "description": "Weekly online meetings for students dealing with anxiety",
+            "type": "Program",
+            "schedule": "Every Wednesday at 4 PM"
+        },
+        {
+            "id": 3,
+            "title": "Mindfulness Meditation",
+            "category": "Wellness",
+            "description": "Daily guided meditation sessions for mental clarity",
+            "type": "Activity",
+            "duration": "15 minutes"
+        },
+        {
+            "id": 4,
+            "title": "Depression Screening",
+            "category": "Assessment",
+            "description": "Professional assessment tools for depression",
+            "type": "Tool",
+            "recommended_for": ["students"]
+        },
+        {
+            "id": 5,
+            "title": "Sleep Hygiene Workshop",
+            "category": "Wellness",
+            "description": "Learn effective techniques for better sleep quality",
+            "type": "Workshop",
+            "duration": "45 minutes",
+            "recommended_for": ["all students"]
+        },
+        {
+            "id": 6,
+            "title": "Peer Support Network",
+            "category": "Support Groups",
+            "description": "Connect with fellow students for mutual support",
+            "type": "Program",
+            "schedule": "Daily drop-in hours"
+        },
+        {
+            "id": 7,
+            "title": "Test Anxiety Management",
+            "category": "Self Help",
+            "description": "Strategies to cope with exam-related stress",
+            "type": "Guide",
+            "recommended_for": ["students"]
+        },
+        {
+            "id": 8,
+            "title": "Family Communication Workshop",
+            "category": "Support Groups",
+            "description": "Improve communication with family members",
+            "type": "Workshop",
+            "schedule": "Monthly sessions"
+        },
+        {
+            "id": 9,
+            "title": "Digital Wellness Guide",
+            "category": "Wellness",
+            "description": "Managing screen time and digital stress",
+            "type": "Article",
+            "recommended_for": ["students", "parents"]
+        },
+        {
+            "id": 10,
+            "title": "Social Media Impact Assessment",
+            "category": "Assessment",
+            "description": "Evaluate how social media affects your mental health",
+            "type": "Tool",
+            "duration": "20 minutes"
+        },
+        {
+            "id": 11,
+            "title": "Healthy Relationships Workshop",
+            "category": "Support Groups",
+            "description": "Building and maintaining healthy relationships",
+            "type": "Workshop",
+            "schedule": "Bi-weekly sessions"
+        },
+        {
+            "id": 12,
+            "title": "Time Management Skills",
+            "category": "Self Help",
+            "description": "Effective strategies for balancing academics and life",
+            "type": "Guide",
+            "recommended_for": ["students"]
+        },
+        {
+            "id": 13,
+            "title": "Mindful Eating Program",
+            "category": "Wellness",
+            "description": "Developing healthy eating habits and relationship with food",
+            "type": "Program",
+            "duration": "6 weeks"
+        },
+        {
+            "id": 14,
+            "title": "Grief Support Group",
+            "category": "Support Groups",
+            "description": "Support for students dealing with loss",
+            "type": "Program",
+            "schedule": "Weekly meetings"
+        },
+        {
+            "id": 15,
+            "title": "Identity and Self-Expression",
+            "category": "Self Help",
+            "description": "Exploring and embracing personal identity",
+            "type": "Workshop",
+            "duration": "90 minutes"
+        },
+        {
+            "id": 16,
+            "title": "Conflict Resolution Skills",
+            "category": "Self Help",
+            "description": "Learning to handle disagreements constructively",
+            "type": "Guide",
+            "recommended_for": ["all students"]
+        },
+        {
+            "id": 17,
+            "title": "Substance Use Prevention",
+            "category": "Wellness",
+            "description": "Education and prevention strategies",
+            "type": "Program",
+            "duration": "8 weeks"
+        },
+        {
+            "id": 18,
+            "title": "LGBTQ+ Support Group",
+            "category": "Support Groups",
+            "description": "Safe space for LGBTQ+ students",
+            "type": "Program",
+            "schedule": "Weekly meetings"
+        },
+        {
+            "id": 19,
+            "title": "Cultural Adjustment Support",
+            "category": "Support Groups",
+            "description": "Help for international and multicultural students",
+            "type": "Program",
+            "schedule": "Bi-weekly sessions"
+        },
+        {
+            "id": 20,
+            "title": "Body Image Workshop",
+            "category": "Wellness",
+            "description": "Promoting positive body image and self-acceptance",
+            "type": "Workshop",
+            "duration": "60 minutes"
+        },
+        {
+            "id": 21,
+            "title": "Academic Resilience Training",
+            "category": "Self Help",
+            "description": "Building academic confidence and resilience",
+            "type": "Program",
+            "duration": "4 weeks"
+        },
+        {
+            "id": 22,
+            "title": "Seasonal Affective Disorder Support",
+            "category": "Support Groups",
+            "description": "Coping with seasonal mood changes",
+            "type": "Program",
+            "schedule": "Seasonal sessions"
+        },
+        {
+            "id": 23,
+            "title": "Digital Detox Challenge",
+            "category": "Wellness",
+            "description": "Guided program for healthy tech habits",
+            "type": "Program",
+            "duration": "30 days"
+        },
+        {
+            "id": 24,
+            "title": "Emotional Intelligence Development",
+            "category": "Self Help",
+            "description": "Enhancing emotional awareness and regulation",
+            "type": "Workshop",
+            "duration": "75 minutes"
+        }
+    ],
+    "counselors": [
+        {
+            "id": 1,
+            "name": "Dr. Sarah Johnson",
+            "specialization": "Academic Stress",
+            "availability": "Mon-Wed",
+            "experience": "10 years"
+        },
+        {
+            "id": 2,
+            "name": "Dr. Michael Chen",
+            "specialization": "Anxiety & Depression",
+            "availability": "Thu-Fri",
+            "experience": "8 years"
+        },
+        {
+            "id": 3,
+            "name": "Dr. Emily Rodriguez",
+            "specialization": "Family Dynamics",
+            "availability": "Mon-Thu",
+            "experience": "12 years"
+        },
+        {
+            "id": 4,
+            "name": "Dr. James Thompson",
+            "specialization": "Teen Depression",
+            "availability": "Wed-Fri",
+            "experience": "15 years"
+        },
+        {
+            "id": 5,
+            "name": "Dr. Lisa Wong",
+            "specialization": "Cultural Adjustment",
+            "availability": "Tue-Thu",
+            "experience": "9 years"
+        },
+        {
+            "id": 6,
+            "name": "Dr. Marcus Brown",
+            "specialization": "LGBTQ+ Support",
+            "availability": "Mon-Wed",
+            "experience": "7 years"
+        },
+        {
+            "id": 7,
+            "name": "Dr. Rachel Green",
+            "specialization": "Eating Disorders",
+            "availability": "Thu-Sat",
+            "experience": "11 years"
+        },
+        {
+            "id": 8,
+            "name": "Dr. David Kim",
+            "specialization": "Social Anxiety",
+            "availability": "Mon-Fri",
+            "experience": "6 years"
+        },
+        {
+            "id": 9,
+            "name": "Dr. Amanda Martinez",
+            "specialization": "Grief Counseling",
+            "availability": "Tue-Fri",
+            "experience": "13 years"
+        },
+        {
+            "id": 10,
+            "name": "Dr. Thomas Wilson",
+            "specialization": "Test Anxiety",
+            "availability": "Mon-Thu",
+            "experience": "8 years"
+        },
+        {
+            "id": 11,
+            "name": "Dr. Sophia Patel",
+            "specialization": "Identity Development",
+            "availability": "Wed-Sat",
+            "experience": "10 years"
+        },
+        {
+            "id": 12,
+            "name": "Dr. Robert Taylor",
+            "specialization": "Substance Use Prevention",
+            "availability": "Mon-Wed",
+            "experience": "14 years"
+        }
+    ]
+} 
