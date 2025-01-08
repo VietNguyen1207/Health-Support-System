@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import "../theme/Login.css";
+import "../style/Login.css";
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    username: "",
+    email: "",
     password: "",
     rememberMe: false,
   });
@@ -29,16 +29,16 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label" htmlFor="username">
-              Username
+            <label className="form-label" htmlFor="email">
+              Email
             </label>
             <input
               type="text"
-              id="username"
-              name="username"
+              id="email"
+              name="email"
               className="form-input"
-              placeholder="Enter your username"
-              value={formData.username}
+              placeholder="Enter your Email"
+              value={formData.email}
               onChange={handleChange}
               required
             />

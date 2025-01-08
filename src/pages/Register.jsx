@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../theme/Register.css";
+import "../style/Register.css";
 
 export default function Register() {
   // Add state management
@@ -67,7 +67,8 @@ export default function Register() {
             name="userType"
             value={formData.userType}
             onChange={handleChange}
-            required>
+            required
+          >
             <option value="student">Student</option>
             <option value="parent">Parent</option>
           </select>
