@@ -184,6 +184,6 @@
 
 /* Ensure content doesn't hide under header */
 main {
-  margin-top: 70px;
+  padding-top: 70px;
   min-height: calc(100vh - 70px);
 }

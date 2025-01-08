@@ -28,7 +28,6 @@ const Header = () => {
             to="/"
             className={`nav-link ${location.pathname === "/" ? "active" : ""}`}
             onClick={() => setIsMenuOpen(false)}>
-            <i className="fas fa-home"></i>
             <span>Home</span>
           </Link>
           <Link
@@ -37,7 +36,6 @@ const Header = () => {
               location.pathname === "/about" ? "active" : ""
             }`}
             onClick={() => setIsMenuOpen(false)}>
-            <i className="fas fa-info-circle"></i>
             <span>About</span>
           </Link>
           <Link
@@ -46,7 +44,6 @@ const Header = () => {
               location.pathname === "/services" ? "active" : ""
             }`}
             onClick={() => setIsMenuOpen(false)}>
-            <i className="fas fa-hands-helping"></i>
             <span>Services</span>
           </Link>
           <Link
@@ -55,17 +52,7 @@ const Header = () => {
               location.pathname === "/dashboard" ? "active" : ""
             }`}
             onClick={() => setIsMenuOpen(false)}>
-            <i className="fas fa-chart-line"></i>
             <span>Dashboard</span>
-          </Link>
-          <Link
-            to="/book-appointment"
-            className={`nav-link book-now ${
-              location.pathname === "/book-appointment" ? "active" : ""
-            }`}
-            onClick={() => setIsMenuOpen(false)}>
-            <i className="fas fa-calendar-check"></i>
-            <span>Book Now</span>
           </Link>
           <Link
             to="/contact"
@@ -73,9 +60,24 @@ const Header = () => {
               location.pathname === "/contact" ? "active" : ""
             }`}
             onClick={() => setIsMenuOpen(false)}>
-            <i className="fas fa-envelope"></i>
             <span>Contact</span>
           </Link>
+          <Link
+            to="/book-appointment"
+            className={`nav-link book-now ${
+              location.pathname === "/book-appointment" ? "active" : ""
+            }`}
+            onClick={() => setIsMenuOpen(false)}>
+            <span>Book Now</span>
+          </Link>
+          <div className="nav-actions" id="authButtons">
+            <Link to="/register" className="btn btn-outline">
+              Sign Up
+            </Link>
+            <Link to="/login" className="btn btn-primary">
+              Login
+            </Link>
+          </div>
         </nav>
       </div>
     </header>
