@@ -1,7 +1,9 @@
+import "../theme/Footer.css";
+
 export default function Footer() {
   return (
     <div className="main-wrapper">
-      <div className="footer">
+      <footer className="footer mt-auto">
         <div className="footer-container">
           <div className="footer-grid">
             <div className="footer-section">
@@ -55,7 +57,7 @@ export default function Footer() {
             </div>
           </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
