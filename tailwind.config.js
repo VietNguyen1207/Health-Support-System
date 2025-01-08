@@ -2,9 +2,13 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        "custom-green": "#4a7c59",
+      },
+    },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/forms")],
   daisyui: {
     themes: ["light"],
   },

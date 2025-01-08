@@ -39,114 +39,12 @@ const Booking = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8 pb-2 border-b">
+      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+        <h2 className="text-2xl font-bold text-custom-green mb-8 pb-2 border-b">
           Book an Appointment
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Personal Information Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-700">
-              Personal Information
-            </h3>
-
-            <div>
-              <label
-                htmlFor="fullName"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                id="fullName"
-                required
-                value={formData.fullName}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="dateOfBirth"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Date of Birth
-              </label>
-              <input
-                type="date"
-                name="dateOfBirth"
-                id="dateOfBirth"
-                required
-                value={formData.dateOfBirth}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Gender
-              </label>
-              <div className="space-x-4">
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    name="gender"
-                    value="male"
-                    checked={formData.gender === "male"}
-                    onChange={handleChange}
-                    className="form-radio text-blue-600"
-                  />
-                  <span className="ml-2">Male</span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    name="gender"
-                    value="female"
-                    checked={formData.gender === "female"}
-                    onChange={handleChange}
-                    className="form-radio text-blue-600"
-                  />
-                  <span className="ml-2">Female</span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    name="gender"
-                    value="other"
-                    checked={formData.gender === "other"}
-                    onChange={handleChange}
-                    className="form-radio text-blue-600"
-                  />
-                  <span className="ml-2">Other</span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="phoneNumber"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                name="phoneNumber"
-                id="phoneNumber"
-                required
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
           {/* Appointment Details Section */}
           <div className="space-y-4 pt-6">
             <h3 className="text-lg font-semibold text-gray-700">
@@ -264,7 +162,7 @@ const Booking = () => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green hover:bg-custom-green/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-green"
             >
               Book Appointment
             </button>
