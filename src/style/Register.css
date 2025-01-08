@@ -1,7 +1,6 @@
 .register-container {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   background-color: #f3f4f6;
@@ -12,9 +11,9 @@
 .register-box {
   background-color: white;
   padding: 2rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  min-width: 30rem;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 800px;
 }
 
 .register-container h2 {
@@ -24,15 +23,23 @@
   font-size: 2rem;
 }
 
-.form-group {
+.login-text {
   margin-bottom: 1.5rem;
 }
 
-.form-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--text-dark);
-  font-weight: 500;
+.login-text a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  /* margin-bottom: 1rem; */
+}
+
+.form-group {
+  flex: 1;
 }
 
 .form-control {
@@ -56,9 +63,7 @@
   background: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 1rem;
@@ -67,4 +72,15 @@
 .register-btn:hover {
   background: var(--matcha-dark);
   transform: translateY(-2px);
+}
+
+.radio-group {
+  display: flex;
+  gap: 5rem;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
