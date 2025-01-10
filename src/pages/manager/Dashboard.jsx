@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import studentData from "../data/student-data.json";
+import studentData from "../../data/student-data.json";
 
 export default function Dashboard() {
   const [students, setStudents] = useState([]);
