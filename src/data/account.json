@@ -1,0 +1,44 @@
+{
+  "user": [
+    {
+      "id": 1,
+      "name": "Manager",
+      "email": "manager@example.com",
+      "role": "manager",
+      "created_at": "2024-01-01",
+      "updated_at": "2024-01-01",
+      "password": "123456",
+      "token": "m123"
+    },
+    {
+      "id": 2,
+      "name": "Student",
+      "email": "student@example.com",
+      "role": "student",
+      "created_at": "2024-01-01",
+      "updated_at": "2024-01-01",
+      "password": "123456",
+      "token": "st123"
+    },
+    {
+      "id": 3,
+      "name": "Parent",
+      "email": "parent@example.com",
+      "role": "parent",
+      "created_at": "2024-01-01",
+      "updated_at": "2024-01-01",
+      "password": "123456",
+      "token": "pa123"
+    },
+    {
+      "id": 4,
+      "name": "psychologist",
+      "email": "psychologist@example.com",
+      "role": "psychologist",
+      "created_at": "2024-01-01",
+      "updated_at": "2024-01-01",
+      "password": "123456",
+      "token": "ps123"
+    }
+  ]
+}

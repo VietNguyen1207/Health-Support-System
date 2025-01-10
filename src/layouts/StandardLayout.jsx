@@ -1,12 +1,3 @@
-// import { Layout, Menu, Button, theme } from "antd";
-// import { Outlet, useNavigate } from "react-router-dom";
-// import {
-//   LogoutOutlined,
-//   UserOutlined,
-//   HomeOutlined,
-//   ContactsOutlined,
-// } from "@ant-design/icons";
-// import { useAuthStore } from "../stores/authStore";
 import { Outlet } from "react-router-dom";
 import { Layout } from "antd";
 import Header from "../components/Header";
