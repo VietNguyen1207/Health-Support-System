@@ -69,7 +69,6 @@ const Test = () => {
   };
 
   const handleStartTest = (testId) => {
-    // Add your navigation logic here
     console.log("Starting test:", testId);
   };
 
