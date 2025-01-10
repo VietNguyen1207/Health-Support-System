@@ -12,7 +12,8 @@ function App() {
         token: {
           colorPrimary: "#2f7a39",
         },
-      }}>
+      }}
+    >
       {element}
     </ConfigProvider>
   );

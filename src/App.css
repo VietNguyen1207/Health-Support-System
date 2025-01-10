@@ -188,7 +188,7 @@ body::-webkit-scrollbar {
   display: none;
 }
 /* Footer */
-.footer {
+/* .footer {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -198,7 +198,7 @@ body::-webkit-scrollbar {
   padding: 1rem 0;
   width: 100%;
   z-index: 10;
-}
+} */
 
 .footer-container {
   max-width: 90%;
@@ -493,6 +493,10 @@ body.is-student .student-only {
 }
 
 .contact-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   background: var(--white);
   padding: 1.5rem;
   border-radius: 12px;
@@ -974,6 +978,6 @@ h3 {
 
 /* padding bottom */
 .general-wrapper {
-  padding-bottom: 16rem;
+  padding-bottom: 5rem;
   margin-top: 4rem;
 }

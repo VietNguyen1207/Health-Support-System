@@ -92,7 +92,8 @@ const Header = () => {
         {/*  <button
           className="mobile-menu-button"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu">
+          aria-label="Toggle menu"
+        >
           <span className="hamburger-icon"></span>
         </button> */}
 
@@ -124,7 +125,8 @@ const Header = () => {
             className={`nav-link ${
               location.pathname === "/dashboard" ? "active" : ""
             }`}
-            onClick={() => setIsMenuOpen(false)}>
+            onClick={() => setIsMenuOpen(false)}
+          >
             <span>Dashboard</span>
           </Link> */}
           <Link
@@ -134,6 +136,14 @@ const Header = () => {
             }`}
             onClick={() => setIsMenuOpen(false)}>
             <span>Contact</span>
+          </Link>
+          <Link
+            to="/test"
+            className={`nav-link ${
+              location.pathname === "/test" ? "active" : ""
+            }`}
+            onClick={() => setIsMenuOpen(false)}>
+            <span>Test</span>
           </Link>
           {!user ||
             (user.role !== "manager" && user.role !== "psychologist" && (
