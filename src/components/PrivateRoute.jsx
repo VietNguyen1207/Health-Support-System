@@ -1,18 +1,20 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useAuthStore } from "../stores/authStore";
 // import Home from "../pages/Home";
 
-export const PrivateRoute = ({ children, allowedRoles }) => {
-  const { user } = useAuthStore();
+export const PrivateRoute = ({ children, allowedRoles = [] }) => {
+  const location = useLocation();
+  const { isAuthenticated, user } = useAuthStore();
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  // Kiểm tra đăng nhập
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
-    // Redirect to home page if user doesn't have required role
-    return <Navigate to="/" replace />;
+  // Kiểm tra quyền (nếu có)
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return children;
