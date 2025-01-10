@@ -82,9 +82,13 @@ export const StandardLayout = () => {
         )}
       </Header> */}
       <Layout style={{ minHeight: "100vh" }}>
-        <Header />
-        <Outlet />
-        <Footer />
+        <div className="main-wrapper">
+          <Header />
+          <div className="content">
+            <Outlet />
+          </div>
+          <Footer />
+        </div>
       </Layout>
     </>
   );

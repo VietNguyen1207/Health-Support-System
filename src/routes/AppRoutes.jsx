@@ -11,6 +11,7 @@ import Service from "../pages/Service";
 import Login from "../pages/Login";
 import { Unauthorized } from "../pages/Unauthorized";
 import Booking from "../pages/Booking";
+import Test from "../pages/Test";
 
 export const routes = [
   {
@@ -23,6 +24,7 @@ export const routes = [
       { path: "services", element: <Service /> },
       { path: "contact", element: <Contact /> },
       { path: "dashboard", element: <Dashboard /> },
+      { path: "test", element: <Test /> },
       { path: "book-appointment", element: <Booking /> },
       {
         path: "login",
