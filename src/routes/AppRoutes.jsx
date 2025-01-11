@@ -12,6 +12,14 @@ import Login from "../pages/Login";
 import { Unauthorized } from "../pages/Unauthorized";
 import Booking from "../pages/Booking";
 import Test from "../pages/Test";
+import { Outlet } from "react-router-dom";
+import Appointment from "../pages/psycologist/Appointment";
+import ChildrenRecord from "../pages/parent/ChildrenRecord";
+import AppointmentRecord from "../pages/student/AppointmentRecord";
+import TestRecord from "../pages/student/TestRecord";
+import PatientRecord from "../pages/psycologist/PatientRecord";
+import UserManagement from "../pages/manager/UserManagement";
+import SurveyManagement from "../pages/manager/SurveyManagement";
 
 export const routes = [
   {
@@ -23,45 +31,49 @@ export const routes = [
       { path: "about", element: <About /> },
       { path: "services", element: <Service /> },
       { path: "contact", element: <Contact /> },
-      { path: "dashboard", element: <Dashboard /> },
-      { path: "test", element: <Test /> },
-      { path: "book-appointment", element: <Booking /> },
+      // { path: "dashboard", element: <Dashboard /> },
+      { path: "login", element: <Login /> },
+      { path: "register", element: <Register /> },
+      { path: "forgot-password", element: <ForgotPassword /> },
       {
-        path: "login",
-        element: <Login />,
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["student"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [
+          { path: "test", element: <Test /> },
+          { path: "book-appointment", element: <Booking /> },
+          { path: "appointment-record", element: <AppointmentRecord /> },
+          { path: "test-record", element: <TestRecord /> },
+        ],
       },
       {
-        path: "register",
-        element: <Register />,
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["parent"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [
+          { path: "children-record", element: <ChildrenRecord /> },
+          { path: "book-appointment", element: <Booking /> },
+        ],
       },
       {
-        path: "forgot-password",
-        element: <ForgotPassword />,
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["psychologist"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [
+          { path: "appointment", element: <Appointment /> },
+          { path: "test", element: <Test /> },
+          { path: "patient-record", element: <PatientRecord /> },
+        ],
       },
-      // {
-      //   path: "student",
-      //   element: (
-      //     <PrivateRoute allowedRoles={["student"]}>
-      //       {/* <StudentDashboard /> */}
-      //     </PrivateRoute>
-      //   ),
-      // },
-      // {
-      //   path: "parent",
-      //   element: (
-      //     <PrivateRoute allowedRoles={["parent"]}>
-      //       {/* <ParentDashboard /> */}
-      //     </PrivateRoute>
-      //   ),
-      // },
-      // {
-      //   path: "psychologist",
-      //   element: (
-      //     <PrivateRoute allowedRoles={["psychologist"]}>
-      //       <PsychologistDashboard />
-      //     </PrivateRoute>
-      //   ),
-      // },
       { path: "unauthorized", element: <Unauthorized /> },
     ],
   },
@@ -74,8 +86,8 @@ export const routes = [
     ),
     children: [
       { index: true, element: <Dashboard /> },
-      //   { path: "users", element: <UserManagement /> },
-      //   { path: "surveys", element: <SurveyManagement /> },
+      { path: "users", element: <UserManagement /> },
+      { path: "surveys", element: <SurveyManagement /> },
     ],
   },
 ];

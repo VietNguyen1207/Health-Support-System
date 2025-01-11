@@ -8,6 +8,7 @@ import {
   // ContactsOutlined,
   // CustomerServiceOutlined,
   // InfoCircleOutlined,
+  SwapOutlined,
   PoweroffOutlined,
   FileDoneOutlined,
   HistoryOutlined,
@@ -19,8 +20,9 @@ const Header = () => {
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  let menuItems = [];
 
-  const items = [
+  const studentMenu = [
     {
       label: "Test Record",
       key: "test-record",
@@ -39,6 +41,65 @@ const Header = () => {
     },
   ];
 
+  const parentMenu = [
+    {
+      label: "Children Record",
+      key: "children-record",
+      icon: <UserOutlined />,
+    },
+    {
+      label: "Logout",
+      key: "logout",
+      icon: <PoweroffOutlined />,
+      danger: true,
+    },
+  ];
+
+  const psyMenu = [
+    {
+      label: "Patient Record",
+      key: "patient-record",
+      icon: <UserOutlined />,
+    },
+    {
+      label: "Logout",
+      key: "logout",
+      icon: <PoweroffOutlined />,
+      danger: true,
+    },
+  ];
+
+  const managerMenu = [
+    {
+      label: "Dashboard",
+      key: "dashboard",
+      icon: <SwapOutlined />,
+    },
+    {
+      label: "Logout",
+      key: "logout",
+      icon: <PoweroffOutlined />,
+      danger: true,
+    },
+  ];
+
+  if (user) {
+    switch (user.role) {
+      case "student":
+        menuItems = studentMenu;
+        break;
+      case "parent":
+        menuItems = parentMenu;
+        break;
+      case "psychologist":
+        menuItems = psyMenu;
+        break;
+      case "manager":
+        menuItems = managerMenu;
+        break;
+    }
+  }
+
   const handleMenuClick = (e) => {
     switch (e.key) {
       case "test-record":
@@ -46,6 +107,15 @@ const Header = () => {
         break;
       case "appointment-record":
         navigate("/appointment-record");
+        break;
+      case "patient-record":
+        navigate("/patient-record");
+        break;
+      case "children-record":
+        navigate("/children-record");
+        break;
+      case "dashboard":
+        navigate(`/${user?.role}/dashboard`);
         break;
       case "logout":
         handleLogout();
@@ -56,7 +126,7 @@ const Header = () => {
   };
 
   const menuProps = {
-    items,
+    items: menuItems,
     onClick: handleMenuClick,
   };
 
@@ -64,21 +134,6 @@ const Header = () => {
     await logout();
     navigate("/login");
   };
-
-  // const menuItems = [
-  //   { key: "/", label: "Home", icon: <HomeOutlined /> },
-  //   { key: "/contact", label: "Contact", icon: <ContactsOutlined /> },
-  //   { key: "/services", label: "Services", icon: <CustomerServiceOutlined /> },
-  //   { key: "/about", label: "About", icon: <InfoCircleOutlined /> },
-  // ];
-
-  // if (user) {
-  //   menuItems.push({
-  //     key: `/${user.role}`,
-  //     label: "Dashboard",
-  //     icon: <UserOutlined />,
-  //   });
-  // }
 
   return (
     <header className="header">
@@ -120,15 +175,6 @@ const Header = () => {
             onClick={() => setIsMenuOpen(false)}>
             <span>Services</span>
           </Link>
-          {/* <Link
-            to="/dashboard"
-            className={`nav-link ${
-              location.pathname === "/dashboard" ? "active" : ""
-            }`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <span>Dashboard</span>
-          </Link> */}
           <Link
             to="/contact"
             className={`nav-link ${
@@ -137,25 +183,45 @@ const Header = () => {
             onClick={() => setIsMenuOpen(false)}>
             <span>Contact</span>
           </Link>
-          <Link
-            to="/test"
-            className={`nav-link ${
-              location.pathname === "/test" ? "active" : ""
-            }`}
-            onClick={() => setIsMenuOpen(false)}>
-            <span>Test</span>
-          </Link>
-          {!user ||
-            (user.role !== "manager" && user.role !== "psychologist" && (
+
+          {user && user.role !== "parent" && (
+            <>
               <Link
-                to="/book-appointment"
-                className={`nav-link book-now ${
-                  location.pathname === "/book-appointment" ? "active" : ""
+                to="/test"
+                className={`nav-link ${
+                  location.pathname === "/test" ? "active" : ""
                 }`}
                 onClick={() => setIsMenuOpen(false)}>
-                <span>Book Now</span>
+                <span>Test</span>
               </Link>
-            ))}
+            </>
+          )}
+
+          {!user ||
+          (user.role !== "manager" && user.role !== "psychologist") ? (
+            <Link
+              to="/book-appointment"
+              className={`nav-link book-now ${
+                location.pathname === "/book-appointment" ? "active" : ""
+              }`}
+              onClick={() => setIsMenuOpen(false)}>
+              <span>Book Now</span>
+            </Link>
+          ) : (
+            user.role === "psychologist" && (
+              <>
+                <Link
+                  to="/appointment"
+                  className={`nav-link book-now ${
+                    location.pathname === "/appointment" ? "active" : ""
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}>
+                  <span>Appointment</span>
+                </Link>
+              </>
+            )
+          )}
+
           <div className="nav-actions" id="authButtons">
             {!user ? (
               <>
