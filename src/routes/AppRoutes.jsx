@@ -12,6 +12,7 @@ import Login from "../pages/Login";
 import { Unauthorized } from "../pages/Unauthorized";
 import Booking from "../pages/Booking";
 import Test from "../pages/Test";
+import TestQuestion from "../pages/TestQuestion";
 
 export const routes = [
   {
@@ -25,6 +26,7 @@ export const routes = [
       { path: "contact", element: <Contact /> },
       { path: "dashboard", element: <Dashboard /> },
       { path: "test", element: <Test /> },
+      { path: "test-question", element: <TestQuestion /> },
       { path: "book-appointment", element: <Booking /> },
       {
         path: "login",
