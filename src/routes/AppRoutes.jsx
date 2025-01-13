@@ -9,7 +9,7 @@ import Register from "../pages/Register";
 import ForgotPassword from "../pages/ForgotPassword";
 import Service from "../pages/Service";
 import Login from "../pages/Login";
-import { Unauthorized } from "../pages/Unauthorized";
+import { Unauthorized } from "../pages/error/Unauthorized";
 import Booking from "../pages/Booking";
 import Test from "../pages/Test";
 import { Outlet } from "react-router-dom";
@@ -20,6 +20,8 @@ import TestRecord from "../pages/student/TestRecord";
 import PatientRecord from "../pages/psycologist/PatientRecord";
 import UserManagement from "../pages/manager/UserManagement";
 import SurveyManagement from "../pages/manager/SurveyManagement";
+import NotFound from "../pages/error/NotFound";
+// import { PERMISSIONS } from "../utils/permissions";
 
 export const routes = [
   {
@@ -32,33 +34,41 @@ export const routes = [
       { path: "services", element: <Service /> },
       { path: "contact", element: <Contact /> },
       // { path: "dashboard", element: <Dashboard /> },
-      { path: "login", element: <Login /> },
-      { path: "register", element: <Register /> },
-      { path: "forgot-password", element: <ForgotPassword /> },
       {
-        path: "",
+        path: "login",
         element: (
-          <PrivateRoute allowedRoles={["student"]}>
-            <Outlet />
+          <PrivateRoute requiresGuest>
+            <Login />
           </PrivateRoute>
         ),
-        children: [
-          { path: "test", element: <Test /> },
-          { path: "book-appointment", element: <Booking /> },
-          { path: "appointment-record", element: <AppointmentRecord /> },
-          { path: "test-record", element: <TestRecord /> },
-        ],
+      },
+      {
+        path: "register",
+        element: (
+          <PrivateRoute requiresGuest>
+            <Register />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "forgot-password",
+        element: (
+          <PrivateRoute requiresGuest>
+            <ForgotPassword />
+          </PrivateRoute>
+        ),
       },
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={["parent"]}>
+          <PrivateRoute allowedRoles={[""]}>
             <Outlet />
           </PrivateRoute>
         ),
         children: [
-          { path: "children-record", element: <ChildrenRecord /> },
           { path: "book-appointment", element: <Booking /> },
+          { path: "appointment-record", element: <AppointmentRecord /> },
+          { path: "test-record", element: <TestRecord /> },
         ],
       },
       {
@@ -70,9 +80,29 @@ export const routes = [
         ),
         children: [
           { path: "appointment", element: <Appointment /> },
-          { path: "test", element: <Test /> },
           { path: "patient-record", element: <PatientRecord /> },
         ],
+      },
+      {
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["parent"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [
+          { path: "children-record", element: <ChildrenRecord /> },
+          // { path: "book-appointment", element: <Booking /> },
+        ],
+      },
+      {
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["student", "psychologist"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [{ path: "test", element: <Test /> }],
       },
       { path: "unauthorized", element: <Unauthorized /> },
     ],
@@ -86,8 +116,19 @@ export const routes = [
     ),
     children: [
       { index: true, element: <Dashboard /> },
-      { path: "users", element: <UserManagement /> },
+      {
+        path: "users",
+        element: (
+          // <PrivateRoute allowedRoles={["manager"]}>
+          <UserManagement />
+          // </PrivateRoute>
+        ),
+      },
       { path: "surveys", element: <SurveyManagement /> },
     ],
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ];

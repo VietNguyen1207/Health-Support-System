@@ -2,7 +2,7 @@ import { BrowserRouter, useRoutes } from "react-router-dom";
 import { ConfigProvider } from "antd";
 import { routes } from "./routes/AppRoutes";
 import "./App.css";
-
+import ScrollToTop from "./components/ScrollToTop";
 function App() {
   const element = useRoutes(routes);
 
@@ -12,8 +12,8 @@ function App() {
         token: {
           colorPrimary: "#2f7a39",
         },
-      }}
-    >
+      }}>
+      <ScrollToTop />
       {element}
     </ConfigProvider>
   );

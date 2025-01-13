@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../style/Login.css";
 import { useAuthStore } from "../stores/authStore";
+import { message } from "antd";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    rememberMe: false,
+    remember: false,
   });
 
   const handleChange = (e) => {
@@ -28,7 +29,9 @@ const Login = () => {
       // Chuyển hướng sau khi đăng nhập thành công
       navigate("/");
     } catch (error) {
-      console.error("Login failed:", error);
+      console.log(error);
+
+      message.error("Login failed");
     }
   };
 
@@ -73,9 +76,9 @@ const Login = () => {
           <div className="remember-me">
             <input
               type="checkbox"
-              id="rememberMe"
-              name="rememberMe"
-              checked={formData.rememberMe}
+              id="remember"
+              name="remember"
+              checked={formData.remember}
               onChange={handleChange}
             />
 

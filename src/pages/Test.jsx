@@ -97,7 +97,9 @@ const Test = () => {
                 <SearchOutlined className="text-gray-400 text-lg mr-2" />
                 <Input
                   placeholder="Search tests..."
-                  bordered={false}
+                  // `bordered` is deprecated. Please use `variant` instead
+                  // bordered={false}
+                  variant="borderless"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1"

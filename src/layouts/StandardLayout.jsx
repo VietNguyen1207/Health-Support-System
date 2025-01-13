@@ -5,33 +5,7 @@ import Footer from "../components/Footer";
 import "../style/Header.css";
 import "../style/Footer.css";
 
-// const { Header, Content } = Layout;
-
 export const StandardLayout = () => {
-  //   const { user, setUser } = useAuthStore();
-  //   const navigate = useNavigate();
-  //   const {
-  //     token: { colorBgContainer, borderRadiusLG },
-  //   } = theme.useToken();
-
-  //   const handleLogout = () => {
-  //     setUser(null);
-  //     navigate("/login");
-  //   };
-
-  //   const menuItems = [
-  //     { key: "/", label: "Home", icon: <HomeOutlined /> },
-  //     { key: "/contact", label: "Contact", icon: <ContactsOutlined /> },
-  //   ];
-
-  //   if (user) {
-  //     menuItems.push({
-  //       key: `/${user.role}`,
-  //       label: "Dashboard",
-  //       icon: <UserOutlined />,
-  //     });
-  //   }
-
   return (
     <>
       {/* <Header
@@ -75,7 +49,7 @@ export const StandardLayout = () => {
       <Layout style={{ minHeight: "100vh" }}>
         <div className="main-wrapper">
           <Header />
-          <div className="content">
+          <div className="lg:mb-28 md:mb-72 mb-96 pb-32 min-h-screen">
             <Outlet />
           </div>
           <Footer />
