@@ -1,184 +1,34 @@
 {
   "tests": [
     {
-      "id": 1,
+      "id": "1",
       "title": "Depression Assessment Test",
       "description": "A comprehensive screening tool for depression symptoms",
       "duration": "15-20 minutes",
-      "questions": 20,
-      "category": "Mental Health Screening",
-      "detailedDescription": "This test helps identify symptoms of depression and their severity. It uses standardized questions to assess your emotional well-being over the past two weeks."
+      "questions": 9,
+      "category": "Depression",
+      "status": "unfinished",
+      "detailedDescription": "This test helps identify symptoms of depression and their severity. It uses standardized questions based on PHQ-9 to assess your emotional well-being over the past two weeks."
     },
     {
-      "id": 2,
+      "id": "2",
       "title": "Anxiety Screening Test",
       "description": "Quick assessment for anxiety levels",
       "duration": "10-15 minutes",
-      "questions": 15,
-      "category": "Mental Health Screening",
-      "detailedDescription": "A screening tool designed to measure anxiety levels and identify potential anxiety disorders. The test evaluates both physical and psychological symptoms."
+      "questions": 7,
+      "category": "Anxiety",
+      "status": "finished",
+      "detailedDescription": "A screening tool based on GAD-7 designed to measure anxiety levels and identify potential anxiety disorders. The test evaluates both physical and psychological symptoms."
     },
     {
-      "id": 3,
+      "id": "3",
       "title": "Stress Level Assessment",
       "description": "Evaluate your current stress levels and coping mechanisms",
       "duration": "10-12 minutes",
-      "questions": 18,
-      "category": "Stress Management",
-      "detailedDescription": "Assess your current stress levels and identify potential stressors in your life. Includes recommendations for stress management techniques."
-    },
-    {
-      "id": 4,
-      "title": "Sleep Quality Index",
-      "description": "Analyze your sleep patterns and quality",
-      "duration": "8-10 minutes",
-      "questions": 12,
-      "category": "Wellness",
-      "detailedDescription": "Evaluate your sleep quality, patterns, and potential sleep disorders. Provides recommendations for better sleep hygiene."
-    },
-    {
-      "id": 5,
-      "title": "Social Anxiety Evaluation",
-      "description": "Assessment of social anxiety symptoms",
-      "duration": "12-15 minutes",
-      "questions": 16,
-      "category": "Mental Health Screening",
-      "detailedDescription": "Evaluate symptoms of social anxiety and their impact on daily life. Includes situations-based questions."
-    },
-    {
-      "id": 6,
-      "title": "Academic Stress Assessment",
-      "description": "Measure academic-related stress levels",
-      "duration": "10-12 minutes",
-      "questions": 14,
-      "category": "Academic Support",
-      "detailedDescription": "Specifically designed for students to assess stress levels related to academic performance and workload."
-    },
-    {
-      "id": 7,
-      "title": "Emotional Intelligence Quiz",
-      "description": "Evaluate your emotional intelligence quotient",
-      "duration": "20-25 minutes",
-      "questions": 25,
-      "category": "Personal Development",
-      "detailedDescription": "Comprehensive assessment of emotional intelligence including self-awareness, empathy, and social skills."
-    },
-    {
-      "id": 8,
-      "title": "Mindfulness Readiness Assessment",
-      "description": "Evaluate your mindfulness practice readiness",
-      "duration": "8-10 minutes",
-      "questions": 10,
-      "category": "Wellness",
-      "detailedDescription": "Assess your readiness to begin mindfulness practices and identify potential areas of focus."
-    },
-    {
-      "id": 9,
-      "title": "Relationship Satisfaction Scale",
-      "description": "Assess satisfaction in relationships",
-      "duration": "15-18 minutes",
-      "questions": 20,
-      "category": "Relationships",
-      "detailedDescription": "Evaluate satisfaction levels in various relationships including family, friends, and romantic partners."
-    },
-    {
-      "id": 10,
-      "title": "Self-Esteem Evaluation",
-      "description": "Measure your self-esteem levels",
-      "duration": "12-15 minutes",
-      "questions": 15,
-      "category": "Personal Development",
-      "detailedDescription": "Comprehensive assessment of self-esteem levels and factors affecting self-worth."
-    },
-    {
-      "id": 11,
-      "title": "Study Habits Assessment",
-      "description": "Evaluate your study patterns and effectiveness",
-      "duration": "10-12 minutes",
-      "questions": 16,
-      "category": "Academic Support",
-      "detailedDescription": "Analyze your study habits and receive recommendations for improvement."
-    },
-    {
-      "id": 12,
-      "title": "Time Management Skills Test",
-      "description": "Assess your time management abilities",
-      "duration": "12-15 minutes",
-      "questions": 18,
-      "category": "Personal Development",
-      "detailedDescription": "Evaluate how effectively you manage your time and identify areas for improvement."
-    },
-    {
-      "id": 13,
-      "title": "Eating Habits Assessment",
-      "description": "Evaluate your eating patterns",
-      "duration": "10-12 minutes",
-      "questions": 15,
-      "category": "Wellness",
-      "detailedDescription": "Assess your eating habits and relationship with food. Includes nutritional awareness evaluation."
-    },
-    {
-      "id": 14,
-      "title": "Procrastination Tendency Test",
-      "description": "Measure your procrastination levels",
-      "duration": "8-10 minutes",
-      "questions": 12,
-      "category": "Academic Support",
-      "detailedDescription": "Identify your procrastination patterns and receive strategies for improvement."
-    },
-    {
-      "id": 15,
-      "title": "Resilience Scale",
-      "description": "Assess your emotional resilience",
-      "duration": "15-18 minutes",
-      "questions": 20,
-      "category": "Mental Health Screening",
-      "detailedDescription": "Measure your ability to bounce back from difficulties and adapt to change."
-    },
-    {
-      "id": 16,
-      "title": "Communication Style Analysis",
-      "description": "Identify your communication patterns",
-      "duration": "12-15 minutes",
-      "questions": 16,
-      "category": "Relationships",
-      "detailedDescription": "Analyze your communication style and learn how it affects your relationships."
-    },
-    {
-      "id": 17,
-      "title": "Goal Setting Assessment",
-      "description": "Evaluate your goal-setting abilities",
-      "duration": "10-12 minutes",
-      "questions": 14,
-      "category": "Personal Development",
-      "detailedDescription": "Assess how effectively you set and achieve personal and academic goals."
-    },
-    {
-      "id": 18,
-      "title": "Peer Pressure Resilience Test",
-      "description": "Measure resistance to peer pressure",
-      "duration": "12-15 minutes",
-      "questions": 15,
-      "category": "Mental Health Screening",
-      "detailedDescription": "Evaluate your ability to maintain personal values under peer pressure."
-    },
-    {
-      "id": 19,
-      "title": "Digital Wellness Assessment",
-      "description": "Assess your digital habits and wellness",
-      "duration": "10-12 minutes",
-      "questions": 14,
-      "category": "Wellness",
-      "detailedDescription": "Evaluate your relationship with technology and digital media consumption."
-    },
-    {
-      "id": 20,
-      "title": "Career Interest Inventory",
-      "description": "Explore your career interests and preferences",
-      "duration": "20-25 minutes",
-      "questions": 25,
-      "category": "Career Development",
-      "detailedDescription": "Comprehensive assessment to help identify potential career paths based on your interests and strengths."
+      "questions": 9,
+      "category": "Stress",
+      "status": "unfinished",
+      "detailedDescription": "Based on the PSS (Perceived Stress Scale), this assessment helps identify your current stress levels and provides insights into your stress management capabilities."
     }
   ]
 }

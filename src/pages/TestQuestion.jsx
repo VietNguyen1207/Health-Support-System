@@ -5,46 +5,12 @@ import { Radio, Button, Progress, Card } from "antd";
 const TestQuestion = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const test = location.state?.test; // Get test data passed from Test.jsx
+  const test = location.state?.test;
+  const questions = test?.questions || [];
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
-
-  // Sample GAD-7 questions
-  const questions = [
-    {
-      id: 1,
-      text: "Feeling nervous, anxious, or on edge",
-      options: [
-        { value: 0, label: "Not at all" },
-        { value: 1, label: "Several days" },
-        { value: 2, label: "More than half the days" },
-        { value: 3, label: "Nearly every day" },
-      ],
-    },
-    {
-      id: 2,
-      text: "Not being able to stop or control worrying",
-      options: [
-        { value: 0, label: "Not at all" },
-        { value: 1, label: "Several days" },
-        { value: 2, label: "More than half the days" },
-        { value: 3, label: "Nearly every day" },
-      ],
-    },
-    {
-      id: 3,
-      text: "Worrying too much about different things",
-      options: [
-        { value: 0, label: "Not at all" },
-        { value: 1, label: "Several days" },
-        { value: 2, label: "More than half the days" },
-        { value: 3, label: "Nearly every day" },
-      ],
-    },
-    // Add more questions as needed
-  ];
 
   const handleAnswer = (value) => {
     setSelectedOption(value);

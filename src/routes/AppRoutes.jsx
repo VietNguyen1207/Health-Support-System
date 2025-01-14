@@ -65,7 +65,7 @@ export const routes = [
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={[""]}>
+          <PrivateRoute allowedRoles={["student"]}>
             <Outlet />
           </PrivateRoute>
         ),
