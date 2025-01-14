@@ -166,7 +166,7 @@ const Header = () => {
       {user && user.role !== "parent" && (
         <Menu.Item key="test">
           <Link to="/test" onClick={onClose}>
-            Test
+            Survey
           </Link>
         </Menu.Item>
       )}
@@ -210,7 +210,8 @@ const Header = () => {
           placement="right"
           onClose={onClose}
           open={visible}
-          className="lg:hidden">
+          className="lg:hidden"
+        >
           {mobileMenu}
           <div className="mt-4 flex justify-center items-center">
             {!user ? (
@@ -218,7 +219,8 @@ const Header = () => {
                 <Link
                   to="/register"
                   className="btn btn-outline"
-                  onClick={onClose}>
+                  onClick={onClose}
+                >
                   Sign Up
                 </Link>
                 <Link to="/login" className="btn btn-primary" onClick={onClose}>
@@ -236,28 +238,32 @@ const Header = () => {
         <nav className="hidden lg:flex justify-between items-center gap-10">
           <Link
             to="/"
-            className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
+            className={`nav-link ${location.pathname === "/" ? "active" : ""}`}
+          >
             <span>Home</span>
           </Link>
           <Link
             to="/about"
             className={`nav-link ${
               location.pathname === "/about" ? "active" : ""
-            }`}>
+            }`}
+          >
             <span>About</span>
           </Link>
           <Link
             to="/services"
             className={`nav-link ${
               location.pathname === "/services" ? "active" : ""
-            }`}>
+            }`}
+          >
             <span>Services</span>
           </Link>
           <Link
             to="/contact"
             className={`nav-link ${
               location.pathname === "/contact" ? "active" : ""
-            }`}>
+            }`}
+          >
             <span>Contact</span>
           </Link>
 
@@ -267,8 +273,9 @@ const Header = () => {
                 to="/test"
                 className={`nav-link ${
                   location.pathname === "/test" ? "active" : ""
-                }`}>
-                <span>Test</span>
+                }`}
+              >
+                <span>Survey</span>
               </Link>
             </>
           )}
@@ -279,7 +286,8 @@ const Header = () => {
               to="/book-appointment"
               className={`nav-link book-now ${
                 location.pathname === "/book-appointment" ? "active" : ""
-              }`}>
+              }`}
+            >
               <span>Book Now</span>
             </Link>
           ) : (
@@ -289,7 +297,8 @@ const Header = () => {
                   to="/appointment"
                   className={`nav-link book-now ${
                     location.pathname === "/appointment" ? "active" : ""
-                  }`}>
+                  }`}
+                >
                   <span>Appointment</span>
                 </Link>
               </>

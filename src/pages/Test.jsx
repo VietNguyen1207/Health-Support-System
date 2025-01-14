@@ -5,9 +5,13 @@ import {
   MenuOutlined,
   DeleteOutlined,
   EditOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import { Input, Select, Pagination, Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
+
+const { Option } = Select;
 
 const Test = () => {
   const navigate = useNavigate();
@@ -16,8 +20,8 @@ const Test = () => {
   const [selectedTest, setSelectedTest] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDuration, setSelectedDuration] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState();
+  const [selectedCategory, setSelectedCategory] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
 
@@ -38,16 +42,15 @@ const Test = () => {
     fetchTests();
   }, []);
 
-  // Get unique durations and categories for filters
-  const durations = useMemo(
-    () => [...new Set(tests.map((test) => test.duration))],
+  // Get unique statuses and categories for filters
+  const statuses = useMemo(
+    () => [...new Set(tests.map((test) => test.status))],
     [tests]
   );
 
-  const categories = useMemo(
-    () => [...new Set(tests.map((test) => test.category))],
-    [tests]
-  );
+  const categories = useMemo(() => {
+    return [...new Set(tests.map((test) => test.category))].filter(Boolean);
+  }, [tests]);
 
   // Move the items array inside the component but outside any render logic
   const menuItems = {
@@ -59,7 +62,8 @@ const Test = () => {
             onClick={() => {
               console.log("Edit clicked");
               // Add your edit logic here
-            }}>
+            }}
+          >
             <EditOutlined /> Edit
           </div>
         ),
@@ -71,7 +75,8 @@ const Test = () => {
             onClick={() => {
               console.log("Delete clicked");
               // Add your delete logic here
-            }}>
+            }}
+          >
             <DeleteOutlined /> Delete
           </div>
         ),
@@ -86,14 +91,13 @@ const Test = () => {
         test.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         test.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesDuration =
-        !selectedDuration || test.duration === selectedDuration;
+      const matchesStatus = !selectedStatus || test.status === selectedStatus;
       const matchesCategory =
         !selectedCategory || test.category === selectedCategory;
 
-      return matchesSearch && matchesDuration && matchesCategory;
+      return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [tests, searchQuery, selectedDuration, selectedCategory]);
+  }, [tests, searchQuery, selectedStatus, selectedCategory]);
 
   // Calculate pagination
   const totalTests = filteredTests.length;
@@ -106,8 +110,27 @@ const Test = () => {
     setIsModalOpen(true);
   };
 
-  const handleStartTest = (test) => {
-    navigate("/test-question", { state: { test } });
+  const handleStartTest = async (test) => {
+    try {
+      const response = await fetch("/src/data/test-questions.json");
+      const data = await response.json();
+
+      // Get questions for this specific test using test.id
+      const testQuestions = data.questions[test.id];
+
+      if (testQuestions) {
+        navigate("/test-question", {
+          state: {
+            test: {
+              ...test,
+              questions: testQuestions.questions,
+            },
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching test questions:", error);
+    }
   };
 
   const handlePageChange = (page) => {
@@ -115,19 +138,29 @@ const Test = () => {
   };
 
   return (
-    <div className="general-wrapper bg-gray-50">
+    <div className="general-wrapper bg-gradient-to-b from-gray-50 to-white min-h-screen py-12">
       {loading ? (
         <div className="flex justify-center items-center min-h-[400px]">
           <div className="text-gray-500">Loading tests...</div>
         </div>
       ) : (
-        <div className="test-content">
+        <div className="test-content max-w-5xl mx-auto px-4">
+          {/* Title Section */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">
+              Available Tests
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Select a psychological assessment to begin your journey of
+              self-discovery
+            </p>
+          </div>
           {/* Search and Filters Section */}
-          <div className="search-filters mb-6">
-            <div className="space-y-4 max-w-3xl mx-auto">
+          <div className="search-filters mb-10 max-w-3xl mx-auto">
+            <div className="">
               {/* Search Bar */}
-              <div className="flex items-center bg-white rounded-lg shadow-sm border border-gray-200 p-2 max-w-md">
-                <SearchOutlined className="text-gray-400 text-lg mr-2" />
+              <div className="flex items-center bg-gray-50 rounded-xl p-3 mb-4 bg-white rounded-lg shadow-sm border border-gray-370 p-2 ">
+                <SearchOutlined className="text-gray-400 text-lg mr-3" />
                 <Input
                   placeholder="Search tests..."
                   // `bordered` is deprecated. Please use `variant` instead
@@ -135,35 +168,37 @@ const Test = () => {
                   variant="borderless"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1"
+                  className="flex-1 bg-transparent"
                 />
               </div>
 
               {/* Filters */}
-              <div className="flex space-x-4">
+              <div className="flex flex-col sm:flex-row gap-4 ">
                 <Select
-                  placeholder="Filter by duration"
+                  placeholder="Filter by status"
                   allowClear
-                  style={{ width: "160px" }}
-                  onChange={(value) => setSelectedDuration(value)}
-                  value={selectedDuration}>
-                  {durations.map((duration) => (
-                    <Select.Option key={duration} value={duration}>
-                      {duration}
-                    </Select.Option>
+                  style={{ width: "30%" }}
+                  onChange={(value) => setSelectedStatus(value)}
+                  value={selectedStatus}
+                >
+                  {statuses.map((status) => (
+                    <Option key={status} value={status}>
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </Option>
                   ))}
                 </Select>
 
                 <Select
                   placeholder="Filter by category"
                   allowClear
-                  style={{ width: "160px" }}
-                  onChange={(value) => setSelectedCategory(value)}
-                  value={selectedCategory}>
+                  style={{ width: "30%" }}
+                  onChange={setSelectedCategory}
+                  value={selectedCategory}
+                >
                   {categories.map((category) => (
-                    <Select.Option key={category} value={category}>
+                    <Option key={category} value={category}>
                       {category}
-                    </Select.Option>
+                    </Option>
                   ))}
                 </Select>
               </div>
@@ -177,20 +212,41 @@ const Test = () => {
                 <div
                   key={test.id}
                   onClick={() => handleTestClick(test)}
-                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 cursor-pointer transform hover:-translate-y-1">
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 cursor-pointer transform hover:-translate-y-1"
+                >
                   <div className="p-6 flex items-center justify-between">
                     <div className="flex-1 pr-4">
-                      <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                        {test.title}
-                      </h3>
-                      <p className="text-gray-600 mb-3">{test.description}</p>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xl font-semibold text-gray-800">
+                          {test.title}
+                        </h3>
+                        <div className="flex items-center">
+                          {test.status === "finished" ? (
+                            <span className="flex items-center text-green-500 bg-green-50 rounded-xl p-2">
+                              <CheckCircleOutlined className="mr-1.5" />
+                              <span className="text-sm">Completed</span>
+                            </span>
+                          ) : (
+                            <span className="flex items-center text-blue-500 bg-blue-50 rounded-xl p-2">
+                              <ClockCircleOutlined className="mr-1.5" />
+                              <span className="text-sm">Not Started</span>
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Card Content */}
+                      <p className="text-gray-600 mb-6 line-clamp-2 ">
+                        {test.description}
+                      </p>
                       <div className="flex space-x-6">
-                        <span className="flex items-center text-sm text-gray-500">
+                        <span className="flex items-center bg-gray-50 px-3 py-1.5 rounded-lg">
                           <svg
                             className="w-4 h-4 mr-2"
                             fill="none"
                             stroke="currentColor"
-                            viewBox="0 0 24 24">
+                            viewBox="0 0 24 24"
+                          >
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -200,12 +256,13 @@ const Test = () => {
                           </svg>
                           {test.duration}
                         </span>
-                        <span className="flex items-center text-sm text-gray-500">
+                        <span className="flex items-center bg-gray-50 px-3 py-1.5 rounded-lg">
                           <svg
                             className="w-4 h-4 mr-2"
                             fill="none"
                             stroke="currentColor"
-                            viewBox="0 0 24 24">
+                            viewBox="0 0 24 24"
+                          >
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -215,12 +272,13 @@ const Test = () => {
                           </svg>
                           {test.questions} Questions
                         </span>
-                        <span className="flex items-center text-sm text-custom-green">
+                        <span className="flex items-center bg-custom-green/10 text-custom-green px-3 py-1.5 rounded-lg">
                           <svg
                             className="w-4 h-4 mr-2"
                             fill="none"
                             stroke="currentColor"
-                            viewBox="0 0 24 24">
+                            viewBox="0 0 24 24"
+                          >
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -271,10 +329,12 @@ const Test = () => {
           {isModalOpen && selectedTest && (
             <div
               className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 backdrop-blur-sm z-[100]"
-              onClick={() => setIsModalOpen(false)}>
+              onClick={() => setIsModalOpen(false)}
+            >
               <div
                 className="bg-white rounded-xl max-w-2xl w-full shadow-2xl transform transition-all relative"
-                onClick={(e) => e.stopPropagation()}>
+                onClick={(e) => e.stopPropagation()}
+              >
                 {/* Modal Header */}
                 <div className="p-6 border-b">
                   <div className="flex justify-between items-start">
@@ -284,10 +344,12 @@ const Test = () => {
                     <Dropdown
                       menu={menuItems}
                       trigger={["click"]}
-                      placement="bottomRight">
+                      placement="bottomRight"
+                    >
                       <button
                         onClick={(e) => e.stopPropagation()}
-                        className="text-gray-400 hover:text-gray-500">
+                        className="text-gray-400 hover:text-gray-500"
+                      >
                         <MenuOutlined style={{ fontSize: "24px" }} />
                       </button>
                     </Dropdown>
@@ -340,12 +402,14 @@ const Test = () => {
                 <div className="p-6 border-t bg-gray-50 flex justify-end space-x-3 rounded-b-lg">
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
                     Cancel
                   </button>
                   <button
                     onClick={() => handleStartTest(selectedTest)}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green hover:bg-custom-green/90">
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green hover:bg-custom-green/90"
+                  >
                     Start Test
                   </button>
                 </div>

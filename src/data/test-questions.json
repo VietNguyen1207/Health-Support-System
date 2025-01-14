@@ -1,8 +1,7 @@
 {
   "questions": {
-    // depression test with id 1
     "1": {
-      "title": "Depression Assessment Test",
+      "title": "Depression Assessment Test (PHQ-9)",
       "questions": [
         {
           "id": 1,
@@ -13,12 +12,91 @@
             { "value": 2, "label": "More than half the days" },
             { "value": 3, "label": "Nearly every day" }
           ]
+        },
+        {
+          "id": 2,
+          "text": "Feeling down, depressed, or hopeless",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Trouble falling or staying asleep, or sleeping too much",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
+        },
+        {
+          "id": 4,
+          "text": "Feeling tired or having little energy",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
+        },
+        {
+          "id": 5,
+          "text": "Poor appetite or overeating",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
+        },
+        {
+          "id": 6,
+          "text": "Feeling bad about yourself - or that you are a failure or have let yourself or your family down",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
+        },
+        {
+          "id": 7,
+          "text": "Trouble concentrating on things, such as reading or watching TV",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
+        },
+        {
+          "id": 8,
+          "text": "Moving or speaking so slowly that other people could have noticed, or being so fidgety or restless that you have been moving around a lot more than usual",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
+        },
+        {
+          "id": 9,
+          "text": "Thoughts that you would be better off dead, or of hurting yourself",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
         }
       ]
     },
-    // anxiety test with id 2
     "2": {
-      "title": "Anxiety Screening Test",
+      "title": "Anxiety Screening Test (GAD-7)",
       "questions": [
         {
           "id": 1,
@@ -29,21 +107,169 @@
             { "value": 2, "label": "More than half the days" },
             { "value": 3, "label": "Nearly every day" }
           ]
-        }
-      ]
-    },
-    // stress test with id 3
-    "3": {
-      "title": "Stress Test",
-      "questions": [
+        },
         {
-          "id": 1,
-          "text": "How often do you feel stressed or overwhelmed?",
+          "id": 2,
+          "text": "Not being able to stop or control worrying",
           "options": [
             { "value": 0, "label": "Not at all" },
             { "value": 1, "label": "Several days" },
             { "value": 2, "label": "More than half the days" },
             { "value": 3, "label": "Nearly every day" }
+          ]
+        },
+        {
+          "id": 3,
+          "text": "Worrying too much about different things",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
+        },
+        {
+          "id": 4,
+          "text": "Trouble relaxing",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
+        },
+        {
+          "id": 5,
+          "text": "Being so restless that it's hard to sit still",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
+        },
+        {
+          "id": 6,
+          "text": "Becoming easily annoyed or irritable",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
+        },
+        {
+          "id": 7,
+          "text": "Feeling afraid as if something awful might happen",
+          "options": [
+            { "value": 0, "label": "Not at all" },
+            { "value": 1, "label": "Several days" },
+            { "value": 2, "label": "More than half the days" },
+            { "value": 3, "label": "Nearly every day" }
+          ]
+        }
+      ]
+    },
+    "3": {
+      "title": "Stress Level Assessment (PSS)",
+      "questions": [
+        {
+          "id": 1,
+          "text": "In the last month, how often have you been upset because of something that happened unexpectedly?",
+          "options": [
+            { "value": 0, "label": "Never" },
+            { "value": 1, "label": "Almost Never" },
+            { "value": 2, "label": "Sometimes" },
+            { "value": 3, "label": "Fairly Often" },
+            { "value": 4, "label": "Very Often" }
+          ]
+        },
+        {
+          "id": 2,
+          "text": "In the last month, how often have you felt that you were unable to control the important things in your life?",
+          "options": [
+            { "value": 0, "label": "Never" },
+            { "value": 1, "label": "Almost Never" },
+            { "value": 2, "label": "Sometimes" },
+            { "value": 3, "label": "Fairly Often" },
+            { "value": 4, "label": "Very Often" }
+          ]
+        },
+        {
+          "id": 3,
+          "text": "In the last month, how often have you felt nervous and stressed?",
+          "options": [
+            { "value": 0, "label": "Never" },
+            { "value": 1, "label": "Almost Never" },
+            { "value": 2, "label": "Sometimes" },
+            { "value": 3, "label": "Fairly Often" },
+            { "value": 4, "label": "Very Often" }
+          ]
+        },
+        {
+          "id": 4,
+          "text": "In the last month, how often have you felt confident about your ability to handle your personal problems?",
+          "options": [
+            { "value": 4, "label": "Never" },
+            { "value": 3, "label": "Almost Never" },
+            { "value": 2, "label": "Sometimes" },
+            { "value": 1, "label": "Fairly Often" },
+            { "value": 0, "label": "Very Often" }
+          ]
+        },
+        {
+          "id": 5,
+          "text": "In the last month, how often have you felt that things were going your way?",
+          "options": [
+            { "value": 4, "label": "Never" },
+            { "value": 3, "label": "Almost Never" },
+            { "value": 2, "label": "Sometimes" },
+            { "value": 1, "label": "Fairly Often" },
+            { "value": 0, "label": "Very Often" }
+          ]
+        },
+        {
+          "id": 6,
+          "text": "In the last month, how often have you found that you could not cope with all the things that you had to do?",
+          "options": [
+            { "value": 0, "label": "Never" },
+            { "value": 1, "label": "Almost Never" },
+            { "value": 2, "label": "Sometimes" },
+            { "value": 3, "label": "Fairly Often" },
+            { "value": 4, "label": "Very Often" }
+          ]
+        },
+        {
+          "id": 7,
+          "text": "In the last month, how often have you been able to control irritations in your life?",
+          "options": [
+            { "value": 4, "label": "Never" },
+            { "value": 3, "label": "Almost Never" },
+            { "value": 2, "label": "Sometimes" },
+            { "value": 1, "label": "Fairly Often" },
+            { "value": 0, "label": "Very Often" }
+          ]
+        },
+        {
+          "id": 8,
+          "text": "In the last month, how often have you felt that you were on top of things?",
+          "options": [
+            { "value": 4, "label": "Never" },
+            { "value": 3, "label": "Almost Never" },
+            { "value": 2, "label": "Sometimes" },
+            { "value": 1, "label": "Fairly Often" },
+            { "value": 0, "label": "Very Often" }
+          ]
+        },
+        {
+          "id": 9,
+          "text": "In the last month, how often have you been angered because of things that happened that were outside of your control?",
+          "options": [
+            { "value": 0, "label": "Never" },
+            { "value": 1, "label": "Almost Never" },
+            { "value": 2, "label": "Sometimes" },
+            { "value": 3, "label": "Fairly Often" },
+            { "value": 4, "label": "Very Often" }
           ]
         }
       ]
