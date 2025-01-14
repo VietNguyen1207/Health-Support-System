@@ -6,7 +6,7 @@ import {
   DeleteOutlined,
   EditOutlined,
 } from "@ant-design/icons";
-import { Input, Select, Pagination, Dropdown, Space } from "antd";
+import { Input, Select, Pagination, Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
 
 const Test = () => {
@@ -59,8 +59,7 @@ const Test = () => {
             onClick={() => {
               console.log("Edit clicked");
               // Add your edit logic here
-            }}
-          >
+            }}>
             <EditOutlined /> Edit
           </div>
         ),
@@ -72,8 +71,7 @@ const Test = () => {
             onClick={() => {
               console.log("Delete clicked");
               // Add your delete logic here
-            }}
-          >
+            }}>
             <DeleteOutlined /> Delete
           </div>
         ),
@@ -132,6 +130,8 @@ const Test = () => {
                 <SearchOutlined className="text-gray-400 text-lg mr-2" />
                 <Input
                   placeholder="Search tests..."
+                  // `bordered` is deprecated. Please use `variant` instead
+                  // bordered={false}
                   variant="borderless"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -146,8 +146,7 @@ const Test = () => {
                   allowClear
                   style={{ width: "160px" }}
                   onChange={(value) => setSelectedDuration(value)}
-                  value={selectedDuration}
-                >
+                  value={selectedDuration}>
                   {durations.map((duration) => (
                     <Select.Option key={duration} value={duration}>
                       {duration}
@@ -160,8 +159,7 @@ const Test = () => {
                   allowClear
                   style={{ width: "160px" }}
                   onChange={(value) => setSelectedCategory(value)}
-                  value={selectedCategory}
-                >
+                  value={selectedCategory}>
                   {categories.map((category) => (
                     <Select.Option key={category} value={category}>
                       {category}
@@ -179,8 +177,7 @@ const Test = () => {
                 <div
                   key={test.id}
                   onClick={() => handleTestClick(test)}
-                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 cursor-pointer transform hover:-translate-y-1"
-                >
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 cursor-pointer transform hover:-translate-y-1">
                   <div className="p-6 flex items-center justify-between">
                     <div className="flex-1 pr-4">
                       <h3 className="text-xl font-semibold text-gray-800 mb-2">
@@ -193,8 +190,7 @@ const Test = () => {
                             className="w-4 h-4 mr-2"
                             fill="none"
                             stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                            viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -209,8 +205,7 @@ const Test = () => {
                             className="w-4 h-4 mr-2"
                             fill="none"
                             stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                            viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -225,8 +220,7 @@ const Test = () => {
                             className="w-4 h-4 mr-2"
                             fill="none"
                             stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                            viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -277,12 +271,10 @@ const Test = () => {
           {isModalOpen && selectedTest && (
             <div
               className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 backdrop-blur-sm z-[100]"
-              onClick={() => setIsModalOpen(false)}
-            >
+              onClick={() => setIsModalOpen(false)}>
               <div
                 className="bg-white rounded-xl max-w-2xl w-full shadow-2xl transform transition-all relative"
-                onClick={(e) => e.stopPropagation()}
-              >
+                onClick={(e) => e.stopPropagation()}>
                 {/* Modal Header */}
                 <div className="p-6 border-b">
                   <div className="flex justify-between items-start">
@@ -292,12 +284,10 @@ const Test = () => {
                     <Dropdown
                       menu={menuItems}
                       trigger={["click"]}
-                      placement="bottomRight"
-                    >
+                      placement="bottomRight">
                       <button
                         onClick={(e) => e.stopPropagation()}
-                        className="text-gray-400 hover:text-gray-500"
-                      >
+                        className="text-gray-400 hover:text-gray-500">
                         <MenuOutlined style={{ fontSize: "24px" }} />
                       </button>
                     </Dropdown>
@@ -350,14 +340,12 @@ const Test = () => {
                 <div className="p-6 border-t bg-gray-50 flex justify-end space-x-3 rounded-b-lg">
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
+                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                     Cancel
                   </button>
                   <button
                     onClick={() => handleStartTest(selectedTest)}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green hover:bg-custom-green/90"
-                  >
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green hover:bg-custom-green/90">
                     Start Test
                   </button>
                 </div>

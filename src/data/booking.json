@@ -1,0 +1,75 @@
+{
+  "appointments": [
+    {
+      "appointmentID": "APT001",
+      "timeSlotID": "TS002",
+      "studentID": "STU001",
+      "psychologist": {
+        "psychologistID": "PSY001",
+        "userID": "USR001",
+        "yearsOfExperience": 5,
+        "availableHours": "9:00-17:00",
+        "status": "active"
+      },
+      "timeSlot": {
+        "slotDate": "2024-03-15",
+        "time": "10:00",
+        "duration": 60
+      },
+      "status": "confirmed",
+      "notes": "First consultation session",
+      "meetingLink": "https://meet.google.com/abc-defg-hij",
+      "appointmentType": "online",
+      "createdAt": "2024-03-11T10:00:00Z",
+      "updatedAt": "2024-03-11T10:00:00Z"
+    },
+    {
+      "appointmentID": "APT002",
+      "timeSlotID": "TS003",
+      "studentID": "STU002",
+      "psychologist": {
+        "psychologistID": "PSY002",
+        "userID": "USR002",
+        "yearsOfExperience": 8,
+        "availableHours": "8:00-16:00",
+        "status": "active"
+      },
+      "timeSlot": {
+        "slotDate": "2024-03-16",
+        "slotID": "SLOT_9AM",
+        "time": "09:00",
+        "duration": 60
+      },
+      "status": "pending",
+      "notes": "Follow-up session",
+      "meetingLink": "https://meet.google.com/xyz-uvw-rst",
+      "appointmentType": "online",
+      "createdAt": "2024-03-12T09:00:00Z",
+      "updatedAt": "2024-03-12T09:00:00Z"
+    },
+    {
+      "appointmentID": "APT003",
+      "timeSlotID": "TS001",
+      "studentID": null,
+      "psychologist": {
+        "psychologistID": "PSY001",
+        "userID": "USR001",
+        "yearsOfExperience": 5,
+        "availableHours": "9:00-17:00",
+        "status": "active"
+      },
+      "timeSlot": {
+        "slotDate": "2024-03-15",
+        "slotID": "SLOT_9AM",
+        "time": "09:00",
+        "duration": 60
+      },
+      "status": "available",
+      "notes": null,
+      "meetingLink": null,
+      "appointmentType": null,
+      "createdAt": "2024-03-10T08:00:00Z",
+      "updatedAt": "2024-03-10T08:00:00Z"
+    }
+  ]
+}

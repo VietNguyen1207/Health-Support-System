@@ -44,7 +44,7 @@ export const useAuthStore = create(
           // Set token cho axios
           // api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-          return data;
+          return true;
         } catch (error) {
           if (axios.isAxiosError(error)) {
             throw new Error(error.response?.data?.message || "Login failed");
@@ -55,8 +55,15 @@ export const useAuthStore = create(
 
       // Action logout
       logout: () => {
-        // Xóa token khỏi axios headers
-        // delete api.defaults.headers.common["Authorization"];
+        // Clear both storages to be safe
+        // localStorage.removeItem("token");
+        // localStorage.removeItem("user");
+        // sessionStorage.removeItem("token");
+        // sessionStorage.removeItem("user");
+
+        // Clear axios default header
+        // delete axios.defaults.headers.common["Authorization"];
+
         // Reset state
         set(initialState);
       },
