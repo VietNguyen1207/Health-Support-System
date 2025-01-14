@@ -22,6 +22,7 @@ import PatientRecord from "../pages/psycologist/PatientRecord";
 import UserManagement from "../pages/manager/UserManagement";
 import SurveyManagement from "../pages/manager/SurveyManagement";
 import NotFound from "../pages/error/NotFound";
+import TestResult from "../pages/TestResult";
 // import { PERMISSIONS } from "../utils/permissions";
 
 export const routes = [
@@ -75,6 +76,7 @@ export const routes = [
           { path: "book-appointment", element: <Booking /> },
           { path: "appointment-record", element: <AppointmentRecord /> },
           { path: "test-record", element: <TestRecord /> },
+          { path: "test-results", element: <TestResult /> },
         ],
       },
       {

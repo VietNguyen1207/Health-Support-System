@@ -14,7 +14,18 @@ const TestQuestion = () => {
 
   const handleAnswer = (value) => {
     setSelectedOption(value);
-    setAnswers({ ...answers, [currentQuestion]: value });
+    setAnswers({
+      ...answers,
+      [currentQuestion]: {
+        questionId: questions[currentQuestion].id,
+        question: questions[currentQuestion].text,
+        selectedOption: value,
+        answer: questions[currentQuestion].options.find(
+          (opt) => opt.value === value
+        )?.label,
+        score: value,
+      },
+    });
   };
 
   const handleNext = () => {
@@ -32,13 +43,14 @@ const TestQuestion = () => {
   };
 
   const handleSubmit = () => {
-    // Calculate score
-    const totalScore = Object.values(answers).reduce(
-      (sum, value) => sum + value,
-      0
-    );
-    // Navigate to results page with score
-    navigate("/test-results", { state: { score: totalScore, test: test } });
+    // Navigate to results with answers and test data
+    navigate("/test-results", {
+      state: {
+        answers: Object.values(answers),
+        test,
+        dateCompleted: new Date().toISOString(),
+      },
+    });
   };
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;

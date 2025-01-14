@@ -1,0 +1,158 @@
+{
+  "results": [
+    {
+      "id": "result_1",
+      "testId": "1",
+      "testTitle": "Depression Assessment Test (PHQ-9)",
+      "category": "Depression",
+      "dateCompleted": "2024-03-20T15:30:00Z",
+      "answers": [
+        {
+          "questionId": 1,
+          "question": "Little interest or pleasure in doing things",
+          "selectedOption": 2,
+          "answer": "More than half the days",
+          "score": 2
+        },
+        {
+          "questionId": 2,
+          "question": "Feeling down, depressed, or hopeless",
+          "selectedOption": 1,
+          "answer": "Several days",
+          "score": 1
+        },
+        {
+          "questionId": 3,
+          "question": "Trouble falling or staying asleep, or sleeping too much",
+          "selectedOption": 2,
+          "answer": "More than half the days",
+          "score": 2
+        },
+        {
+          "questionId": 4,
+          "question": "Feeling tired or having little energy",
+          "selectedOption": 3,
+          "answer": "Nearly every day",
+          "score": 3
+        },
+        {
+          "questionId": 5,
+          "question": "Poor appetite or overeating",
+          "selectedOption": 1,
+          "answer": "Several days",
+          "score": 1
+        }
+      ],
+      "scores": {
+        "totalScore": 9,
+        "maxPossibleScore": 15,
+        "averageScore": 1.8,
+        "percentage": 60
+      },
+      "interpretation": {
+        "level": "Moderate",
+        "description": "Your symptoms suggest moderate depression."
+      },
+      "duration": "15-20 minutes",
+      "status": "finished"
+    },
+    {
+      "id": "result_2",
+      "testId": "2",
+      "testTitle": "Anxiety Screening Test (GAD-7)",
+      "category": "Anxiety",
+      "dateCompleted": "2024-03-21T10:15:00Z",
+      "answers": [
+        {
+          "questionId": 1,
+          "question": "Feeling nervous, anxious, or on edge",
+          "selectedOption": 2,
+          "answer": "More than half the days",
+          "score": 2
+        },
+        {
+          "questionId": 2,
+          "question": "Not being able to stop or control worrying",
+          "selectedOption": 3,
+          "answer": "Nearly every day",
+          "score": 3
+        },
+        {
+          "questionId": 3,
+          "question": "Worrying too much about different things",
+          "selectedOption": 2,
+          "answer": "More than half the days",
+          "score": 2
+        },
+        {
+          "questionId": 4,
+          "question": "Trouble relaxing",
+          "selectedOption": 1,
+          "answer": "Several days",
+          "score": 1
+        }
+      ],
+      "scores": {
+        "totalScore": 8,
+        "maxPossibleScore": 12,
+        "averageScore": 2,
+        "percentage": 66.67
+      },
+      "interpretation": {
+        "level": "Moderate",
+        "description": "Your symptoms suggest moderate anxiety."
+      },
+      "duration": "10-15 minutes",
+      "status": "finished"
+    },
+    {
+      "id": "result_3",
+      "testId": "3",
+      "testTitle": "Stress Level Assessment (PSS)",
+      "category": "Stress",
+      "dateCompleted": "2024-03-22T14:45:00Z",
+      "answers": [
+        {
+          "questionId": 1,
+          "question": "In the last month, how often have you been upset because of something that happened unexpectedly?",
+          "selectedOption": 2,
+          "answer": "Sometimes",
+          "score": 2
+        },
+        {
+          "questionId": 2,
+          "question": "In the last month, how often have you felt that you were unable to control the important things in your life?",
+          "selectedOption": 3,
+          "answer": "Fairly Often",
+          "score": 3
+        },
+        {
+          "questionId": 3,
+          "question": "In the last month, how often have you felt nervous and stressed?",
+          "selectedOption": 4,
+          "answer": "Very Often",
+          "score": 4
+        },
+        {
+          "questionId": 4,
+          "question": "In the last month, how often have you felt confident about your ability to handle your personal problems?",
+          "selectedOption": 1,
+          "answer": "Almost Never",
+          "score": 1
+        }
+      ],
+      "scores": {
+        "totalScore": 10,
+        "maxPossibleScore": 16,
+        "averageScore": 2.5,
+        "percentage": 62.5
+      },
+      "interpretation": {
+        "level": "Moderate",
+        "description": "Your perceived stress level is moderate."
+      },
+      "duration": "10-12 minutes",
+      "status": "finished"
+    }
+  ]
+}
