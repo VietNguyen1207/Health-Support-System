@@ -65,12 +65,12 @@ export const routes = [
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={[""]}>
+          <PrivateRoute allowedRoles={["student"]}>
             <Outlet />
           </PrivateRoute>
         ),
         children: [
-          { path: "test", element: <Test /> },
+          // { path: "test", element: <Test /> },
           { path: "test-question", element: <TestQuestion /> },
           { path: "book-appointment", element: <Booking /> },
           { path: "appointment-record", element: <AppointmentRecord /> },

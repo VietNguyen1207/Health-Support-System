@@ -2,19 +2,24 @@
   "appointments": [
     {
       "appointmentID": "APT001",
-      "timeSlotID": "TS002",
-      "studentID": "STU001",
-      "psychologist": {
-        "psychologistID": "PSY001",
+      "studentID": {
+        "studentID": "STU001",
         "userID": "USR001",
-        "yearsOfExperience": 5,
-        "availableHours": "9:00-17:00",
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "phone": "1234567890",
         "status": "active"
       },
       "timeSlot": {
         "slotDate": "2024-03-15",
         "time": "10:00",
-        "duration": 60
+        "psychologist": {
+          "psychologistID": "PSY001",
+          "userID": "USR001",
+          "yearsOfExperience": 5,
+          "availableHours": "9:00-17:00",
+          "status": "active"
+        }
       },
       "status": "confirmed",
       "notes": "First consultation session",
@@ -25,51 +30,87 @@
     },
     {
       "appointmentID": "APT002",
-      "timeSlotID": "TS003",
-      "studentID": "STU002",
-      "psychologist": {
-        "psychologistID": "PSY002",
-        "userID": "USR002",
-        "yearsOfExperience": 8,
-        "availableHours": "8:00-16:00",
-        "status": "active"
-      },
-      "timeSlot": {
-        "slotDate": "2024-03-16",
-        "slotID": "SLOT_9AM",
-        "time": "09:00",
-        "duration": 60
-      },
-      "status": "pending",
-      "notes": "Follow-up session",
-      "meetingLink": "https://meet.google.com/xyz-uvw-rst",
-      "appointmentType": "online",
-      "createdAt": "2024-03-12T09:00:00Z",
-      "updatedAt": "2024-03-12T09:00:00Z"
-    },
-    {
-      "appointmentID": "APT003",
-      "timeSlotID": "TS001",
-      "studentID": null,
-      "psychologist": {
-        "psychologistID": "PSY001",
+      "studentID": {
+        "studentID": "STU001",
         "userID": "USR001",
-        "yearsOfExperience": 5,
-        "availableHours": "9:00-17:00",
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "phone": "1234567890",
         "status": "active"
       },
       "timeSlot": {
         "slotDate": "2024-03-15",
-        "slotID": "SLOT_9AM",
-        "time": "09:00",
-        "duration": 60
+        "time": "14:00",
+        "psychologist": {
+          "psychologistID": "PSY001",
+          "userID": "USR001",
+          "yearsOfExperience": 5,
+          "availableHours": "9:00-17:00",
+          "status": "active"
+        }
       },
-      "status": "available",
-      "notes": null,
-      "meetingLink": null,
-      "appointmentType": null,
-      "createdAt": "2024-03-10T08:00:00Z",
-      "updatedAt": "2024-03-10T08:00:00Z"
+      "status": "confirmed",
+      "notes": "First consultation session",
+      "meetingLink": "https://meet.google.com/abc-defg-hij",
+      "appointmentType": "online",
+      "createdAt": "2024-03-11T10:00:00Z",
+      "updatedAt": "2024-03-11T10:00:00Z"
+    },
+    {
+      "appointmentID": "APT003",
+      "studentID": {
+        "studentID": "STU002",
+        "userID": "USR002",
+        "name": "Jane Smith",
+        "email": "jane.smith@example.com",
+        "phone": "0987654321",
+        "status": "active"
+      },
+      "timeSlot": {
+        "slotDate": "2024-03-16",
+        "time": "14:30",
+        "psychologist": {
+          "psychologistID": "PSY002",
+          "userID": "USR003",
+          "yearsOfExperience": 8,
+          "availableHours": "13:00-21:00",
+          "status": "active"
+        }
+      },
+      "status": "confirmed",
+      "notes": "Follow-up session",
+      "meetingLink": "https://meet.google.com/xyz-mnop-qrs",
+      "appointmentType": "online",
+      "createdAt": "2024-03-12T09:30:00Z",
+      "updatedAt": "2024-03-12T09:30:00Z"
+    },
+    {
+      "appointmentID": "APT003",
+      "studentID": {
+        "studentID": "STU003",
+        "userID": "USR004",
+        "name": "Mike Johnson",
+        "email": "mike.johnson@example.com",
+        "phone": "0123456789",
+        "status": "active"
+      },
+      "timeSlot": {
+        "slotDate": "2024-03-17",
+        "time": "11:15",
+        "psychologist": {
+          "psychologistID": "PSY001",
+          "userID": "USR001",
+          "yearsOfExperience": 5,
+          "availableHours": "9:00-17:00",
+          "status": "active"
+        }
+      },
+      "status": "pending",
+      "notes": "Initial assessment",
+      "meetingLink": "https://meet.google.com/lmn-opq-rst",
+      "appointmentType": "in-person",
+      "createdAt": "2024-03-13T08:45:00Z",
+      "updatedAt": "2024-03-13T08:45:00Z"
     }
   ]
 }
