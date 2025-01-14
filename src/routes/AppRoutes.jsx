@@ -12,9 +12,7 @@ import Login from "../pages/Login";
 import { Unauthorized } from "../pages/Unauthorized";
 import Booking from "../pages/Booking";
 import Test from "../pages/Test";
-<<<<<<< HEAD
 import TestQuestion from "../pages/TestQuestion";
-=======
 import { Outlet } from "react-router-dom";
 import Appointment from "../pages/psycologist/Appointment";
 import ChildrenRecord from "../pages/parent/ChildrenRecord";
@@ -23,7 +21,6 @@ import TestRecord from "../pages/student/TestRecord";
 import PatientRecord from "../pages/psycologist/PatientRecord";
 import UserManagement from "../pages/manager/UserManagement";
 import SurveyManagement from "../pages/manager/SurveyManagement";
->>>>>>> e06e853aa7bdb2913ace032f78f1bc6782f9f677
 
 export const routes = [
   {
@@ -35,17 +32,13 @@ export const routes = [
       { path: "about", element: <About /> },
       { path: "services", element: <Service /> },
       { path: "contact", element: <Contact /> },
-<<<<<<< HEAD
-      { path: "dashboard", element: <Dashboard /> },
-      { path: "test", element: <Test /> },
-      { path: "test-question", element: <TestQuestion /> },
-      { path: "book-appointment", element: <Booking /> },
-=======
+      // { path: "test", element: <Test /> },
+      // { path: "test-question", element: <TestQuestion /> },
+      // { path: "book-appointment", element: <Booking /> },
       // { path: "dashboard", element: <Dashboard /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "forgot-password", element: <ForgotPassword /> },
->>>>>>> e06e853aa7bdb2913ace032f78f1bc6782f9f677
       {
         path: "",
         element: (
@@ -55,6 +48,7 @@ export const routes = [
         ),
         children: [
           { path: "test", element: <Test /> },
+          { path: "test-question", element: <TestQuestion /> },
           { path: "book-appointment", element: <Booking /> },
           { path: "appointment-record", element: <AppointmentRecord /> },
           { path: "test-record", element: <TestRecord /> },
