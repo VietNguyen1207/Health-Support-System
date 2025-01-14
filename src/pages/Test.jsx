@@ -1,8 +1,16 @@
 import { useState, useMemo, useEffect } from "react";
-import { DownOutlined, SearchOutlined } from "@ant-design/icons";
-import { Input, Select, Pagination } from "antd";
+import {
+  DownOutlined,
+  SearchOutlined,
+  MenuOutlined,
+  DeleteOutlined,
+  EditOutlined,
+} from "@ant-design/icons";
+import { Input, Select, Pagination, Dropdown } from "antd";
+import { useNavigate } from "react-router-dom";
 
 const Test = () => {
+  const navigate = useNavigate();
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTest, setSelectedTest] = useState(null);
@@ -41,6 +49,36 @@ const Test = () => {
     [tests]
   );
 
+  // Move the items array inside the component but outside any render logic
+  const menuItems = {
+    items: [
+      {
+        key: "1",
+        label: (
+          <div
+            onClick={() => {
+              console.log("Edit clicked");
+              // Add your edit logic here
+            }}>
+            <EditOutlined /> Edit
+          </div>
+        ),
+      },
+      {
+        key: "2",
+        label: (
+          <div
+            onClick={() => {
+              console.log("Delete clicked");
+              // Add your delete logic here
+            }}>
+            <DeleteOutlined /> Delete
+          </div>
+        ),
+      },
+    ],
+  };
+
   // Filter tests based on search and filters
   const filteredTests = useMemo(() => {
     return tests.filter((test) => {
@@ -68,9 +106,8 @@ const Test = () => {
     setIsModalOpen(true);
   };
 
-  const handleStartTest = (testId) => {
-    // Add your navigation logic here
-    console.log("Starting test:", testId);
+  const handleStartTest = (test) => {
+    navigate("/test-question", { state: { test } });
   };
 
   const handlePageChange = (page) => {
@@ -85,10 +122,6 @@ const Test = () => {
         </div>
       ) : (
         <div className="test-content">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">
-            Available Tests
-          </h1>
-
           {/* Search and Filters Section */}
           <div className="search-filters mb-6">
             <div className="space-y-4 max-w-3xl mx-auto">
@@ -248,12 +281,16 @@ const Test = () => {
                     <h2 className="text-xl font-semibold text-gray-900">
                       {selectedTest.title}
                     </h2>
-                    <button
-                      onClick={() => setIsModalOpen(false)}
-                      className="text-gray-400 hover:text-gray-500">
-                      <span className="sr-only">Close</span>
-                      <DownOutlined rotate={45} className="text-xl" />
-                    </button>
+                    <Dropdown
+                      menu={menuItems}
+                      trigger={["click"]}
+                      placement="bottomRight">
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-gray-400 hover:text-gray-500">
+                        <MenuOutlined style={{ fontSize: "24px" }} />
+                      </button>
+                    </Dropdown>
                   </div>
                 </div>
 
@@ -307,7 +344,7 @@ const Test = () => {
                     Cancel
                   </button>
                   <button
-                    onClick={() => handleStartTest(selectedTest.id)}
+                    onClick={() => handleStartTest(selectedTest)}
                     className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green hover:bg-custom-green/90">
                     Start Test
                   </button>

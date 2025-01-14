@@ -12,6 +12,7 @@ import Login from "../pages/Login";
 import { Unauthorized } from "../pages/error/Unauthorized";
 import Booking from "../pages/Booking";
 import Test from "../pages/Test";
+import TestQuestion from "../pages/TestQuestion";
 import { Outlet } from "react-router-dom";
 import Appointment from "../pages/psycologist/Appointment";
 import ChildrenRecord from "../pages/parent/ChildrenRecord";
@@ -33,6 +34,9 @@ export const routes = [
       { path: "about", element: <About /> },
       { path: "services", element: <Service /> },
       { path: "contact", element: <Contact /> },
+      // { path: "test", element: <Test /> },
+      // { path: "test-question", element: <TestQuestion /> },
+      // { path: "book-appointment", element: <Booking /> },
       // { path: "dashboard", element: <Dashboard /> },
       {
         path: "login",
@@ -66,6 +70,8 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [
+          { path: "test", element: <Test /> },
+          { path: "test-question", element: <TestQuestion /> },
           { path: "book-appointment", element: <Booking /> },
           { path: "appointment-record", element: <AppointmentRecord /> },
           { path: "test-record", element: <TestRecord /> },
