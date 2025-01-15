@@ -35,7 +35,7 @@ export default function Appointment() {
         appointmentID: appointment.appointmentID,
       });
     });
-
+    console.log(events);
     return events;
   }, []);
 
