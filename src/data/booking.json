@@ -11,7 +11,7 @@
         "status": "active"
       },
       "timeSlot": {
-        "slotDate": "2024-03-15",
+        "slotDate": "2025-01-15",
         "time": "10:00",
         "psychologist": {
           "psychologistID": "PSY001",
@@ -24,7 +24,7 @@
       "status": "confirmed",
       "notes": "First consultation session",
       "meetingLink": "https://meet.google.com/abc-defg-hij",
-      "appointmentType": "online",
+      "appointmentType": "offline",
       "createdAt": "2024-03-11T10:00:00Z",
       "updatedAt": "2024-03-11T10:00:00Z"
     },
@@ -39,7 +39,7 @@
         "status": "active"
       },
       "timeSlot": {
-        "slotDate": "2024-03-15",
+        "slotDate": "2025-01-15",
         "time": "14:00",
         "psychologist": {
           "psychologistID": "PSY001",
@@ -67,8 +67,8 @@
         "status": "active"
       },
       "timeSlot": {
-        "slotDate": "2024-03-16",
-        "time": "14:30",
+        "slotDate": "2025-01-16",
+        "time": "15:00",
         "psychologist": {
           "psychologistID": "PSY002",
           "userID": "USR003",
@@ -95,8 +95,8 @@
         "status": "active"
       },
       "timeSlot": {
-        "slotDate": "2024-03-17",
-        "time": "11:15",
+        "slotDate": "2025-01-17",
+        "time": "8:00",
         "psychologist": {
           "psychologistID": "PSY001",
           "userID": "USR001",
