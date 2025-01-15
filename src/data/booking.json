@@ -67,7 +67,7 @@
         "status": "active"
       },
       "timeSlot": {
-        "slotDate": "2025-01-16",
+        "slotDate": "2025-01-14",
         "time": "15:00",
         "psychologist": {
           "psychologistID": "PSY002",
@@ -108,7 +108,35 @@
       "status": "pending",
       "notes": "Initial assessment",
       "meetingLink": "https://meet.google.com/lmn-opq-rst",
-      "appointmentType": "in-person",
+      "appointmentType": "offline",
+      "createdAt": "2024-03-13T08:45:00Z",
+      "updatedAt": "2024-03-13T08:45:00Z"
+    },
+    {
+      "appointmentID": "APT003",
+      "studentID": {
+        "studentID": "STU003",
+        "userID": "USR004",
+        "name": "Mike Johnson",
+        "email": "mike.johnson@example.com",
+        "phone": "0123456789",
+        "status": "active"
+      },
+      "timeSlot": {
+        "slotDate": "2025-01-17",
+        "time": "8:00",
+        "psychologist": {
+          "psychologistID": "PSY001",
+          "userID": "USR001",
+          "yearsOfExperience": 5,
+          "availableHours": "9:00-17:00",
+          "status": "active"
+        }
+      },
+      "status": "confirmed",
+      "notes": "Initial assessment",
+      "meetingLink": "https://meet.google.com/lmn-opq-rst",
+      "appointmentType": "offline",
       "createdAt": "2024-03-13T08:45:00Z",
       "updatedAt": "2024-03-13T08:45:00Z"
     }

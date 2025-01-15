@@ -12,6 +12,7 @@ export default function Appointment() {
     bookingData.appointments.forEach((appointment) => {
       const date = new Date(appointment.timeSlot.slotDate);
       const dateKey = date.toISOString().split("T")[0];
+      const appointmentStatus = appointment.status;
 
       if (!events[dateKey]) {
         events[dateKey] = [];
@@ -28,14 +29,14 @@ export default function Appointment() {
       }
 
       // Thêm appointment vào mảng của ngày
-      events[dateKey].push({
-        type: type,
-        content: `${appointment.timeSlot.time} - ${appointment.studentID.name}`,
-        timeSlotID: appointment.timeSlot.psychologist.psychologistID,
-        appointmentID: appointment.appointmentID,
-      });
+      appointmentStatus === "confirmed" &&
+        events[dateKey].push({
+          type: type,
+          content: `${appointment.timeSlot.time} - ${appointment.studentID.name}`,
+          appointment,
+        });
     });
-    console.log(events);
+    // console.log(events);
     return events;
   }, []);
 
@@ -45,25 +46,30 @@ export default function Appointment() {
   };
 
   const dateCellRender = (value) => {
-    const listData = getListData(value);
+    const listData = value.isAfter(moment().subtract(1, "day"))
+      ? getListData(value)
+      : [];
+
     return (
       <ul className="w-full flex flex-col gap-2 justify-start">
-        {listData.map((item) => (
-          <li key={item.content}>
-            <Tag
-              color={item.type}
-              className="text-sm"
-              icon={
-                item.appointmentType !== "online" ? (
-                  <PhoneOutlined />
-                ) : (
-                  <UserOutlined />
-                )
-              }>
-              {item.content}
-            </Tag>
-          </li>
-        ))}
+        {listData.map((item) => {
+          return (
+            <li key={item.content}>
+              <Tag
+                color={item.type}
+                className="text-sm"
+                icon={
+                  item.appointment.appointmentType === "online" ? (
+                    <PhoneOutlined />
+                  ) : (
+                    <UserOutlined />
+                  )
+                }>
+                {item.content}
+              </Tag>
+            </li>
+          );
+        })}
       </ul>
     );
   };
