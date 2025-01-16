@@ -203,16 +203,16 @@ export default function Appointment() {
     );
 
     if (currentIndex !== -1) {
-      console.log("currentIndex: ", currentIndex);
+      // console.log("currentIndex: ", currentIndex);
       setIndexAppointment(currentIndex);
     } else if (isBefore && isAfter) {
-      console.log("between: ", dates.length);
+      // console.log("between: ", dates.length);
       setIndexAppointment(dates.length);
     } else if (isBefore) {
       console.log("before:", 0);
       setIndexAppointment(0);
     } else if (isAfter) {
-      console.log("after:", dates.length - 1);
+      // console.log("after:", dates.length - 1);
       setIndexAppointment(dates.length - 1);
     }
     setSelectedDate(value);
