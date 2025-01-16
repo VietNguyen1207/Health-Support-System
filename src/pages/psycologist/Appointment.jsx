@@ -59,7 +59,8 @@ export default function Appointment() {
                 ) : (
                   <UserOutlined />
                 )
-              }>
+              }
+            >
               {item.content}
             </Tag>
           </li>
@@ -76,7 +77,8 @@ export default function Appointment() {
             itemActiveBg: "#e8f5e9",
           },
         },
-      }}>
+      }}
+    >
       <div className="general-wrapper pt-16 mx-20">
         <Calendar
           mode="month"
