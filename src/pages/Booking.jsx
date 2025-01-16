@@ -54,6 +54,10 @@ const Booking = () => {
     }));
   };
 
+  const selectedPsychologistData = psychologists.find(
+    (p) => p.id === parseInt(formData.psychologist)
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 general-wrapper">
       <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
@@ -80,7 +84,7 @@ const Booking = () => {
                   required
                   value={selectedSpeciality}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-green focus:ring-custom-green">
                   <option value="" className="text-gray-400">
                     --- Select a speciality ---
                   </option>
@@ -105,7 +109,7 @@ const Booking = () => {
                   required
                   value={formData.psychologist}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-green focus:ring-custom-green">
                   <option value="" className="text-gray-400">
                     --- Select a psychologist ---
                   </option>
@@ -130,14 +134,16 @@ const Booking = () => {
                   required
                   value={formData.reason}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-green focus:ring-custom-green"
                   placeholder="Please briefly describe your reason for seeking consultation..."
                 />
               </div>
             </div>
 
             <div className="w-1/2">
-              <DateTimeSelector />
+              <DateTimeSelector
+                selectedPsychologist={selectedPsychologistData}
+              />
             </div>
           </div>
           {/* Consent Section */}
@@ -149,7 +155,7 @@ const Booking = () => {
                 checked={formData.consent}
                 onChange={handleChange}
                 required
-                className="form-checkbox text-blue-600 h-4 w-4"
+                className="form-checkbox h-4 w-4"
               />
               <span className="ml-2 text-sm text-gray-600">
                 I consent to the processing of my personal information and agree

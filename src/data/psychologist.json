@@ -4,25 +4,96 @@
       "id": 1,
       "name": "Dr. Sarah Johnson",
       "speciality": "Clinical Psychology",
-      "experience": "15 years experience"
+      "experience": "15 years experience",
+      "workingHours": {
+        "monday": {
+          "start": "09:00",
+          "end": "17:30",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        },
+        "tuesday": {
+          "start": "09:00",
+          "end": "17:30",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        },
+        "wednesday": {},
+        "thursday": {
+          "start": "09:00",
+          "end": "17:30",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        },
+        "friday": {
+          "start": "09:00",
+          "end": "15:00",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        }
+      },
+      "bookedSlots": [
+        {
+          "date": "2025-01-18",
+          "time": "09:00",
+          "duration": 30
+        },
+        {
+          "date": "2025-01-16",
+          "time": "11:30",
+          "duration": 30
+        },
+        {
+          "date": "2025-01-16",
+          "time": "11:00",
+          "duration": 30
+        }
+      ]
     },
     {
       "id": 2,
       "name": "Dr. Michael Chen",
       "speciality": "Clinical Psychology",
-      "experience": "10 years experience"
-    },
-    {
-      "id": 3,
-      "name": "Dr. Emily Williams",
-      "speciality": "Clinical Psychology",
-      "experience": "8 years experience"
-    },
-    {
-      "id": 4,
-      "name": "Dr. David Kim",
-      "speciality": "Clinical Psychology",
-      "experience": "12 years experience"
+      "experience": "10 years experience",
+      "workingHours": {
+        "monday": {
+          "start": "09:00",
+          "end": "17:00",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        },
+        "tuesday": {
+          "start": "09:00",
+          "end": "17:00",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        },
+        "wednesday": {
+          "start": "09:00",
+          "end": "17:00",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        },
+        "thursday": {
+          "start": "09:00",
+          "end": "17:00",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        },
+        "friday": {
+          "start": "09:00",
+          "end": "15:00",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        }
+      },
+      "bookedSlots": [
+        {
+          "date": "2025-01-16",
+          "time": "9:00",
+          "duration": 30
+        }
+      ]
     }
   ],
   "child_psychology": [
@@ -30,103 +101,40 @@
       "id": 5,
       "name": "Dr. Maria Garcia",
       "speciality": "Child Psychology",
-      "experience": "14 years experience"
-    },
-    {
-      "id": 6,
-      "name": "Dr. James Wilson",
-      "speciality": "Child Psychology",
-      "experience": "9 years experience"
-    },
-    {
-      "id": 7,
-      "name": "Dr. Lisa Thompson",
-      "speciality": "Child Psychology",
-      "experience": "11 years experience"
-    },
-    {
-      "id": 8,
-      "name": "Dr. Robert Lee",
-      "speciality": "Child Psychology",
-      "experience": "7 years experience"
-    }
-  ],
-  "counseling_psychology": [
-    {
-      "id": 9,
-      "name": "Dr. Anna Martinez",
-      "speciality": "Counseling Psychology",
-      "experience": "13 years experience"
-    },
-    {
-      "id": 10,
-      "name": "Dr. Thomas Brown",
-      "speciality": "Counseling Psychology",
-      "experience": "16 years experience"
-    },
-    {
-      "id": 11,
-      "name": "Dr. Sophie Anderson",
-      "speciality": "Counseling Psychology",
-      "experience": "8 years experience"
-    },
-    {
-      "id": 12,
-      "name": "Dr. William Park",
-      "speciality": "Counseling Psychology",
-      "experience": "11 years experience"
-    }
-  ],
-  "educational_psychology": [
-    {
-      "id": 13,
-      "name": "Dr. Rachel Green",
-      "speciality": "Educational Psychology",
-      "experience": "10 years experience"
-    },
-    {
-      "id": 14,
-      "name": "Dr. Daniel White",
-      "speciality": "Educational Psychology",
-      "experience": "12 years experience"
-    },
-    {
-      "id": 15,
-      "name": "Dr. Emma Davis",
-      "speciality": "Educational Psychology",
-      "experience": "9 years experience"
-    },
-    {
-      "id": 16,
-      "name": "Dr. Kevin Zhang",
-      "speciality": "Educational Psychology",
-      "experience": "7 years experience"
-    }
-  ],
-  "industrial_psychology": [
-    {
-      "id": 17,
-      "name": "Dr. Jennifer Taylor",
-      "speciality": "Industrial Psychology",
-      "experience": "15 years experience"
-    },
-    {
-      "id": 18,
-      "name": "Dr. Christopher Lee",
-      "speciality": "Industrial Psychology",
-      "experience": "11 years experience"
-    },
-    {
-      "id": 19,
-      "name": "Dr. Michelle Wong",
-      "speciality": "Industrial Psychology",
-      "experience": "13 years experience"
-    },
-    {
-      "id": 20,
-      "name": "Dr. Andrew Clark",
-      "speciality": "Industrial Psychology",
-      "experience": "8 years experience"
+      "experience": "14 years experience",
+      "workingHours": {
+        "monday": {
+          "start": "07:00",
+          "end": "17:00",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        },
+        "tuesday": {
+          "start": "08:00",
+          "end": "17:00",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        },
+        "wednesday": {
+          "start": "08:00",
+          "end": "17:00",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        },
+        "thursday": {
+          "start": "07:00",
+          "end": "17:00",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        },
+        "friday": {
+          "start": "07:00",
+          "end": "15:00",
+          "breakTime": "12:00-13:00",
+          "slotDuration": 30
+        }
+      },
+      "bookedSlots": []
     }
   ]
 }
