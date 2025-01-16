@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DateTimeSelector from "../components/DateTimeSelector";
+import psychologistData from "../data/psychologist.json";
 
 const Booking = () => {
   const navigate = useNavigate();
+  const [selectedSpeciality, setSelectedSpeciality] = useState("");
   const [formData, setFormData] = useState({
     fullName: "",
     dateOfBirth: "",
@@ -16,13 +18,19 @@ const Booking = () => {
     consent: false,
   });
 
-  // Sample psychologist list
-  const psychologists = [
-    { id: 1, name: "Dr. Sarah Johnson", speciality: "Anxiety & Depression" },
-    { id: 2, name: "Dr. Michael Chen", speciality: "Trauma & PTSD" },
-    { id: 3, name: "Dr. Emily Williams", speciality: "Student Counseling" },
-    { id: 4, name: "Dr. David Kim", speciality: "Stress Management" },
-  ];
+  // Get list of specialities
+  const specialities = Object.keys(psychologistData).map((key) => ({
+    id: key,
+    name: key
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" "),
+  }));
+
+  // Get psychologists based on selected speciality
+  const psychologists = selectedSpeciality
+    ? psychologistData[selectedSpeciality]
+    : [];
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -32,6 +40,14 @@ const Booking = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (name === "speciality") {
+      setSelectedSpeciality(value);
+      // Reset psychologist selection when speciality changes
+      setFormData((prev) => ({
+        ...prev,
+        psychologist: "",
+      }));
+    }
     setFormData((prevState) => ({
       ...prevState,
       [name]: type === "checkbox" ? checked : value,
@@ -49,36 +65,39 @@ const Booking = () => {
           <h3 className="text-lg font-semibold text-gray-700">
             Appointment Details
           </h3>
-          {/* Appointment Details Section */}
           <div className="flex gap-4">
             <div className="space-y-4 pt-6 flex-1">
+              {/* Speciality Selection */}
               <div>
                 <label
-                  htmlFor="psychologist"
+                  htmlFor="speciality"
                   className="block text-base font-medium text-gray-700 mb-4">
-                  Department<span className="text-red-500">*</span>
+                  Select Speciality<span className="text-red-500">*</span>
                 </label>
                 <select
-                  name="psychologist"
-                  id="psychologist"
+                  name="speciality"
+                  id="speciality"
                   required
-                  value={formData.psychologist}
+                  value={selectedSpeciality}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                  <option value="">Select a psychologist</option>
-                  {psychologists.map((psych) => (
-                    <option key={psych.id} value={psych.id}>
-                      {psych.name} - {psych.speciality}
+                  <option value="" className="text-gray-400">
+                    --- Select a speciality ---
+                  </option>
+                  {specialities.map((spec) => (
+                    <option key={spec.id} value={spec.id}>
+                      {spec.name}
                     </option>
                   ))}
                 </select>
               </div>
 
+              {/* Psychologist Selection */}
               <div>
                 <label
                   htmlFor="psychologist"
                   className="block text-base font-medium text-gray-700 mb-4">
-                  Preferred Psychologist
+                  Select Psychologist<span className="text-red-500">*</span>
                 </label>
                 <select
                   name="psychologist"
@@ -87,10 +106,12 @@ const Booking = () => {
                   value={formData.psychologist}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                  <option value="">Select a psychologist</option>
+                  <option value="" className="text-gray-400">
+                    --- Select a psychologist ---
+                  </option>
                   {psychologists.map((psych) => (
                     <option key={psych.id} value={psych.id}>
-                      {psych.name} - {psych.speciality}
+                      {psych.name} - {psych.experience}
                     </option>
                   ))}
                 </select>
