@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DateTimeSelector from "../components/DateTimeSelector";
+import psychologistData from "../data/psychologist.json";
 
 const Booking = () => {
   const navigate = useNavigate();
+  const [selectedSpeciality, setSelectedSpeciality] = useState("");
   const [formData, setFormData] = useState({
     fullName: "",
     dateOfBirth: "",
@@ -15,13 +18,19 @@ const Booking = () => {
     consent: false,
   });
 
-  // Sample psychologist list
-  const psychologists = [
-    { id: 1, name: "Dr. Sarah Johnson", speciality: "Anxiety & Depression" },
-    { id: 2, name: "Dr. Michael Chen", speciality: "Trauma & PTSD" },
-    { id: 3, name: "Dr. Emily Williams", speciality: "Student Counseling" },
-    { id: 4, name: "Dr. David Kim", speciality: "Stress Management" },
-  ];
+  // Get list of specialities
+  const specialities = Object.keys(psychologistData).map((key) => ({
+    id: key,
+    name: key
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" "),
+  }));
+
+  // Get psychologists based on selected speciality
+  const psychologists = selectedSpeciality
+    ? psychologistData[selectedSpeciality]
+    : [];
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -31,6 +40,14 @@ const Booking = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (name === "speciality") {
+      setSelectedSpeciality(value);
+      // Reset psychologist selection when speciality changes
+      setFormData((prev) => ({
+        ...prev,
+        psychologist: "",
+      }));
+    }
     setFormData((prevState) => ({
       ...prevState,
       [name]: type === "checkbox" ? checked : value,
@@ -39,95 +56,90 @@ const Booking = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 general-wrapper">
-      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+      <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
         <h2 className="text-2xl font-bold text-custom-green mb-8 pb-2 border-b">
           Book an Appointment
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Appointment Details Section */}
-          <div className="space-y-4 pt-6">
-            <h3 className="text-lg font-semibold text-gray-700">
-              Appointment Details
-            </h3>
-
-            <div className="grid grid-cols-2 gap-4">
+          <h3 className="text-lg font-semibold text-gray-700">
+            Appointment Details
+          </h3>
+          <div className="flex gap-4">
+            <div className="space-y-4 pt-6 flex-1">
+              {/* Speciality Selection */}
               <div>
                 <label
-                  htmlFor="appointmentDate"
-                  className="block text-sm font-medium text-gray-700">
-                  Preferred Date
+                  htmlFor="speciality"
+                  className="block text-base font-medium text-gray-700 mb-4">
+                  Select Speciality<span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="date"
-                  name="appointmentDate"
-                  id="appointmentDate"
+                <select
+                  name="speciality"
+                  id="speciality"
                   required
-                  value={formData.appointmentDate}
+                  value={selectedSpeciality}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="appointmentTime"
-                  className="block text-sm font-medium text-gray-700">
-                  Preferred Time
-                </label>
-                <input
-                  type="time"
-                  name="appointmentTime"
-                  id="appointmentTime"
-                  required
-                  value={formData.appointmentTime}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="psychologist"
-                className="block text-sm font-medium text-gray-700">
-                Preferred Psychologist
-              </label>
-              <select
-                name="psychologist"
-                id="psychologist"
-                required
-                value={formData.psychologist}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                <option value="">Select a psychologist</option>
-                {psychologists.map((psych) => (
-                  <option key={psych.id} value={psych.id}>
-                    {psych.name} - {psych.speciality}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  <option value="" className="text-gray-400">
+                    --- Select a speciality ---
                   </option>
-                ))}
-              </select>
+                  {specialities.map((spec) => (
+                    <option key={spec.id} value={spec.id}>
+                      {spec.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Psychologist Selection */}
+              <div>
+                <label
+                  htmlFor="psychologist"
+                  className="block text-base font-medium text-gray-700 mb-4">
+                  Select Psychologist<span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="psychologist"
+                  id="psychologist"
+                  required
+                  value={formData.psychologist}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  <option value="" className="text-gray-400">
+                    --- Select a psychologist ---
+                  </option>
+                  {psychologists.map((psych) => (
+                    <option key={psych.id} value={psych.id}>
+                      {psych.name} - {psych.experience}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="reason"
+                  className="block text-base font-medium text-gray-700 mb-4">
+                  Reason for Appointment
+                </label>
+                <textarea
+                  name="reason"
+                  id="reason"
+                  rows={4}
+                  required
+                  value={formData.reason}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder="Please briefly describe your reason for seeking consultation..."
+                />
+              </div>
             </div>
 
-            <div>
-              <label
-                htmlFor="reason"
-                className="block text-sm font-medium text-gray-700">
-                Reason for Appointment
-              </label>
-              <textarea
-                name="reason"
-                id="reason"
-                rows={4}
-                required
-                value={formData.reason}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="Please briefly describe your reason for seeking consultation..."
-              />
+            <div className="w-1/2">
+              <DateTimeSelector />
             </div>
           </div>
-
           {/* Consent Section */}
           <div className="pt-4">
             <label className="flex items-center">
