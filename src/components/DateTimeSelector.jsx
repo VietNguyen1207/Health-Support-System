@@ -5,9 +5,10 @@ import dayjs from "dayjs";
 import PropTypes from "prop-types";
 const { Text } = Typography;
 
-const DateTimeSelector = ({ selectedPsychologist }) => {
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
+  const [selectedDate, setSelectedDate] = useState();
   const [selectedTime, setSelectedTime] = useState(null);
+  const { setFormData } = props;
 
   const dates = [
     { date: dayjs().format("DD/MM"), weekday: dayjs().format("dddd") },
@@ -25,7 +26,9 @@ const DateTimeSelector = ({ selectedPsychologist }) => {
   // Kiểm tra xem có lịch làm việc hay không và có phải ngày làm việc không
   const hasWorkingHours = useMemo(() => {
     if (!selectedPsychologist?.workingHours) return false;
-    const weekday = dayjs(selectedDate).format("dddd").toLowerCase();
+    const weekday = dayjs(selectedDate || dayjs())
+      ?.format("dddd")
+      .toLowerCase();
     return selectedPsychologist.workingHours[weekday] !== undefined;
   }, [selectedPsychologist, selectedDate]);
 
@@ -85,8 +88,8 @@ const DateTimeSelector = ({ selectedPsychologist }) => {
     return !isBooked;
   };
 
-  console.log("workingHours", getWorkingHoursForDate(dayjs(selectedDate)));
-  console.log("isSlotAvailable", isSlotAvailable(dayjs(selectedDate), "10:00"));
+  //   console.log("workingHours", getWorkingHoursForDate(dayjs(selectedDate)));
+  //   console.log("isSlotAvailable", isSlotAvailable(dayjs(selectedDate), "10:00"));
 
   return (
     <div className="p-5">
@@ -102,7 +105,7 @@ const DateTimeSelector = ({ selectedPsychologist }) => {
             className={`
               w-24 h-28 cursor-pointer border-none transition-all
               ${
-                selectedDate.format("DD/MM") === item.date
+                selectedDate?.format("DD/MM") === item.date
                   ? "bg-[#5C8C6B]"
                   : "bg-gray-100 hover:bg-gray-200"
               }
@@ -114,11 +117,15 @@ const DateTimeSelector = ({ selectedPsychologist }) => {
                   .set("date", day)
                   .set("month", month - 1)
               );
+              setFormData((prev) => ({
+                ...prev,
+                appointmentDate: item.date,
+              }));
             }}>
             <div className="text-center">
               <div
                 className={`text-base font-medium ${
-                  selectedDate.format("DD/MM") === item.date
+                  selectedDate?.format("DD/MM") === item.date
                     ? "text-white"
                     : "text-gray-800"
                 }`}>
@@ -126,7 +133,7 @@ const DateTimeSelector = ({ selectedPsychologist }) => {
               </div>
               <div
                 className={`text-sm ${
-                  selectedDate.format("DD/MM") === item.date
+                  selectedDate?.format("DD/MM") === item.date
                     ? "text-white"
                     : "text-gray-500"
                 }`}>
@@ -178,19 +185,22 @@ const DateTimeSelector = ({ selectedPsychologist }) => {
 
 DateTimeSelector.propTypes = {
   selectedPsychologist: PropTypes.shape({
-    workingHours: PropTypes.objectOf(PropTypes.arrayOf(PropTypes.string))
-      .isRequired,
+    workingHours: PropTypes.objectOf(
+      PropTypes.shape({
+        start: PropTypes.string,
+        end: PropTypes.string,
+        breakTime: PropTypes.string,
+        slotDuration: PropTypes.number,
+      })
+    ),
     bookedSlots: PropTypes.arrayOf(
       PropTypes.shape({
         date: PropTypes.string.isRequired,
         time: PropTypes.string.isRequired,
       })
-    ).isRequired,
+    ),
   }),
-};
-
-DateTimeSelector.defaultProps = {
-  selectedPsychologist: null,
+  setFormData: PropTypes.func,
 };
 
 export default DateTimeSelector;

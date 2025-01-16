@@ -2,15 +2,16 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DateTimeSelector from "../components/DateTimeSelector";
 import psychologistData from "../data/psychologist.json";
-
+import { useAuthStore } from "../stores/authStore";
 const Booking = () => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [selectedSpeciality, setSelectedSpeciality] = useState("");
   const [formData, setFormData] = useState({
-    fullName: "",
-    dateOfBirth: "",
-    gender: "",
-    phoneNumber: "",
+    fullName: user?.name,
+    dateOfBirth: user?.dateOfBirth,
+    gender: user?.gender,
+    phoneNumber: user?.phoneNumber,
     appointmentDate: "",
     appointmentTime: "",
     reason: "",
@@ -19,7 +20,7 @@ const Booking = () => {
   });
 
   // Get list of specialities
-  const specialities = Object.keys(psychologistData).map((key) => ({
+  const specialities = Object.keys(psychologistData)?.map((key) => ({
     id: key,
     name: key
       .split("_")
@@ -46,15 +47,18 @@ const Booking = () => {
       setFormData((prev) => ({
         ...prev,
         psychologist: "",
+        appointmentDate: "",
+        appointmentTime: "",
       }));
     }
+
     setFormData((prevState) => ({
       ...prevState,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const selectedPsychologistData = psychologists.find(
+  const selectedPsychologistData = psychologists?.find(
     (p) => p.id === parseInt(formData.psychologist)
   );
 
@@ -125,13 +129,13 @@ const Booking = () => {
                 <label
                   htmlFor="reason"
                   className="block text-base font-medium text-gray-700 mb-4">
-                  Reason for Appointment
+                  Reason for Appointment (Optional)
                 </label>
                 <textarea
                   name="reason"
                   id="reason"
                   rows={4}
-                  required
+                  // required
                   value={formData.reason}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-green focus:ring-custom-green"
@@ -143,6 +147,7 @@ const Booking = () => {
             <div className="w-1/2">
               <DateTimeSelector
                 selectedPsychologist={selectedPsychologistData}
+                setFormData={setFormData}
               />
             </div>
           </div>
