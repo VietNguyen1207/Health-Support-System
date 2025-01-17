@@ -1,38 +1,64 @@
 // DateTimeSelector.jsx
 import { useState, useMemo } from "react";
 import { Card, Space, Typography } from "antd";
+import dayjs from "dayjs";
+import PropTypes from "prop-types";
+import timeSlots from "../data/timeSlots.json";
 const { Text } = Typography;
 
-const DateTimeSelector = () => {
-  const [selectedDate, setSelectedDate] = useState("17/01");
-  const [selectedTime, setSelectedTime] = useState(null);
+const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
+  const { formData, setFormData } = props;
+  const [selectedDate, setSelectedDate] = useState(
+    dayjs(formData?.appointmentDate)
+  );
+
+  // console.log("selectedDate", selectedDate);
+  // console.log("formData?.appointmentDate", formData?.appointmentDate);
+  // console.log(selectedDate === formData?.appointmentDate);
+  // console.log(selectedPsychologist);
 
   const dates = [
-    { date: "16/01", weekday: "Thứ 5" },
-    { date: "17/01", weekday: "Thứ 6" },
-    { date: "18/01", weekday: "Thứ 7" },
-    { date: "09/02", weekday: "Ngày khác" },
+    { date: dayjs(), weekday: dayjs().format("ddd") },
+    {
+      date: dayjs().add(1, "day"),
+      weekday: dayjs().add(1, "day").format("ddd"),
+    },
+    {
+      date: dayjs().add(2, "day"),
+      weekday: dayjs().add(2, "day").format("ddd"),
+    },
+    { date: dayjs().add(3, "day"), weekday: "Other date" },
   ];
 
-  const timeSlots = useMemo(() => {
-    const slots = [];
-    let hour = 8;
-    let minute = 0;
+  // Get available slots based on selected date and psychologist
+  const getAvailableSlots = useMemo(() => {
+    if (!selectedPsychologist) return [];
+    const dateStr = dayjs(selectedDate).format("YYYY-MM-DD");
+    const availableSlots = selectedPsychologist.available[dateStr] || [];
+    const bookedSlots = selectedPsychologist.booked[dateStr] || [];
+    const workingHours = availableSlots
+      .concat(bookedSlots)
+      .sort((a, b) => a - b);
 
-    while (hour < 17 || (hour === 17 && minute === 0)) {
-      const timeString = `${hour.toString().padStart(2, "0")}:${minute
-        .toString()
-        .padStart(2, "0")}`;
-      slots.push(timeString);
+    // console.log(workingHours);
 
-      minute += 30;
-      if (minute >= 60) {
-        hour += 1;
-        minute = 0;
-      }
-    }
-    return slots;
-  }, []);
+    return (
+      workingHours
+        //   .filter((slot) => !bookedSlots.includes(slot))
+        .map((slot) => ({
+          timeSlots: timeSlots[slot],
+          isAvailable: !bookedSlots.includes(slot),
+        }))
+    );
+
+    // Filter out booked slots and convert to time format
+  }, [selectedDate, selectedPsychologist]);
+
+  // Check if psychologist has any available slots
+  const hasAvailableSlots = useMemo(() => {
+    if (!selectedPsychologist) return false;
+    return Object.keys(selectedPsychologist.available).length > 0;
+  }, [selectedPsychologist]);
 
   return (
     <div className="p-5">
@@ -44,26 +70,44 @@ const DateTimeSelector = () => {
       <Space size={12} className="mb-5 flex flex-wrap">
         {dates.map((item) => (
           <Card
-            key={item.date}
+            key={item.date.format("YYYY-MM-DD")}
             className={`
-               cursor-pointer border-none transition-all
+              w-24 h-28 cursor-pointer border-none transition-all
               ${
-                selectedDate === item.date
+                selectedDate &&
+                selectedDate?.format("YYYY-MM-DD") ===
+                  item.date.format("YYYY-MM-DD")
                   ? "bg-[#5C8C6B]"
                   : "bg-gray-100 hover:bg-gray-200"
               }
             `}
-            onClick={() => setSelectedDate(item.date)}>
+            onClick={() => {
+              setSelectedDate(item.date);
+
+              setFormData((prev) => ({
+                ...prev,
+                appointmentDate: item.date.format("YYYY-MM-DD"),
+                appointmentTime: null,
+              }));
+            }}>
             <div className="text-center">
               <div
                 className={`text-base font-medium ${
-                  selectedDate === item.date ? "text-white" : "text-gray-800"
+                  selectedDate &&
+                  selectedDate?.format("YYYY-MM-DD") ===
+                    item.date.format("YYYY-MM-DD")
+                    ? "text-white"
+                    : "text-gray-800"
                 }`}>
-                {item.date}
+                {item.date.format("DD/MM")}
               </div>
               <div
                 className={`text-sm ${
-                  selectedDate === item.date ? "text-white" : "text-gray-500"
+                  selectedDate &&
+                  selectedDate?.format("YYYY-MM-DD") ===
+                    item.date.format("YYYY-MM-DD")
+                    ? "text-white"
+                    : "text-gray-500"
                 }`}>
                 {item.weekday}
               </div>
@@ -71,28 +115,75 @@ const DateTimeSelector = () => {
           </Card>
         ))}
       </Space>
-
-      {/* Time Selection */}
-      <div className="flex flex-wrap gap-2">
-        {timeSlots.map((time) => (
-          <Card
-            key={time}
-            className={`
-              w-20 cursor-pointer border-none transition-all
-              ${
-                selectedTime === time
-                  ? "bg-[#5C8C6B] text-white"
-                  : "bg-gray-100 hover:bg-gray-200"
-              }
-            `}
-            bodyStyle={{ padding: "8px" }}
-            onClick={() => setSelectedTime(time)}>
-            <div className="text-center">{time}</div>
-          </Card>
-        ))}
-      </div>
+      {!hasAvailableSlots ? (
+        <Text className="text-gray-500">There is no available time slots.</Text>
+      ) : (
+        <>
+          {/* Time Selection */}
+          {selectedDate && selectedPsychologist ? (
+            getAvailableSlots.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {getAvailableSlots.map((slot) => (
+                  <Card
+                    key={slot.timeSlots}
+                    disabled={!slot.isAvailable}
+                    className={`
+                       w-1/6 min-w-20 p-0 cursor-pointer border-none transition-all
+                      ${
+                        formData?.appointmentTime === slot.timeSlots
+                          ? "bg-[#5C8C6B] text-white"
+                          : slot.isAvailable
+                          ? "bg-gray-100 hover:bg-gray-200"
+                          : "bg-gray-300 cursor-not-allowed"
+                      }
+                    `}
+                    onClick={() => {
+                      if (slot.isAvailable) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          appointmentTime: slot.timeSlots,
+                        }));
+                      }
+                    }}>
+                    <div className="text-center">{slot.timeSlots}</div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Text className="text-gray-500">
+                No available slots for selected date.
+              </Text>
+            )
+          ) : (
+            <Text className="text-gray-500">
+              Please select a date and psychologist first.
+            </Text>
+          )}
+        </>
+      )}
     </div>
   );
+};
+
+DateTimeSelector.propTypes = {
+  selectedPsychologist: PropTypes.shape({
+    workingHours: PropTypes.objectOf(
+      PropTypes.shape({
+        start: PropTypes.string,
+        end: PropTypes.string,
+        breakTime: PropTypes.string,
+        slotDuration: PropTypes.number,
+      })
+    ),
+    bookedSlots: PropTypes.arrayOf(
+      PropTypes.shape({
+        date: PropTypes.string.isRequired,
+        time: PropTypes.string.isRequired,
+      })
+    ),
+  }),
+  formData: PropTypes.object,
+  setFormData: PropTypes.func,
 };
 
 export default DateTimeSelector;
