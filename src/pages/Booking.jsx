@@ -2,15 +2,16 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DateTimeSelector from "../components/DateTimeSelector";
 import psychologistData from "../data/psychologist.json";
-
+import { useAuthStore } from "../stores/authStore";
 const Booking = () => {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [selectedSpeciality, setSelectedSpeciality] = useState("");
   const [formData, setFormData] = useState({
-    fullName: "",
-    dateOfBirth: "",
-    gender: "",
-    phoneNumber: "",
+    fullName: user?.name,
+    dateOfBirth: user?.dateOfBirth,
+    gender: user?.gender,
+    phoneNumber: user?.phoneNumber,
     appointmentDate: "",
     appointmentTime: "",
     reason: "",
@@ -19,7 +20,7 @@ const Booking = () => {
   });
 
   // Get list of specialities
-  const specialities = Object.keys(psychologistData).map((key) => ({
+  const specialities = Object.keys(psychologistData)?.map((key) => ({
     id: key,
     name: key
       .split("_")
@@ -46,17 +47,24 @@ const Booking = () => {
       setFormData((prev) => ({
         ...prev,
         psychologist: "",
+        appointmentDate: "",
+        appointmentTime: "",
       }));
     }
+
     setFormData((prevState) => ({
       ...prevState,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
+  const selectedPsychologistData = psychologists?.find(
+    (p) => p.id === parseInt(formData.psychologist)
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 general-wrapper">
-      <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+      <div className="max-w-7xl min-w-6xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
         <h2 className="text-2xl font-bold text-custom-green mb-8 pb-2 border-b">
           Book an Appointment
         </h2>
@@ -65,8 +73,8 @@ const Booking = () => {
           <h3 className="text-lg font-semibold text-gray-700">
             Appointment Details
           </h3>
-          <div className="flex gap-4">
-            <div className="space-y-4 pt-6 flex-1">
+          <div className="flex gap-4 flex-wrap flex-row">
+            <div className="w-2/5 min-w-80 space-y-4 pt-6">
               {/* Speciality Selection */}
               <div>
                 <label
@@ -80,7 +88,7 @@ const Booking = () => {
                   required
                   value={selectedSpeciality}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-green focus:ring-custom-green">
                   <option value="" className="text-gray-400">
                     --- Select a speciality ---
                   </option>
@@ -105,7 +113,7 @@ const Booking = () => {
                   required
                   value={formData.psychologist}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-green focus:ring-custom-green">
                   <option value="" className="text-gray-400">
                     --- Select a psychologist ---
                   </option>
@@ -121,23 +129,27 @@ const Booking = () => {
                 <label
                   htmlFor="reason"
                   className="block text-base font-medium text-gray-700 mb-4">
-                  Reason for Appointment
+                  Reason for Appointment (Optional)
                 </label>
                 <textarea
                   name="reason"
                   id="reason"
                   rows={4}
-                  required
+                  // required
                   value={formData.reason}
                   onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-green focus:ring-custom-green"
                   placeholder="Please briefly describe your reason for seeking consultation..."
                 />
               </div>
             </div>
 
-            <div className="w-1/2">
-              <DateTimeSelector />
+            <div className="w-3/5 flex-1">
+              <DateTimeSelector
+                selectedPsychologist={selectedPsychologistData}
+                setFormData={setFormData}
+                formData={formData}
+              />
             </div>
           </div>
           {/* Consent Section */}
@@ -149,7 +161,7 @@ const Booking = () => {
                 checked={formData.consent}
                 onChange={handleChange}
                 required
-                className="form-checkbox text-blue-600 h-4 w-4"
+                className="form-checkbox h-4 w-4"
               />
               <span className="ml-2 text-sm text-gray-600">
                 I consent to the processing of my personal information and agree
