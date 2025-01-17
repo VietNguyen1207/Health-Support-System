@@ -64,7 +64,7 @@ const Booking = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 general-wrapper">
-      <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
+      <div className="max-w-7xl min-w-6xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8">
         <h2 className="text-2xl font-bold text-custom-green mb-8 pb-2 border-b">
           Book an Appointment
         </h2>
@@ -73,8 +73,8 @@ const Booking = () => {
           <h3 className="text-lg font-semibold text-gray-700">
             Appointment Details
           </h3>
-          <div className="flex gap-4">
-            <div className="space-y-4 pt-6 flex-1">
+          <div className="flex gap-4 flex-wrap flex-row">
+            <div className="w-2/5 min-w-80 space-y-4 pt-6">
               {/* Speciality Selection */}
               <div>
                 <label
@@ -144,10 +144,11 @@ const Booking = () => {
               </div>
             </div>
 
-            <div className="w-1/2">
+            <div className="w-3/5 flex-1">
               <DateTimeSelector
                 selectedPsychologist={selectedPsychologistData}
                 setFormData={setFormData}
+                formData={formData}
               />
             </div>
           </div>

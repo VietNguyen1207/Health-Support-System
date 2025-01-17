@@ -3,93 +3,62 @@ import { useState, useMemo } from "react";
 import { Card, Space, Typography } from "antd";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
+import timeSlots from "../data/timeSlots.json";
 const { Text } = Typography;
 
 const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
-  const [selectedDate, setSelectedDate] = useState();
-  const [selectedTime, setSelectedTime] = useState(null);
-  const { setFormData } = props;
+  const { formData, setFormData } = props;
+  const [selectedDate, setSelectedDate] = useState(
+    dayjs(formData?.appointmentDate)
+  );
+
+  // console.log("selectedDate", selectedDate);
+  // console.log("formData?.appointmentDate", formData?.appointmentDate);
+  // console.log(selectedDate === formData?.appointmentDate);
+  // console.log(selectedPsychologist);
 
   const dates = [
-    { date: dayjs().format("DD/MM"), weekday: dayjs().format("dddd") },
+    { date: dayjs(), weekday: dayjs().format("ddd") },
     {
-      date: dayjs().add(1, "day").format("DD/MM"),
-      weekday: dayjs().add(1, "day").format("dddd"),
+      date: dayjs().add(1, "day"),
+      weekday: dayjs().add(1, "day").format("ddd"),
     },
     {
-      date: dayjs().add(2, "day").format("DD/MM"),
-      weekday: dayjs().add(2, "day").format("dddd"),
+      date: dayjs().add(2, "day"),
+      weekday: dayjs().add(2, "day").format("ddd"),
     },
-    { date: dayjs().add(3, "day").format("DD/MM"), weekday: "Other date" },
+    { date: dayjs().add(3, "day"), weekday: "Other date" },
   ];
 
-  // Kiểm tra xem có lịch làm việc hay không và có phải ngày làm việc không
-  const hasWorkingHours = useMemo(() => {
-    if (!selectedPsychologist?.workingHours) return false;
-    const weekday = dayjs(selectedDate || dayjs())
-      ?.format("dddd")
-      .toLowerCase();
-    return selectedPsychologist.workingHours[weekday] !== undefined;
-  }, [selectedPsychologist, selectedDate]);
+  // Get available slots based on selected date and psychologist
+  const getAvailableSlots = useMemo(() => {
+    if (!selectedPsychologist) return [];
+    const dateStr = dayjs(selectedDate).format("YYYY-MM-DD");
+    const availableSlots = selectedPsychologist.available[dateStr] || [];
+    const bookedSlots = selectedPsychologist.booked[dateStr] || [];
+    const workingHours = availableSlots
+      .concat(bookedSlots)
+      .sort((a, b) => a - b);
 
-  // Lấy thông tin giờ làm việc của ngày được chọn
-  const getWorkingHoursForDate = (date) => {
-    if (!selectedPsychologist?.workingHours) return null;
-    const weekday = date.format("dddd").toLowerCase();
-    return selectedPsychologist.workingHours[weekday] || null;
-  };
+    // console.log(workingHours);
 
-  // Tạo time slots dựa trên giờ làm việc
-  const timeSlots = useMemo(() => {
-    if (!selectedDate) return [];
+    return (
+      workingHours
+        //   .filter((slot) => !bookedSlots.includes(slot))
+        .map((slot) => ({
+          timeSlots: timeSlots[slot],
+          isAvailable: !bookedSlots.includes(slot),
+        }))
+    );
 
-    const workingHours = getWorkingHoursForDate(dayjs(selectedDate));
-    if (!workingHours) return []; // Nếu không có lịch làm việc cho ngày này
-
-    const slots = [];
-    const startTime = dayjs(`2024-01-01 ${workingHours.start}`);
-    const endTime = dayjs(`2024-01-01 ${workingHours.end}`);
-    const slotDuration = workingHours.slotDuration || 30;
-
-    let currentTime = startTime;
-    while (!currentTime.isAfter(endTime)) {
-      // Bỏ qua giờ nghỉ trưa nếu có
-      if (workingHours.breakTime) {
-        const [breakStart, breakEnd] = workingHours.breakTime.split("-");
-        const isBreakTime =
-          currentTime.format("HH:mm") >= breakStart &&
-          currentTime.format("HH:mm") < breakEnd;
-        if (isBreakTime) {
-          currentTime = dayjs(`2024-01-01 ${breakEnd}`);
-          continue;
-        }
-      }
-
-      slots.push(currentTime.format("HH:mm"));
-      currentTime = currentTime.add(slotDuration, "minute");
-    }
-
-    return slots;
+    // Filter out booked slots and convert to time format
   }, [selectedDate, selectedPsychologist]);
 
-  const isSlotAvailable = (date, time) => {
-    // Kiểm tra có chuyên viên và có phải ngày làm việc không
+  // Check if psychologist has any available slots
+  const hasAvailableSlots = useMemo(() => {
     if (!selectedPsychologist) return false;
-
-    const weekday = date.format("dddd").toLowerCase();
-    if (!selectedPsychologist.workingHours?.[weekday]) return false;
-
-    // Kiểm tra slot đã được đặt
-    const isBooked = selectedPsychologist.bookedSlots?.some((slot) => {
-      const slotDate = dayjs(slot.date);
-      return slotDate.isSame(date, "day") && slot.time === time;
-    });
-
-    return !isBooked;
-  };
-
-  //   console.log("workingHours", getWorkingHoursForDate(dayjs(selectedDate)));
-  //   console.log("isSlotAvailable", isSlotAvailable(dayjs(selectedDate), "10:00"));
+    return Object.keys(selectedPsychologist.available).length > 0;
+  }, [selectedPsychologist]);
 
   return (
     <div className="p-5">
@@ -101,39 +70,42 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
       <Space size={12} className="mb-5 flex flex-wrap">
         {dates.map((item) => (
           <Card
-            key={item.date}
+            key={item.date.format("YYYY-MM-DD")}
             className={`
               w-24 h-28 cursor-pointer border-none transition-all
               ${
-                selectedDate?.format("DD/MM") === item.date
+                selectedDate &&
+                selectedDate?.format("YYYY-MM-DD") ===
+                  item.date.format("YYYY-MM-DD")
                   ? "bg-[#5C8C6B]"
                   : "bg-gray-100 hover:bg-gray-200"
               }
             `}
             onClick={() => {
-              const [day, month] = item.date.split("/");
-              setSelectedDate(
-                dayjs()
-                  .set("date", day)
-                  .set("month", month - 1)
-              );
+              setSelectedDate(item.date);
+
               setFormData((prev) => ({
                 ...prev,
-                appointmentDate: item.date,
+                appointmentDate: item.date.format("YYYY-MM-DD"),
+                appointmentTime: null,
               }));
             }}>
             <div className="text-center">
               <div
                 className={`text-base font-medium ${
-                  selectedDate?.format("DD/MM") === item.date
+                  selectedDate &&
+                  selectedDate?.format("YYYY-MM-DD") ===
+                    item.date.format("YYYY-MM-DD")
                     ? "text-white"
                     : "text-gray-800"
                 }`}>
-                {item.date}
+                {item.date.format("DD/MM")}
               </div>
               <div
                 className={`text-sm ${
-                  selectedDate?.format("DD/MM") === item.date
+                  selectedDate &&
+                  selectedDate?.format("YYYY-MM-DD") ===
+                    item.date.format("YYYY-MM-DD")
                     ? "text-white"
                     : "text-gray-500"
                 }`}>
@@ -143,38 +115,48 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
           </Card>
         ))}
       </Space>
-
-      {!hasWorkingHours ? (
+      {!hasAvailableSlots ? (
         <Text className="text-gray-500">There is no available time slots.</Text>
       ) : (
         <>
           {/* Time Selection */}
-          {timeSlots.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {timeSlots.map((time) => {
-                const available = isSlotAvailable(selectedDate, time);
-                return (
+          {selectedDate && selectedPsychologist ? (
+            getAvailableSlots.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {getAvailableSlots.map((slot) => (
                   <Card
-                    key={time}
+                    key={slot.timeSlots}
+                    disabled={!slot.isAvailable}
                     className={`
-                      cursor-pointer border-none transition-all
+                       w-1/6 min-w-20 p-0 cursor-pointer border-none transition-all
                       ${
-                        selectedTime === time
+                        formData?.appointmentTime === slot.timeSlots
                           ? "bg-[#5C8C6B] text-white"
-                          : available
+                          : slot.isAvailable
                           ? "bg-gray-100 hover:bg-gray-200"
-                          : "bg-gray-400 cursor-not-allowed"
+                          : "bg-gray-300 cursor-not-allowed"
                       }
                     `}
-                    onClick={() => available && setSelectedTime(time)}>
-                    <div className="text-center">{time}</div>
+                    onClick={() => {
+                      if (slot.isAvailable) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          appointmentTime: slot.timeSlots,
+                        }));
+                      }
+                    }}>
+                    <div className="text-center">{slot.timeSlots}</div>
                   </Card>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <Text className="text-gray-500">
+                No available slots for selected date.
+              </Text>
+            )
           ) : (
             <Text className="text-gray-500">
-              No available slots for selected date.
+              Please select a date and psychologist first.
             </Text>
           )}
         </>
@@ -200,6 +182,7 @@ DateTimeSelector.propTypes = {
       })
     ),
   }),
+  formData: PropTypes.object,
   setFormData: PropTypes.func,
 };
 
