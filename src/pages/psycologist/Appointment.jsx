@@ -115,7 +115,8 @@ export default function Appointment() {
                   ) : (
                     <UserOutlined />
                   )
-                }>
+                }
+              >
                 {item.content}
               </Tag>
             </li>
@@ -179,13 +180,15 @@ export default function Appointment() {
           />
           <Button
             onClick={findPreviousAppointment}
-            disabled={indexAppointment === 0}>
+            disabled={indexAppointment === 0}
+          >
             Previous
           </Button>
           <Button onClick={resetSelectedDate} icon={<AimOutlined />} />
           <Button
             onClick={findNextAppointment}
-            disabled={indexAppointment === Object.keys(eventData).length - 1}>
+            disabled={indexAppointment === Object.keys(eventData).length - 1}
+          >
             Next
           </Button>
         </div>
@@ -271,7 +274,8 @@ export default function Appointment() {
             itemActiveBg: "#e8f5e9",
           },
         },
-      }}>
+      }}
+    >
       <div className="general-wrapper pt-16 mx-20">
         <Calendar
           value={selectedDate}
