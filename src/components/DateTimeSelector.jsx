@@ -1,16 +1,24 @@
 // DateTimeSelector.jsx
-import { useState, useMemo } from "react";
-import { Card, Space, Typography } from "antd";
+import { useState, useMemo, useEffect } from "react";
+import { Card, ConfigProvider, Space, Typography } from "antd";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
 import timeSlots from "../data/timeSlots.json";
+import { CalendarOutlined } from "@ant-design/icons";
+import CustomCalendar from "./CustomCalendar";
 const { Text } = Typography;
 
 const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
   const { formData, setFormData } = props;
-  const [selectedDate, setSelectedDate] = useState(
-    dayjs(formData?.appointmentDate)
-  );
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [isOtherDate, setIsOtherDate] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [otherDate, setOtherDate] = useState(null);
+
+  useEffect(() => {
+    setSelectedDate(dayjs(formData?.appointmentDate));
+    setIsOtherDate(false);
+  }, [formData?.appointmentDate]);
 
   // console.log("selectedDate", selectedDate);
   // console.log("formData?.appointmentDate", formData?.appointmentDate);
@@ -27,7 +35,6 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
       date: dayjs().add(2, "day"),
       weekday: dayjs().add(2, "day").format("ddd"),
     },
-    { date: dayjs().add(3, "day"), weekday: "Other date" },
   ];
 
   // Get available slots based on selected date and psychologist
@@ -54,12 +61,6 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
     // Filter out booked slots and convert to time format
   }, [selectedDate, selectedPsychologist]);
 
-  // Check if psychologist has any available slots
-  const hasAvailableSlots = useMemo(() => {
-    if (!selectedPsychologist) return false;
-    return Object.keys(selectedPsychologist.available).length > 0;
-  }, [selectedPsychologist]);
-
   return (
     <div className="p-5">
       <Text strong className="block text-base mb-4">
@@ -67,99 +68,142 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
       </Text>
 
       {/* Date Selection */}
-      <Space size={12} className="mb-5 flex flex-wrap">
-        {dates.map((item) => (
-          <Card
-            key={item.date.format("YYYY-MM-DD")}
-            className={`
-              w-24 h-28 cursor-pointer border-none transition-all
+      <ConfigProvider theme={{ components: { Card: { bodyPadding: 20 } } }}>
+        <Space size={12} className="mb-5 flex flex-wrap">
+          {dates.map((item) => (
+            <Card
+              key={item.date.format("YYYY-MM-DD")}
+              className={`
+               min-w-14 p-0 cursor-pointer border-none transition-all
               ${
+                !isOtherDate &&
                 selectedDate &&
                 selectedDate?.format("YYYY-MM-DD") ===
                   item.date.format("YYYY-MM-DD")
-                  ? "bg-[#5C8C6B]"
+                  ? selectedPsychologist
+                    ? "bg-[#5C8C6B]"
+                    : "bg-gray-400"
+                  : "bg-gray-100 hover:bg-gray-200"
+              }
+            `}
+              onClick={() => {
+                if (selectedPsychologist) {
+                  setSelectedDate(item.date);
+                  setIsOtherDate(false);
+                  setFormData((prev) => ({
+                    ...prev,
+                    appointmentDate: item.date.format("YYYY-MM-DD"),
+                    appointmentTime: null,
+                  }));
+                }
+              }}>
+              <div className="text-center">
+                <div
+                  className={`text-base font-medium ${
+                    !isOtherDate &&
+                    selectedDate &&
+                    selectedDate?.format("YYYY-MM-DD") ===
+                      item.date.format("YYYY-MM-DD")
+                      ? "text-white"
+                      : "text-gray-800"
+                  }`}>
+                  {item.date.format("DD/MM")}
+                </div>
+                <div
+                  className={`text-sm ${
+                    !isOtherDate &&
+                    selectedDate &&
+                    selectedDate?.format("YYYY-MM-DD") ===
+                      item.date.format("YYYY-MM-DD")
+                      ? "text-white"
+                      : "text-gray-500"
+                  }`}>
+                  {item.weekday}
+                </div>
+              </div>
+            </Card>
+          ))}
+
+          {/* Other Date */}
+          <Card
+            key={"other"}
+            className={`
+              min-w-14 cursor-pointer border-none transition-all
+              ${
+                isOtherDate
+                  ? selectedPsychologist
+                    ? "bg-[#5C8C6B]"
+                    : "bg-gray-400"
                   : "bg-gray-100 hover:bg-gray-200"
               }
             `}
             onClick={() => {
-              setSelectedDate(item.date);
-
-              setFormData((prev) => ({
-                ...prev,
-                appointmentDate: item.date.format("YYYY-MM-DD"),
-                appointmentTime: null,
-              }));
+              if (!selectedPsychologist) return;
+              setIsOtherDate(true);
+              setSelectedDate("");
             }}>
             <div className="text-center">
               <div
                 className={`text-base font-medium ${
-                  selectedDate &&
-                  selectedDate?.format("YYYY-MM-DD") ===
-                    item.date.format("YYYY-MM-DD")
-                    ? "text-white"
-                    : "text-gray-800"
+                  isOtherDate ? "text-white" : "text-gray-800"
                 }`}>
-                {item.date.format("DD/MM")}
+                {!otherDate ? (
+                  <CalendarOutlined className="text-xl" />
+                ) : (
+                  otherDate.format("DD/MM")
+                )}
               </div>
               <div
                 className={`text-sm ${
-                  selectedDate &&
-                  selectedDate?.format("YYYY-MM-DD") ===
-                    item.date.format("YYYY-MM-DD")
-                    ? "text-white"
-                    : "text-gray-500"
+                  isOtherDate ? "text-white" : "text-gray-500"
                 }`}>
-                {item.weekday}
+                Other Date
               </div>
             </div>
           </Card>
-        ))}
-      </Space>
-      {!hasAvailableSlots ? (
-        <Text className="text-gray-500">There is no available time slots.</Text>
-      ) : (
-        <>
-          {/* Time Selection */}
-          {selectedDate && selectedPsychologist ? (
-            getAvailableSlots.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {getAvailableSlots.map((slot) => (
-                  <Card
-                    key={slot.timeSlots}
-                    disabled={!slot.isAvailable}
-                    className={`
-                       w-1/6 min-w-20 p-0 cursor-pointer border-none transition-all
+          <CustomCalendar fullWidth={false} />
+        </Space>
+      </ConfigProvider>
+
+      {/* Time Selection */}
+      {!selectedPsychologist ? (
+        <Text className="text-gray-500">
+          Please select a date and psychologist first.
+        </Text>
+      ) : getAvailableSlots.length > 0 ? (
+        <ConfigProvider theme={{ components: { Card: { bodyPadding: 5 } } }}>
+          <div className="flex flex-wrap gap-2">
+            {getAvailableSlots.map((slot) => (
+              <Card
+                key={slot.timeSlots}
+                disabled={!slot.isAvailable}
+                className={`
+                       w-1/12 min-w-20 p-0 border-none transition-all
                       ${
                         formData?.appointmentTime === slot.timeSlots
                           ? "bg-[#5C8C6B] text-white"
                           : slot.isAvailable
-                          ? "bg-gray-100 hover:bg-gray-200"
-                          : "bg-gray-300 cursor-not-allowed"
+                          ? "bg-gray-100 hover:bg-gray-200  cursor-pointer"
+                          : " cursor-not-allowed bg-gray-50 text-gray-300"
                       }
                     `}
-                    onClick={() => {
-                      if (slot.isAvailable) {
-                        setFormData((prev) => ({
-                          ...prev,
-                          appointmentTime: slot.timeSlots,
-                        }));
-                      }
-                    }}>
-                    <div className="text-center">{slot.timeSlots}</div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Text className="text-gray-500">
-                No available slots for selected date.
-              </Text>
-            )
-          ) : (
-            <Text className="text-gray-500">
-              Please select a date and psychologist first.
-            </Text>
-          )}
-        </>
+                onClick={() => {
+                  if (slot.isAvailable) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      appointmentTime: slot.timeSlots,
+                    }));
+                  }
+                }}>
+                <div className="text-center">{slot.timeSlots}</div>
+              </Card>
+            ))}
+          </div>
+        </ConfigProvider>
+      ) : (
+        <Text className="text-gray-500">
+          No available slots for selected date.
+        </Text>
       )}
     </div>
   );

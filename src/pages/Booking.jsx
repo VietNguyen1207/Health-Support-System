@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DateTimeSelector from "../components/DateTimeSelector";
 import psychologistData from "../data/psychologist.json";
 import { useAuthStore } from "../stores/authStore";
+import dayjs from "dayjs";
 const Booking = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -12,7 +13,7 @@ const Booking = () => {
     dateOfBirth: user?.dateOfBirth,
     gender: user?.gender,
     phoneNumber: user?.phoneNumber,
-    appointmentDate: "",
+    appointmentDate: dayjs().format("YYYY-MM-DD"),
     appointmentTime: "",
     reason: "",
     psychologist: "",
@@ -47,7 +48,7 @@ const Booking = () => {
       setFormData((prev) => ({
         ...prev,
         psychologist: "",
-        appointmentDate: "",
+        appointmentDate: dayjs().format("YYYY-MM-DD"),
         appointmentTime: "",
       }));
     }
