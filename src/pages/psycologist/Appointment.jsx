@@ -1,6 +1,5 @@
 import {
   Button,
-  Calendar,
   ConfigProvider,
   Divider,
   Flex,
@@ -11,7 +10,6 @@ import {
 } from "antd";
 import { useMemo, useState } from "react";
 import bookingData from "../../data/booking.json";
-import moment from "moment";
 import dayjs from "dayjs";
 import {
   AimOutlined,
@@ -19,6 +17,7 @@ import {
   QuestionCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import CustomCalendar from "../../components/CustomCalendar";
 
 export default function Appointment() {
   // const calendarRef = useRef(null);
@@ -273,19 +272,12 @@ export default function Appointment() {
         },
       }}>
       <div className="general-wrapper pt-16 mx-20">
-        <Calendar
+        <CustomCalendar
+          mode="month"
           value={selectedDate}
           onChange={onChange}
-          mode="month"
           cellRender={dateCellRender}
           headerRender={headerRender}
-          className="rounded-lg border-2 px-3"
-          disabledDate={(current) => {
-            return (
-              current.isBefore(moment().subtract(1, "day")) &&
-              current.isAfter(moment().subtract(1, "year"))
-            );
-          }}
         />
       </div>
     </ConfigProvider>
