@@ -18,6 +18,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import CustomCalendar from "../../components/CustomCalendar";
+import { formatAppointmentDate } from "../../utils/Helper";
 
 export default function Appointment() {
   // const calendarRef = useRef(null);
@@ -93,7 +94,7 @@ export default function Appointment() {
   }, []);
 
   const getListData = (value) => {
-    const dateKey = value.format("YYYY-MM-DD");
+    const dateKey = formatAppointmentDate(value);
     return eventData[dateKey] || [];
   };
 
@@ -114,8 +115,7 @@ export default function Appointment() {
                   ) : (
                     <UserOutlined />
                   )
-                }
-              >
+                }>
                 {item.content}
               </Tag>
             </li>
@@ -179,15 +179,13 @@ export default function Appointment() {
           />
           <Button
             onClick={findPreviousAppointment}
-            disabled={indexAppointment === 0}
-          >
+            disabled={indexAppointment === 0}>
             Previous
           </Button>
           <Button onClick={resetSelectedDate} icon={<AimOutlined />} />
           <Button
             onClick={findNextAppointment}
-            disabled={indexAppointment === Object.keys(eventData).length - 1}
-          >
+            disabled={indexAppointment === Object.keys(eventData).length - 1}>
             Next
           </Button>
         </div>
@@ -197,12 +195,11 @@ export default function Appointment() {
 
   const onChange = (value) => {
     const dates = Object.keys(eventData);
-    const isBefore = dates.some((date) => date > value.format("YYYY-MM-DD"));
-    const isAfter = dates.some((date) => date < value.format("YYYY-MM-DD"));
+    const formatValue = formatAppointmentDate(value);
+    const isBefore = dates.some((date) => date > formatValue);
+    const isAfter = dates.some((date) => date < formatValue);
 
-    const currentIndex = dates.findIndex(
-      (date) => date === value.format("YYYY-MM-DD")
-    );
+    const currentIndex = dates.findIndex((date) => date === formatValue);
 
     if (currentIndex !== -1) {
       // console.log("currentIndex: ", currentIndex);
@@ -227,7 +224,7 @@ export default function Appointment() {
     }
 
     const dates = Object.keys(eventData);
-    const currentDate = selectedDate.format("YYYY-MM-DD");
+    const currentDate = formatAppointmentDate(selectedDate);
     const nextIndex = dates.findIndex((date) => date > currentDate);
 
     if (nextIndex === -1) {
@@ -248,7 +245,7 @@ export default function Appointment() {
     }
 
     const dates = Object.keys(eventData);
-    const currentDate = selectedDate.format("YYYY-MM-DD");
+    const currentDate = formatAppointmentDate(selectedDate);
     const prevIndex = dates.findLastIndex((date) => date < currentDate);
 
     if (prevIndex === -1) {
@@ -273,8 +270,7 @@ export default function Appointment() {
             itemActiveBg: "#e8f5e9",
           },
         },
-      }}
-    >
+      }}>
       <div className="general-wrapper pt-16 mx-20">
         <CustomCalendar
           mode="month"
@@ -282,6 +278,12 @@ export default function Appointment() {
           onChange={onChange}
           cellRender={dateCellRender}
           headerRender={headerRender}
+          disabledDate={(current) => {
+            return (
+              current.isBefore(dayjs().subtract(1, "day")) &&
+              current.isAfter(dayjs().subtract(1, "year"))
+            );
+          }}
         />
       </div>
     </ConfigProvider>
