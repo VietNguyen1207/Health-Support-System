@@ -1,6 +1,6 @@
 // DateTimeSelector.jsx
 import { useState, useMemo, useEffect } from "react";
-import { Card, ConfigProvider, Popover, Space, Typography } from "antd";
+import { Card, ConfigProvider, Popover, Select, Space, Typography } from "antd";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
 import timeSlots from "../data/timeSlots.json";
@@ -63,6 +63,37 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
       appointmentDate: formatAppointmentDate(value),
       appointmentTime: null,
     }));
+  };
+
+  const headerRender = ({ value, onChange }) => {
+    const months = [
+      { label: "Jan", value: 0 },
+      { label: "Feb", value: 1 },
+      { label: "Mar", value: 2 },
+      { label: "Apr", value: 3 },
+      { label: "May", value: 4 },
+      { label: "Jun", value: 5 },
+      { label: "Jul", value: 6 },
+      { label: "Aug", value: 7 },
+      { label: "Sep", value: 8 },
+      { label: "Oct", value: 9 },
+      { label: "Nov", value: 10 },
+      { label: "Dec", value: 11 },
+    ];
+
+    return (
+      <div className="flex justify-end py-3">
+        <Select
+          value={value.month()}
+          options={months}
+          onChange={(newMonth) => {
+            const now = value.clone().month(newMonth);
+            onChange(now);
+          }}
+          style={{ width: 100 }}
+        />
+      </div>
+    );
   };
 
   return (
@@ -139,6 +170,7 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
                 <CustomCalendar
                   fullscreen={false}
                   onChange={onChange}
+                  headerRender={headerRender}
                   disabledDate={(current) => {
                     return (
                       current.isBefore(

@@ -8,7 +8,6 @@ import { Button, message } from "antd";
 
 const SUCCESS_PROP = {
   content: "Your submission was successful! Thank you!",
-  duration: 2000,
 };
 
 const Booking = () => {
@@ -20,6 +19,7 @@ const Booking = () => {
     dateOfBirth: user?.dateOfBirth,
     gender: user?.gender,
     phoneNumber: user?.phoneNumber,
+    speciality: "",
     appointmentDate: dayjs().format("YYYY-MM-DD"),
     appointmentTime: "",
     reason: "",
@@ -50,15 +50,19 @@ const Booking = () => {
       newErrors.appointmentDate = "Appointment date is required.";
     }
 
-    if (formData.appointmentTime === "") {
+    if (!formData.appointmentTime) {
       newErrors.appointmentTime = "Appointment time is required.";
+    }
+
+    if (formData.speciality.trim() === "") {
+      newErrors.psychologist = "Speciality selection is required.";
     }
 
     if (formData.psychologist.trim() === "") {
       newErrors.psychologist = "Psychologist selection is required.";
     }
 
-    if (formData.consent === "") {
+    if (!formData.consent) {
       newErrors.consent = "You must agree to the terms and conditions.";
     }
 
@@ -69,6 +73,7 @@ const Booking = () => {
   const resetFormData = () => {
     return setFormData((prev) => ({
       ...prev,
+      speciality: "",
       appointmentDate: dayjs().format("YYYY-MM-DD"),
       appointmentTime: "",
       reason: "",
@@ -100,6 +105,7 @@ const Booking = () => {
       // Reset psychologist selection when speciality changes
       setFormData((prev) => ({
         ...prev,
+        speciality: value,
         psychologist: "",
         appointmentDate: dayjs().format("YYYY-MM-DD"),
         appointmentTime: "",
@@ -237,7 +243,8 @@ const Booking = () => {
             </button>
             <Button
               className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green hover:bg-custom-green/90 focus:outline-none"
-              disabled={disabledButton}>
+              disabled={disabledButton}
+              onClick={handleSubmit}>
               Book Appointment
             </Button>
           </div>
