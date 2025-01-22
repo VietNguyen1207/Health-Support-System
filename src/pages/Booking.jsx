@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DateTimeSelector from "../components/DateTimeSelector";
 import psychologistData from "../data/psychologist.json";
 import { useAuthStore } from "../stores/authStore";
 import dayjs from "dayjs";
+import { Button, message } from "antd";
+
+const SUCCESS_PROP = {
+  content: "Your submission was successful! Thank you!",
+  duration: 2000,
+};
+
 const Booking = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -19,6 +26,8 @@ const Booking = () => {
     psychologist: "",
     consent: false,
   });
+  const [errors, setErrors] = useState({});
+  const [isFormValid, setIsFormValid] = useState(false);
 
   // Get list of specialities
   const specialities = Object.keys(psychologistData)?.map((key) => ({
@@ -34,11 +43,55 @@ const Booking = () => {
     ? psychologistData[selectedSpeciality]
     : [];
 
+  const validateFormData = () => {
+    const newErrors = {};
+
+    if (!formData.appointmentDate) {
+      newErrors.appointmentDate = "Appointment date is required.";
+    }
+
+    if (formData.appointmentTime === "") {
+      newErrors.appointmentTime = "Appointment time is required.";
+    }
+
+    if (formData.psychologist.trim() === "") {
+      newErrors.psychologist = "Psychologist selection is required.";
+    }
+
+    if (formData.consent === "") {
+      newErrors.consent = "You must agree to the terms and conditions.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const resetFormData = () => {
+    return setFormData((prev) => ({
+      ...prev,
+      appointmentDate: dayjs().format("YYYY-MM-DD"),
+      appointmentTime: "",
+      reason: "",
+      psychologist: "",
+      consent: false,
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Booking submitted:", formData);
-    // Add your submission logic here
+    if (validateFormData()) {
+      console.log("Booking submitted:", formData);
+      message.success(SUCCESS_PROP);
+      resetFormData();
+    } else {
+      console.log("Validation errors:", errors);
+    }
   };
+  useEffect(() => {
+    setIsFormValid(validateFormData());
+  }, [formData]); // Revalidate when formData changes
+
+  const disabledButton = useMemo(() => !isFormValid, [isFormValid]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -175,15 +228,18 @@ const Booking = () => {
           <div className="flex justify-end space-x-4 pt-6">
             <button
               type="button"
-              onClick={() => navigate(-1)}
+              onClick={() => {
+                resetFormData();
+                navigate(-1);
+              }}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
               Cancel
             </button>
-            <button
-              type="submit"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green hover:bg-custom-green/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-green">
+            <Button
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green hover:bg-custom-green/90 focus:outline-none"
+              disabled={disabledButton}>
               Book Appointment
-            </button>
+            </Button>
           </div>
         </form>
       </div>

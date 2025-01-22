@@ -1,5 +1,4 @@
 import { Calendar } from "antd";
-import moment from "moment";
 import PropTypes from "prop-types";
 
 function CustomCalendar({
@@ -7,19 +6,7 @@ function CustomCalendar({
   className = "rounded-lg border-2 px-3",
   ...props
 }) {
-  return (
-    <Calendar
-      {...props}
-      className={className}
-      mode={mode}
-      disabledDate={(current) => {
-        return (
-          current.isBefore(moment().subtract(1, "day")) &&
-          current.isAfter(moment().subtract(1, "year"))
-        );
-      }}
-    />
-  );
+  return <Calendar {...props} className={className} mode={mode} />;
 }
 
 CustomCalendar.propTypes = {
