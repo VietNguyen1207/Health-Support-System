@@ -127,7 +127,7 @@ const Booking = () => {
           <h3 className="text-lg font-semibold text-gray-700">
             Appointment Details
           </h3>
-          <div className="flex gap-4 flex-wrap flex-row">
+          <div className="flex gap-16 flex-wrap flex-row">
             <div className="w-2/5 min-w-80 space-y-4 pt-6">
               {/* Speciality Selection */}
               <div>
