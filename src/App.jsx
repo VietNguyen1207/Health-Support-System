@@ -7,12 +7,7 @@ function App() {
   const element = useRoutes(routes);
 
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: "#2f7a39",
-        },
-      }}>
+    <ConfigProvider>
       <ScrollToTop />
       {element}
     </ConfigProvider>

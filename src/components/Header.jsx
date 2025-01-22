@@ -122,7 +122,7 @@ const Header = () => {
         navigate("/children-record");
         break;
       case "dashboard":
-        navigate(`/${user?.role}/dashboard`);
+        navigate(`/${user?.role}`);
         break;
       case "logout":
         handleLogout();
@@ -219,8 +219,7 @@ const Header = () => {
           placement="right"
           onClose={onClose}
           open={visible}
-          className="lg:hidden"
-        >
+          className="lg:hidden">
           {mobileMenu}
           <div className="mt-4 flex justify-center items-center">
             {!user ? (
@@ -228,8 +227,7 @@ const Header = () => {
                 <Link
                   to="/register"
                   className="btn btn-outline"
-                  onClick={onClose}
-                >
+                  onClick={onClose}>
                   Sign Up
                 </Link>
                 <Link to="/login" className="btn btn-primary" onClick={onClose}>
@@ -247,47 +245,43 @@ const Header = () => {
         <nav className="hidden lg:flex justify-between items-center gap-10">
           <Link
             to="/"
-            className={`nav-link ${location.pathname === "/" ? "active" : ""}`}
-          >
+            className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
             <span>Home</span>
           </Link>
           <Link
             to="/about"
             className={`nav-link ${
               location.pathname === "/about" ? "active" : ""
-            }`}
-          >
+            }`}>
             <span>About</span>
           </Link>
           <Link
             to="/services"
             className={`nav-link ${
               location.pathname === "/services" ? "active" : ""
-            }`}
-          >
+            }`}>
             <span>Services</span>
           </Link>
           <Link
             to="/contact"
             className={`nav-link ${
               location.pathname === "/contact" ? "active" : ""
-            }`}
-          >
+            }`}>
             <span>Contact</span>
           </Link>
 
-          {user && user.role !== "parent" && (
-            <>
-              <Link
-                to="/test"
-                className={`nav-link ${
-                  location.pathname === "/test" ? "active" : ""
-                }`}
-              >
-                <span>Survey</span>
-              </Link>
-            </>
-          )}
+          {user &&
+            ["student", "psychologist"].some((role) => role === user.role) && (
+              <>
+                <Link
+                  to="/test"
+                  className={`nav-link ${
+                    location.pathname === "/test" ? "active" : ""
+                  }`}>
+                  <span>Survey</span>
+                </Link>
+              </>
+            )}
 
           {!user ||
           (user.role !== "manager" && user.role !== "psychologist") ? (
@@ -295,8 +289,7 @@ const Header = () => {
               to="/book-appointment"
               className={`nav-link book-now ${
                 location.pathname === "/book-appointment" ? "active" : ""
-              }`}
-            >
+              }`}>
               <span>Book Now</span>
             </Link>
           ) : (
@@ -306,8 +299,7 @@ const Header = () => {
                   to="/appointment"
                   className={`nav-link book-now ${
                     location.pathname === "/appointment" ? "active" : ""
-                  }`}
-                >
+                  }`}>
                   <span>Appointment</span>
                 </Link>
               </>

@@ -53,105 +53,96 @@ export default function Dashboard() {
   const metrics = getAverageMetrics();
 
   return (
-    <div className="general-wrapper">
-      <div className="hero-section">
-        <div className="hero-content">
-          <h1 className="hero-title">Student Mental Health Dashboard</h1>
-          <p className="hero-subtitle">Monitor and Support Student Wellness</p>
+    <div className="">
+      <div className="dashboard-grid">
+        {/* Controls Section */}
+        <div className="dashboard-controls">
+          <input
+            type="text"
+            placeholder="Search students..."
+            className="search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <select
+            className="category-filter"
+            value={selectedGrade}
+            onChange={(e) => setSelectedGrade(e.target.value)}>
+            <option value="all">All Grades</option>
+            <option value="9th">9th Grade</option>
+            <option value="10th">10th Grade</option>
+            <option value="11th">11th Grade</option>
+          </select>
         </div>
-      </div>
 
-      <div className="page-content">
-        <div className="dashboard-grid">
-          {/* Controls Section */}
-          <div className="dashboard-controls">
-            <input
-              type="text"
-              placeholder="Search students..."
-              className="search-input"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <select
-              className="category-filter"
-              value={selectedGrade}
-              onChange={(e) => setSelectedGrade(e.target.value)}>
-              <option value="all">All Grades</option>
-              <option value="9th">9th Grade</option>
-              <option value="10th">10th Grade</option>
-              <option value="11th">11th Grade</option>
-            </select>
-          </div>
-
-          {/* Metrics Section */}
-          {metrics && (
-            <div className="metrics-section">
-              <h2>Class Averages</h2>
-              <div className="metrics-grid">
-                <div className="metric-card">
-                  <h3>Anxiety Level</h3>
-                  <p>{metrics.averageAnxiety}/10</p>
-                </div>
-                <div className="metric-card">
-                  <h3>Stress Level</h3>
-                  <p>{metrics.averageStress}/10</p>
-                </div>
-                <div className="metric-card">
-                  <h3>Depression Score</h3>
-                  <p>{metrics.averageDepression}/10</p>
-                </div>
-                <div className="metric-card">
-                  <h3>Sleep Quality</h3>
-                  <p>{metrics.averageSleep}/10</p>
-                </div>
-                <div className="metric-card">
-                  <h3>Attendance Rate</h3>
-                  <p>{metrics.averageAttendance}%</p>
-                </div>
+        {/* Metrics Section */}
+        {metrics && (
+          <div className="metrics-section">
+            <h2>Class Averages</h2>
+            <div className="metrics-grid">
+              <div className="metric-card">
+                <h3>Anxiety Level</h3>
+                <p>{metrics.averageAnxiety}/10</p>
+              </div>
+              <div className="metric-card">
+                <h3>Stress Level</h3>
+                <p>{metrics.averageStress}/10</p>
+              </div>
+              <div className="metric-card">
+                <h3>Depression Score</h3>
+                <p>{metrics.averageDepression}/10</p>
+              </div>
+              <div className="metric-card">
+                <h3>Sleep Quality</h3>
+                <p>{metrics.averageSleep}/10</p>
+              </div>
+              <div className="metric-card">
+                <h3>Attendance Rate</h3>
+                <p>{metrics.averageAttendance}%</p>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Students Section */}
-          <div className="students-section">
-            <h2>Student Overview</h2>
-            <div className="student-list">
-              {filteredStudents.map((student) => (
-                <div key={student.id} className="student-card">
-                  <h3>{student.name}</h3>
-                  <p>
-                    ID: {student.id} | Grade: {student.grade}
-                  </p>
-                  <div className="health-indicators">
-                    <span
-                      className={`health-indicator ${getIndicatorClass(
-                        student.mental_health_data.anxiety_level
-                      )}`}>
-                      Anxiety: {student.mental_health_data.anxiety_level}/10
-                    </span>
-                    <span
-                      className={`health-indicator ${getIndicatorClass(
-                        student.mental_health_data.stress_level
-                      )}`}>
-                      Stress: {student.mental_health_data.stress_level}/10
-                    </span>
-                    <span
-                      className={`health-indicator ${getIndicatorClass(
-                        student.mental_health_data.depression_score
-                      )}`}>
-                      Depression: {student.mental_health_data.depression_score}
-                      /10
-                    </span>
-                  </div>
-                  <p>
-                    <strong>Last Assessment:</strong>{" "}
-                    {new Date(
-                      student.mental_health_data.last_assessment
-                    ).toLocaleDateString()}
-                  </p>
+        {/* Students Section */}
+        <div className="students-section">
+          <h2>Student Overview</h2>
+          <div className="student-list">
+            {filteredStudents.map((student) => (
+              <div key={student.id} className="student-card">
+                <h3>{student.name}</h3>
+                <p>
+                  ID: {student.id} | Grade: {student.grade}
+                </p>
+                <div className="health-indicators">
+                  <span
+                    className={`health-indicator ${getIndicatorClass(
+                      student.mental_health_data.anxiety_level
+                    )}`}>
+                    Anxiety: {student.mental_health_data.anxiety_level}/10
+                  </span>
+                  <span
+                    className={`health-indicator ${getIndicatorClass(
+                      student.mental_health_data.stress_level
+                    )}`}>
+                    Stress: {student.mental_health_data.stress_level}/10
+                  </span>
+                  <span
+                    className={`health-indicator ${getIndicatorClass(
+                      student.mental_health_data.depression_score
+                    )}`}>
+                    Depression: {student.mental_health_data.depression_score}
+                    /10
+                  </span>
                 </div>
-              ))}
-            </div>
+                <p>
+                  <strong>Last Assessment:</strong>{" "}
+                  {new Date(
+                    student.mental_health_data.last_assessment
+                  ).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -1,21 +1,13 @@
 import { useState } from "react";
-import { Layout, Menu, Button, theme, Drawer } from "antd";
+import { Layout, Menu, theme } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  HomeOutlined,
-  UserOutlined,
-  FileOutlined,
-  LogoutOutlined,
-} from "@ant-design/icons";
+import { HomeOutlined, UserOutlined, FileOutlined } from "@ant-design/icons";
 import { useAuthStore } from "../stores/authStore";
 
 const { Header, Sider, Content } = Layout;
 
 export const ManagerLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const { user, setUser } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,7 +35,6 @@ export const ManagerLayout = () => {
 
   const handleMenuClick = (key) => {
     navigate(key);
-    setMobileOpen(false);
   };
 
   const handleLogout = () => {
@@ -53,91 +44,49 @@ export const ManagerLayout = () => {
 
   const sideMenu = (
     <Menu
-      theme="dark"
       mode="inline"
       selectedKeys={[location.pathname]}
       items={menuItems}
       onClick={({ key }) => handleMenuClick(key)}
+      className="min-h-full pt-4"
     />
   );
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      {/* Desktop Sider */}
-      <Sider
-        trigger={null}
-        collapsible
-        collapsed={collapsed}
-        breakpoint="lg"
-        collapsedWidth="0"
-        onBreakpoint={(broken) => {
-          setCollapsed(broken);
-        }}
+    <Layout style={{ height: "100vh", overflow: "hidden" }}>
+      <Header
         style={{
-          display: { xs: "none", lg: "block" },
-          background: "#2f7a39",
+          padding: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "end",
         }}>
-        <div
-          style={{
-            height: 32,
-            margin: 16,
-            background: "rgba(255, 255, 255, 0.2)",
-          }}
-        />
-        {sideMenu}
-      </Sider>
-
-      {/* Mobile Drawer */}
-      <Drawer
-        placement="left"
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        styles={{
-          body: {
-            padding: 0,
-            background: "#2f7a39",
-          },
-        }}>
-        {sideMenu}
-      </Drawer>
-
+        <div style={{ marginRight: 16, color: "white" }}>
+          <span style={{ marginRight: 16 }}>{user?.name}</span>
+        </div>
+      </Header>
       <Layout>
-        <Header
+        <Sider
+          trigger={null}
+          collapsible
+          collapsed={collapsed}
+          breakpoint="lg"
+          onBreakpoint={(broken) => {
+            setCollapsed(broken);
+          }}
           style={{
-            padding: 0,
-            background: colorBgContainer,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            display: { xs: "none", lg: "block" },
           }}>
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setMobileOpen(true)}
-            style={{
-              fontSize: "16px",
-              width: 64,
-              height: 64,
-              display: { lg: "none" },
-            }}
-          />
-          <div style={{ marginRight: 16 }}>
-            <span style={{ marginRight: 16 }}>{user?.name}</span>
-            <Button
-              type="text"
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}>
-              Logout
-            </Button>
-          </div>
-        </Header>
+          {sideMenu}
+        </Sider>
         <Content
           style={{
             margin: "24px 16px",
             padding: 24,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
-            minHeight: 280,
+            overflow: "auto",
+            height: "calc(100vh - 110px)",
           }}>
           <Outlet />
         </Content>
