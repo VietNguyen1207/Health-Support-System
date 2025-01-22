@@ -128,11 +128,7 @@ export const routes = [
       { index: true, element: <Dashboard /> },
       {
         path: "users",
-        element: (
-          // <PrivateRoute allowedRoles={["manager"]}>
-          <UserManagement />
-          // </PrivateRoute>
-        ),
+        element: <UserManagement />,
       },
       { path: "surveys", element: <SurveyManagement /> },
     ],

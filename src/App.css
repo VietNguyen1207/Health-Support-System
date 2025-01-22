@@ -14,10 +14,6 @@
   --mint-shadow: rgba(74, 124, 89, 0.1); /* Shadow color */
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Reset & Base Styles */
 * {
   margin: 0;
