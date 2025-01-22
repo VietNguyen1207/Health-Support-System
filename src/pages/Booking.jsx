@@ -55,7 +55,7 @@ const Booking = () => {
     }
 
     if (formData.speciality.trim() === "") {
-      newErrors.psychologist = "Speciality selection is required.";
+      newErrors.speciality = "Speciality selection is required.";
     }
 
     if (formData.psychologist.trim() === "") {
@@ -71,6 +71,7 @@ const Booking = () => {
   };
 
   const resetFormData = () => {
+    setSelectedSpeciality("");
     return setFormData((prev) => ({
       ...prev,
       speciality: "",
@@ -105,7 +106,6 @@ const Booking = () => {
       // Reset psychologist selection when speciality changes
       setFormData((prev) => ({
         ...prev,
-        speciality: value,
         psychologist: "",
         appointmentDate: dayjs().format("YYYY-MM-DD"),
         appointmentTime: "",
@@ -242,7 +242,7 @@ const Booking = () => {
               Cancel
             </button>
             <Button
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green hover:bg-custom-green/90 focus:outline-none"
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green focus:outline-none"
               disabled={disabledButton}
               onClick={handleSubmit}>
               Book Appointment

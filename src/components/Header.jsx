@@ -9,6 +9,7 @@ import {
   PoweroffOutlined,
   FileDoneOutlined,
   HistoryOutlined,
+  ProfileOutlined,
 } from "@ant-design/icons";
 
 const Header = () => {
@@ -21,6 +22,11 @@ const Header = () => {
   let menuItems = [];
 
   const studentMenu = [
+    {
+      label: "Student Profile",
+      key: "student-profile",
+      icon: <ProfileOutlined />,
+    },
     {
       label: "Test Record",
       key: "test-record",
@@ -102,6 +108,9 @@ const Header = () => {
     switch (e.key) {
       case "test-record":
         navigate("/test-record");
+        break;
+      case "student-profile":
+        navigate("/student-profile");
         break;
       case "appointment-record":
         navigate("/appointment-record");
