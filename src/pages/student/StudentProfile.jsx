@@ -7,9 +7,9 @@ const StudentProfile = () => {
   const student = studentData.students[0];
 
   const getIndicatorColor = (score) => {
-    if (score <= 3) return "#4a7c59"; // custom-green for good
-    if (score <= 6) return "#fbbf24"; // yellow for moderate
-    return "#ef4444"; // red for concerning
+    if (score <= 3) return "#4a7c59";
+    if (score <= 6) return "#fbbf24";
+    return "#ef4444";
   };
 
   const renderAssessmentCard = (title, score, maxScore = 10) => (
