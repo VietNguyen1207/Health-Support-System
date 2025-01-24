@@ -17,7 +17,6 @@
           "psychologistID": "PSY001",
           "userID": "USR001",
           "yearsOfExperience": 5,
-          "availableHours": "9:00-17:00",
           "status": "active"
         }
       },
@@ -101,7 +100,6 @@
           "psychologistID": "PSY001",
           "userID": "USR001",
           "yearsOfExperience": 5,
-          "availableHours": "9:00-17:00",
           "status": "active"
         }
       },

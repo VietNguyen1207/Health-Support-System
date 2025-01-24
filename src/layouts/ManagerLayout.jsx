@@ -48,7 +48,7 @@ export const ManagerLayout = () => {
       selectedKeys={[location.pathname]}
       items={menuItems}
       onClick={({ key }) => handleMenuClick(key)}
-      className="min-h-full pt-4"
+      className="min-h-full w-max pt-4"
     />
   );
 
@@ -74,9 +74,7 @@ export const ManagerLayout = () => {
           onBreakpoint={(broken) => {
             setCollapsed(broken);
           }}
-          style={{
-            display: { xs: "none", lg: "block" },
-          }}>
+          className="w-fit">
           {sideMenu}
         </Sider>
         <Content

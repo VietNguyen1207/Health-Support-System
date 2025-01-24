@@ -9,3 +9,11 @@ export function formatRegularDate(date) {
 export function formatAppointmentDate(date) {
   return date && date.format("YYYY-MM-DD");
 }
+
+export function transformString(str) {
+  return String(str)
+    .trim()
+    .charAt(0)
+    .toUpperCase()
+    .concat(String(str).slice(1).toLowerCase());
+}
