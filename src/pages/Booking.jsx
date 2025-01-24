@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DateTimeSelector from "../components/DateTimeSelector";
-import psychologistData from "../data/psychologist.json";
+import workingHours from "../data/booking-time.json";
 import { useAuthStore } from "../stores/authStore";
 import dayjs from "dayjs";
 import { Button, message } from "antd";
@@ -30,7 +30,7 @@ const Booking = () => {
   const [isFormValid, setIsFormValid] = useState(false);
 
   // Get list of specialities
-  const specialities = Object.keys(psychologistData)?.map((key) => ({
+  const specialities = Object.keys(workingHours)?.map((key) => ({
     id: key,
     name: key
       .split("_")
@@ -40,7 +40,7 @@ const Booking = () => {
 
   // Get psychologists based on selected speciality
   const psychologists = selectedSpeciality
-    ? psychologistData[selectedSpeciality]
+    ? workingHours[selectedSpeciality]
     : [];
 
   const validateFormData = () => {
@@ -118,7 +118,7 @@ const Booking = () => {
     }));
   };
 
-  const selectedPsychologistData = psychologists?.find(
+  const selectedWorkingHours = psychologists?.find(
     (p) => p.id === parseInt(formData.psychologist)
   );
 
@@ -206,7 +206,7 @@ const Booking = () => {
 
             <div className="w-3/5 flex-1">
               <DateTimeSelector
-                selectedPsychologist={selectedPsychologistData}
+                selectedPsychologist={selectedWorkingHours}
                 setFormData={setFormData}
                 formData={formData}
               />

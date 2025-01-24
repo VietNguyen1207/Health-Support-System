@@ -1,0 +1,153 @@
+{
+  "users": [
+    {
+      "userId": "1",
+      "fullName": "John Brown",
+      "email": "abc",
+      "role": "PARENT",
+      "childInfo": {
+        "studentId": "S001",
+        "userId": "U001",
+        "grade": 10,
+        "className": "A",
+        "fullName": "John Doe"
+      },
+      "status": "Active"
+    },
+    {
+      "userId": "2",
+      "fullName": "Jim Green",
+      "email": "abc",
+      "role": "STUDENT",
+      "status": "Active"
+    },
+    {
+      "userId": "3",
+      "fullName": "Joe Black",
+      "email": "abc",
+      "role": "PSYCHOLOGIST",
+      "status": "Active"
+    },
+    {
+      "userId": "4",
+      "fullName": "Joe Black",
+      "email": "abc",
+      "role": "STUDENT",
+      "status": "Inactive"
+    },
+    {
+      "userId": "5",
+      "fullName": "Joe Black",
+      "email": "abc",
+      "role": "PSYCHOLOGIST",
+      "status": "Inactive"
+    },
+    {
+      "userId": "6",
+      "fullName": "Joe Black",
+      "email": "abc",
+      "role": "PARENT",
+      "status": "Active"
+    },
+    {
+      "userId": "7",
+      "fullName": "Joe Black",
+      "email": "abc",
+      "role": "STUDENT",
+      "status": "Active"
+    },
+    {
+      "userId": "8",
+      "fullName": "Joe Black",
+      "email": "abc",
+      "role": "STUDENT",
+      "status": "Inactive"
+    },
+    {
+      "userId": "9",
+      "fullName": "Joe Black",
+      "email": "abc",
+      "role": "STUDENT",
+      "status": "Active"
+    },
+    {
+      "userId": "10",
+      "fullName": "Joe Black",
+      "email": "abc",
+      "role": "STUDENT",
+      "status": "Active"
+    },
+    {
+      "userId": "11",
+      "fullName": "Joe Black",
+      "email": "abc",
+      "role": "STUDENT",
+      "status": "Active"
+    },
+    {
+      "userId": "12",
+      "fullName": "Joe Black",
+      "email": "abc",
+      "role": "STUDENT",
+      "status": "Active"
+    }
+  ],
+  "surveys": [
+    {
+      "surveyId": "1",
+      "surveyName": "a",
+      "description": "abc",
+      "category": ["depression"],
+      "status": "Active"
+    },
+    {
+      "surveyId": "2",
+      "surveyName": "b",
+      "description": "abc",
+      "category": ["anxiety", "depression", "stress"],
+      "status": "Active"
+    },
+    {
+      "surveyId": "3",
+      "surveyName": "c",
+      "description": "abc",
+      "category": ["stress"],
+      "status": "Active"
+    },
+    {
+      "surveyId": "4",
+      "surveyName": "d",
+      "description": "abc",
+      "category": ["anxiety", "depression"],
+      "status": "Active"
+    },
+    {
+      "surveyId": "5",
+      "surveyName": "a",
+      "description": "abc",
+      "category": ["anxiety", "stress"],
+      "status": "Active"
+    },
+    {
+      "surveyId": "6",
+      "surveyName": "a",
+      "description": "abc",
+      "category": ["anxiety"],
+      "status": "Active"
+    },
+    {
+      "surveyId": "7",
+      "surveyName": "b",
+      "description": "abc",
+      "category": ["depression", "stress"],
+      "status": "Active"
+    },
+    {
+      "surveyId": "8",
+      "surveyName": "a",
+      "description": "abc",
+      "category": ["anxiety"],
+      "status": "Active"
+    }
+  ]
+}

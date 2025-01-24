@@ -37,10 +37,6 @@ export const routes = [
       { path: "about", element: <About /> },
       { path: "services", element: <Service /> },
       { path: "contact", element: <Contact /> },
-      // { path: "test", element: <Test /> },
-      // { path: "test-question", element: <TestQuestion /> },
-      // { path: "book-appointment", element: <Booking /> },
-      // { path: "dashboard", element: <Dashboard /> },
       {
         path: "login",
         element: (
@@ -73,7 +69,6 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [
-          // { path: "test", element: <Test /> },
           { path: "student-profile", element: <StudentProfile /> },
           { path: "test-question", element: <TestQuestion /> },
           { path: "book-appointment", element: <Booking /> },
@@ -102,10 +97,7 @@ export const routes = [
             <Outlet />
           </PrivateRoute>
         ),
-        children: [
-          { path: "children-record", element: <ChildrenRecord /> },
-          // { path: "book-appointment", element: <Booking /> },
-        ],
+        children: [{ path: "children-record", element: <ChildrenRecord /> }],
       },
       {
         path: "",

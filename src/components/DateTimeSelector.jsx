@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import PropTypes from "prop-types";
 import timeSlots from "../data/timeSlots.json";
 import { CalendarOutlined } from "@ant-design/icons";
-import CustomCalendar from "./CustomCalendar";
+import CustomCalendar from "./CalendarComponent";
 import {
   formatAppointmentDate,
   formatRegularDate,

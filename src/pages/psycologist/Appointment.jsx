@@ -9,7 +9,7 @@ import {
   Tag,
 } from "antd";
 import { useMemo, useState } from "react";
-import bookingData from "../../data/booking.json";
+import AppointmentData from "../../data/appointments.json";
 import dayjs from "dayjs";
 import {
   AimOutlined,
@@ -17,7 +17,7 @@ import {
   QuestionCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import CustomCalendar from "../../components/CustomCalendar";
+import CustomCalendar from "../../components/CalendarComponent";
 import { formatAppointmentDate } from "../../utils/Helper";
 
 export default function Appointment() {
@@ -51,7 +51,7 @@ export default function Appointment() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    bookingData.appointments.forEach((appointment) => {
+    AppointmentData.appointments.forEach((appointment) => {
       const date = new Date(appointment.timeSlot.slotDate);
       if (date >= today) {
         const dateKey = date.toISOString().split("T")[0];
