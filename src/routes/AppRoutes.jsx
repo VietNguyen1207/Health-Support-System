@@ -13,6 +13,7 @@ import { Unauthorized } from "../pages/error/Unauthorized";
 import Booking from "../pages/Booking";
 import Test from "../pages/Test";
 import TestQuestion from "../pages/TestQuestion";
+import CreateTest from "../pages/psycologist/CreateTest";
 import StudentProfile from "../pages/student/StudentProfile";
 import { Outlet } from "react-router-dom";
 import Appointment from "../pages/psycologist/Appointment";
@@ -91,6 +92,7 @@ export const routes = [
         children: [
           { path: "appointment", element: <Appointment /> },
           { path: "patient-record", element: <PatientRecord /> },
+          { path: "create-test", element: <CreateTest /> },
         ],
       },
       {

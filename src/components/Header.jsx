@@ -173,11 +173,20 @@ const Header = () => {
         </Link>
       </Menu.Item>
       {user && user.role !== "parent" && (
-        <Menu.Item key="test">
-          <Link to="/test" onClick={onClose}>
-            Survey
-          </Link>
-        </Menu.Item>
+        <Menu.SubMenu key="survey" title="Survey">
+          <Menu.Item key="survey-list">
+            <Link to="/test" onClick={onClose}>
+              Survey List
+            </Link>
+          </Menu.Item>
+          {user?.role === "psychologist" && (
+            <Menu.Item key="create-survey">
+              <Link to="/create-test" onClick={onClose}>
+                Create New Survey
+              </Link>
+            </Menu.Item>
+          )}
+        </Menu.SubMenu>
       )}
       {(!user || (user.role !== "manager" && user.role !== "psychologist")) && (
         <Menu.Item key="book">
@@ -219,7 +228,8 @@ const Header = () => {
           placement="right"
           onClose={onClose}
           open={visible}
-          className="lg:hidden">
+          className="lg:hidden"
+        >
           {mobileMenu}
           <div className="mt-4 flex justify-center items-center">
             {!user ? (
@@ -227,7 +237,8 @@ const Header = () => {
                 <Link
                   to="/register"
                   className="btn btn-outline"
-                  onClick={onClose}>
+                  onClick={onClose}
+                >
                   Sign Up
                 </Link>
                 <Link to="/login" className="btn btn-primary" onClick={onClose}>
@@ -245,42 +256,64 @@ const Header = () => {
         <nav className="hidden lg:flex justify-between items-center gap-10">
           <Link
             to="/"
-            className={`nav-link ${location.pathname === "/" ? "active" : ""}`}>
+            className={`nav-link ${location.pathname === "/" ? "active" : ""}`}
+          >
             <span>Home</span>
           </Link>
           <Link
             to="/about"
             className={`nav-link ${
               location.pathname === "/about" ? "active" : ""
-            }`}>
+            }`}
+          >
             <span>About</span>
           </Link>
           <Link
             to="/services"
             className={`nav-link ${
               location.pathname === "/services" ? "active" : ""
-            }`}>
+            }`}
+          >
             <span>Services</span>
           </Link>
           <Link
             to="/contact"
             className={`nav-link ${
               location.pathname === "/contact" ? "active" : ""
-            }`}>
+            }`}
+          >
             <span>Contact</span>
           </Link>
 
           {user &&
             ["student", "psychologist"].some((role) => role === user.role) && (
-              <>
+              <div className="relative group">
                 <Link
                   to="/test"
                   className={`nav-link ${
-                    location.pathname === "/test" ? "active" : ""
-                  }`}>
+                    location.pathname.startsWith("/test") ? "active" : ""
+                  }`}
+                >
                   <span>Survey</span>
                 </Link>
-              </>
+
+                {user.role === "psychologist" && (
+                  <div className="absolute hidden group-hover:block w-48 py-2 bg-white rounded-lg shadow-xl">
+                    <Link
+                      to="/test"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Survey List
+                    </Link>
+                    <Link
+                      to="/create-test"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Create New Survey
+                    </Link>
+                  </div>
+                )}
+              </div>
             )}
 
           {!user ||
@@ -289,7 +322,8 @@ const Header = () => {
               to="/book-appointment"
               className={`nav-link book-now ${
                 location.pathname === "/book-appointment" ? "active" : ""
-              }`}>
+              }`}
+            >
               <span>Book Now</span>
             </Link>
           ) : (
@@ -299,7 +333,8 @@ const Header = () => {
                   to="/appointment"
                   className={`nav-link book-now ${
                     location.pathname === "/appointment" ? "active" : ""
-                  }`}>
+                  }`}
+                >
                   <span>Appointment</span>
                 </Link>
               </>
