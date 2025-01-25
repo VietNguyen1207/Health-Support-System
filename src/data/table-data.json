@@ -25,6 +25,15 @@
       "status": "Active"
     },
     {
+      "userId": "8",
+      "fullName": "John Brown",
+      "email": "abc",
+      "role": "PARENT",
+      "gender": "Male",
+      "children": [],
+      "status": "Active"
+    },
+    {
       "userId": "2",
       "fullName": "Joe Black",
       "email": "abc",
@@ -41,7 +50,7 @@
       "role": "STUDENT",
       "grade": 10,
       "className": "A",
-      "gender": "Female",
+      "gender": "Male",
       "status": "Active"
     },
     {
@@ -49,6 +58,7 @@
       "fullName": "Joe Black",
       "email": "abc",
       "role": "PSYCHOLOGIST",
+      "gender": "Male",
       "specialization": "Clinic Psychology",
       "yearsOfExperience": 10,
       "status": "Active"
@@ -58,8 +68,9 @@
       "fullName": "Joe Black",
       "email": "abc",
       "role": "STUDENT",
-      "grade": 10,
+      "grade": 11,
       "className": "A",
+      "gender": "Male",
       "status": "Inactive"
     },
     {
@@ -67,6 +78,7 @@
       "fullName": "Joe Black",
       "email": "abc",
       "role": "PSYCHOLOGIST",
+      "gender": "Female",
       "specialization": "Child Psychology",
       "yearsOfExperience": 10,
       "status": "Inactive"
@@ -77,7 +89,8 @@
       "email": "abc",
       "role": "STUDENT",
       "grade": 10,
-      "className": "A",
+      "gender": "Male",
+      "className": "B",
       "status": "Active"
     }
   ],
