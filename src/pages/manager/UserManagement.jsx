@@ -2,8 +2,12 @@ import { useEffect, useState } from "react";
 import TableComponent from "../../components/TableComponent";
 import TagComponent from "../../components/TagComponent";
 import TableData from "../../data/table-data.json";
-import { transformString } from "../../utils/Helper";
-import { Flex, Radio } from "antd";
+import {
+  mergeNestedObject,
+  splitParentArrays,
+  transformString,
+} from "../../utils/Helper";
+import { Flex, Radio, Space } from "antd";
 import SearchInputComponent from "../../components/SearchInputComponent";
 
 const ROLE_SET = ["student", "parent", "psychologist"];
@@ -12,6 +16,7 @@ export default function UserManagement() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [role, setRole] = useState("student");
+  const [childrenArr, setChildrenArr] = useState([]);
 
   const columns = [
     {
@@ -29,33 +34,78 @@ export default function UserManagement() {
         },
         multiple: 1,
       },
-      width: "20%",
+      width: "15%",
     },
     {
       title: "Email",
       dataIndex: "email",
+      width: "15%",
+    },
+    // Student
+    {
+      title: "Class",
+      dataIndex: "grade",
+      render: (_value, record) => {
+        return <>{String(record.grade).concat(record.className)}</>;
+      },
+      sorter: {
+        compare: (a, b) => {
+          const valueA = String(a.grade).concat(a.className);
+          const valueB = String(b.grade).concat(b.className);
+
+          if (valueA < valueB) {
+            return -1;
+          }
+          if (valueA > valueB) {
+            return 1;
+          }
+          return 0;
+        },
+        multiple: 1,
+      },
+      hidden: role !== "student",
+    },
+    //Parent
+    {
+      title: "Children",
+      dataIndex: "numOfChildren",
+      // render: (value) => value?.length || 0,
+      hidden: role !== "parent",
+      width: "10%",
+    },
+    //Psychologist
+    {
+      title: "Specialization",
+      dataIndex: "specialization",
+      hidden: role !== "psychologist",
+      width: "20%",
+    },
+    {
+      title: "Year of Experience",
+      dataIndex: "yearsOfExperience",
+      hidden: role !== "psychologist",
     },
     {
       title: "Gender",
       dataIndex: "gender",
       render: (value) => (
         <TagComponent
-          color={value === "Active" ? "green" : "volcano"}
+          color={value === "Male" ? "blue" : "volcano"}
           tag={value}
         />
       ),
       filters: [
         {
-          text: "Active",
-          value: "Active",
+          text: "Male",
+          value: "Male",
         },
         {
-          text: "Inactive",
-          value: "Inactive",
+          text: "Female",
+          value: "Female",
         },
       ],
-      onFilter: (value, record) => record.status.includes(value),
-      width: "20%",
+      onFilter: (value, record) => record.gender.includes(value),
+      // width: "20%",
     },
     {
       title: "Status",
@@ -77,7 +127,7 @@ export default function UserManagement() {
         },
       ],
       onFilter: (value, record) => record.status.includes(value),
-      width: "20%",
+      // width: "20%",
     },
     {
       title: "",
@@ -89,9 +139,29 @@ export default function UserManagement() {
   ];
 
   const filterDataByRole = (value) => {
-    return TableData.users.filter(
+    const filterData = TableData.users.filter(
       (user) => transformString(user.role) === transformString(value)
     );
+
+    if (value === "parent") {
+      const { parentsWithoutChildren, childrenInfoArray } =
+        splitParentArrays(filterData);
+      setChildrenArr(childrenInfoArray);
+      // console.log("parentsWithoutChildren", parentsWithoutChildren);
+      // console.log("childrenInfoArray ", childrenInfoArray);
+
+      return parentsWithoutChildren;
+    }
+
+    return filterData;
+    // switch (user.role) {
+    //   case "STUDENT":
+    //     return mergeNestedObject(user, "studentInfo");
+    //   case "PSYCHOLOGIST":
+    //     return mergeNestedObject(user, "psychologistInfo");
+    //   default:
+    //     break;
+    // }
   };
 
   const initialData = () => {
@@ -102,7 +172,9 @@ export default function UserManagement() {
 
   useEffect(initialData, []);
 
-  const onSelectRowKey = (selectedRowKeys, selectedRows) => {};
+  const onSelectRowKey = (selectedRowKeys, selectedRows) => {
+    console.log(selectedRowKeys, selectedRows);
+  };
 
   const roleChange = (e) => {
     setRole(e.target.value);
@@ -117,6 +189,18 @@ export default function UserManagement() {
           .toLowerCase()
           .includes(String(e).trim().toLowerCase())
       )
+    );
+  };
+
+  const expandedRowRender = (record) => {
+    const matchParent = childrenArr.find(
+      (child) => child.userId === record.userId
+    );
+
+    return (
+      <Space align="center">
+        {matchParent.children.length > 0 ? <>Hello</> : <>No Data</>}
+      </Space>
     );
   };
 
@@ -143,6 +227,8 @@ export default function UserManagement() {
         loading={loading}
         setData={setData}
         onSelectRowKey={onSelectRowKey}
+        showExpandColumn={role === "parent"}
+        expandedRowRender={expandedRowRender}
       />
     </Flex>
   );

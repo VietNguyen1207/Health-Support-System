@@ -5,90 +5,92 @@
       "fullName": "John Brown",
       "email": "abc",
       "role": "PARENT",
-      "childInfo": {
-        "studentId": "S001",
-        "userId": "U001",
-        "grade": 10,
-        "className": "A",
-        "fullName": "John Doe"
-      },
+      "gender": "Male",
+      "children": [
+        {
+          "userId": "3",
+          "grade": 10,
+          "className": "A",
+          "fullName": "Jim Green",
+          "gender": "Male"
+        },
+        {
+          "userId": "2",
+          "grade": 10,
+          "className": "A",
+          "fullName": "John Black",
+          "gender": "Female"
+        }
+      ],
+      "status": "Active"
+    },
+    {
+      "userId": "8",
+      "fullName": "John Brown",
+      "email": "abc",
+      "role": "PARENT",
+      "gender": "Male",
+      "children": [],
       "status": "Active"
     },
     {
       "userId": "2",
-      "fullName": "Jim Green",
+      "fullName": "Joe Black",
       "email": "abc",
       "role": "STUDENT",
+      "grade": 10,
+      "className": "A",
+      "gender": "Female",
       "status": "Active"
     },
     {
       "userId": "3",
-      "fullName": "Joe Black",
+      "fullName": "Jim Green",
       "email": "abc",
-      "role": "PSYCHOLOGIST",
+      "role": "STUDENT",
+      "grade": 10,
+      "className": "A",
+      "gender": "Male",
       "status": "Active"
     },
     {
       "userId": "4",
       "fullName": "Joe Black",
       "email": "abc",
-      "role": "STUDENT",
-      "status": "Inactive"
+      "role": "PSYCHOLOGIST",
+      "gender": "Male",
+      "specialization": "Clinic Psychology",
+      "yearsOfExperience": 10,
+      "status": "Active"
     },
     {
       "userId": "5",
       "fullName": "Joe Black",
       "email": "abc",
-      "role": "PSYCHOLOGIST",
+      "role": "STUDENT",
+      "grade": 11,
+      "className": "A",
+      "gender": "Male",
       "status": "Inactive"
     },
     {
       "userId": "6",
       "fullName": "Joe Black",
       "email": "abc",
-      "role": "PARENT",
-      "status": "Active"
+      "role": "PSYCHOLOGIST",
+      "gender": "Female",
+      "specialization": "Child Psychology",
+      "yearsOfExperience": 10,
+      "status": "Inactive"
     },
     {
       "userId": "7",
       "fullName": "Joe Black",
       "email": "abc",
       "role": "STUDENT",
-      "status": "Active"
-    },
-    {
-      "userId": "8",
-      "fullName": "Joe Black",
-      "email": "abc",
-      "role": "STUDENT",
-      "status": "Inactive"
-    },
-    {
-      "userId": "9",
-      "fullName": "Joe Black",
-      "email": "abc",
-      "role": "STUDENT",
-      "status": "Active"
-    },
-    {
-      "userId": "10",
-      "fullName": "Joe Black",
-      "email": "abc",
-      "role": "STUDENT",
-      "status": "Active"
-    },
-    {
-      "userId": "11",
-      "fullName": "Joe Black",
-      "email": "abc",
-      "role": "STUDENT",
-      "status": "Active"
-    },
-    {
-      "userId": "12",
-      "fullName": "Joe Black",
-      "email": "abc",
-      "role": "STUDENT",
+      "grade": 10,
+      "gender": "Male",
+      "className": "B",
       "status": "Active"
     }
   ],
