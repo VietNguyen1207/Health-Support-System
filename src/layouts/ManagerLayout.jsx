@@ -1,14 +1,21 @@
 import { useState } from "react";
-import { Layout, Menu, theme } from "antd";
+import { Dropdown, Layout, Menu, theme } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { HomeOutlined, UserOutlined, FileOutlined } from "@ant-design/icons";
+import {
+  HomeOutlined,
+  UserOutlined,
+  FileOutlined,
+  SwapOutlined,
+  PoweroffOutlined,
+} from "@ant-design/icons";
 import { useAuthStore } from "../stores/authStore";
 
 const { Header, Sider, Content } = Layout;
 
 export const ManagerLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const { user, setUser } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -34,14 +41,41 @@ export const ManagerLayout = () => {
   ];
 
   const handleMenuClick = (key) => {
-    navigate(key);
+    // console.log(key);
+
+    switch (key.key) {
+      case "home":
+        navigate("/");
+        break;
+      case "logout":
+        handleLogout();
+        break;
+      default:
+        break;
+    }
   };
 
-  const handleLogout = () => {
-    setUser(null);
+  const menuProps = {
+    items: [
+      {
+        label: "Home",
+        key: "home",
+        icon: <SwapOutlined />,
+      },
+      {
+        label: "Logout",
+        key: "logout",
+        icon: <PoweroffOutlined />,
+        danger: true,
+      },
+    ],
+    onClick: handleMenuClick,
+  };
+
+  const handleLogout = async () => {
+    await logout();
     navigate("/login");
   };
-
   const sideMenu = (
     <Menu
       mode="inline"
@@ -61,8 +95,10 @@ export const ManagerLayout = () => {
           alignItems: "center",
           justifyContent: "end",
         }}>
-        <div style={{ marginRight: 16, color: "white" }}>
-          <span style={{ marginRight: 16 }}>{user?.name}</span>
+        <div style={{ marginRight: 16 }}>
+          <Dropdown.Button menu={menuProps}>
+            <UserOutlined /> {user.name}
+          </Dropdown.Button>
         </div>
       </Header>
       <Layout>
