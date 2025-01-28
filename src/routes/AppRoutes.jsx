@@ -11,8 +11,10 @@ import Service from "../pages/Service";
 import Login from "../pages/Login";
 import { Unauthorized } from "../pages/error/Unauthorized";
 import Booking from "../pages/Booking";
+import Program from "../pages/Program";
 import Test from "../pages/Test";
 import TestQuestion from "../pages/TestQuestion";
+import AddProgram from "../pages/psycologist/AddProgram";
 import CreateTest from "../pages/psycologist/CreateTest";
 import StudentProfile from "../pages/student/StudentProfile";
 import { Outlet } from "react-router-dom";
@@ -36,7 +38,8 @@ export const routes = [
       { path: "contact", element: <Contact /> },
       { path: "about", element: <About /> },
       { path: "services", element: <Service /> },
-      { path: "contact", element: <Contact /> },
+      { path: "program", element: <Program /> },
+      // { path: "contact", element: <Contact /> },
       {
         path: "login",
         element: (
@@ -88,6 +91,7 @@ export const routes = [
           { path: "appointment", element: <Appointment /> },
           { path: "patient-record", element: <PatientRecord /> },
           { path: "create-test", element: <CreateTest /> },
+          { path: "add-program", element: <AddProgram /> },
         ],
       },
       {
