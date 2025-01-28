@@ -202,6 +202,20 @@ const Header = () => {
           </Link>
         </Menu.Item>
       )}
+      <Menu.SubMenu key="program" title="Program">
+        <Menu.Item key="program-list">
+          <Link to="/program" onClick={onClose}>
+            Program List
+          </Link>
+        </Menu.Item>
+        {user?.role === "psychologist" || user?.role === "manager" ? (
+          <Menu.Item key="add-program">
+            <Link to="/add-program" onClick={onClose}>
+              Add Program
+            </Link>
+          </Menu.Item>
+        ) : null}
+      </Menu.SubMenu>
     </Menu>
   );
 
@@ -276,14 +290,33 @@ const Header = () => {
           >
             <span>Services</span>
           </Link>
-          <Link
-            to="/contact"
-            className={`nav-link ${
-              location.pathname === "/contact" ? "active" : ""
-            }`}
-          >
-            <span>Contact</span>
-          </Link>
+          <div className="relative group">
+            <Link
+              to="/program"
+              className={`nav-link ${
+                location.pathname.startsWith("/program") ? "active" : ""
+              }`}
+            >
+              <span>Program</span>
+            </Link>
+
+            {(user?.role === "psychologist" || user?.role === "manager") && (
+              <div className="absolute hidden group-hover:block w-48 py-2 bg-white rounded-lg shadow-xl">
+                <Link
+                  to="/program"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Program List
+                </Link>
+                <Link
+                  to="/add-program"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Add Program
+                </Link>
+              </div>
+            )}
+          </div>
 
           {user &&
             ["student", "psychologist"].some((role) => role === user.role) && (
