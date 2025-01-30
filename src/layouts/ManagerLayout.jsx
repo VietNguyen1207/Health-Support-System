@@ -40,10 +40,10 @@ export const ManagerLayout = () => {
     },
   ];
 
-  const handleMenuClick = (key) => {
-    // console.log(key);
+  const handleMenuClick = (e) => {
+    console.log(e);
 
-    switch (key.key) {
+    switch (e.key) {
       case "home":
         navigate("/");
         break;
@@ -51,7 +51,8 @@ export const ManagerLayout = () => {
         handleLogout();
         break;
       default:
-        break;
+        navigate(e.key)
+        break
     }
   };
 
@@ -81,7 +82,7 @@ export const ManagerLayout = () => {
       mode="inline"
       selectedKeys={[location.pathname]}
       items={menuItems}
-      onClick={({ key }) => handleMenuClick(key)}
+      onClick={(e) => handleMenuClick(e)}
       className="min-h-full w-max pt-4"
     />
   );

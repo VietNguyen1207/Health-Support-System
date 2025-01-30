@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export function formatWeekDay(date) {
   return date && date.format("ddd");
 }
@@ -62,3 +64,28 @@ export function splitParentArrays(parentArray) {
 
   return { parentsWithoutChildren, childrenInfoArray };
 }
+
+// Lọc menu dựa trên role, mặc định cho phép truy cập nếu không có roles
+export const filterMenuItemsByRole = (items, role) => {
+  return items
+    .filter(
+      (item) => !item.roles || (role && item.roles.includes(role))
+    ) // Không có `roles` thì cho phép
+    .map((item) => ({
+      key: item.key,
+      label: <Link to={item.key} className={`${item.special && "px-4 bg-primary rounded-full flex items-center"}`}>
+        <span className={`${item.special && "text-white font-semibold"}`}>{item.label}</span>
+      </Link>,
+      children: item.children
+        ? filterMenuItemsByRole(item.children, role)
+        : undefined,
+    }));
+};
+
+
+export const filterDropdownItemsByRole = (items, role) => {
+  return items
+    .filter(
+      (item) => !item.roles || (role && item.roles.includes(role.toLowerCase()))
+    )
+};

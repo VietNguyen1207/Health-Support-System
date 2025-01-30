@@ -1,6 +1,6 @@
+import "../style/Login.css";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../style/Login.css";
 import { useAuthStore } from "../stores/authStore";
 import { message } from "antd";
 
@@ -8,7 +8,7 @@ const Login = () => {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   const [formData, setFormData] = useState({
-    email: "",
+    loginIdentifier: "",
     password: "",
     remember: false,
   });
@@ -48,10 +48,10 @@ const Login = () => {
             <input
               type="text"
               id="email"
-              name="email"
+              name="loginIdentifier"
               className="form-input"
               placeholder="Enter your Email"
-              value={formData.email}
+              value={formData.loginIdentifier}
               onChange={handleChange}
               required
             />

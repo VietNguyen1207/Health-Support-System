@@ -27,7 +27,6 @@ import UserManagement from "../pages/manager/UserManagement";
 import SurveyManagement from "../pages/manager/SurveyManagement";
 import NotFound from "../pages/error/NotFound";
 import TestResult from "../pages/TestResult";
-// import { PERMISSIONS } from "../utils/permissions";
 
 export const routes = [
   {
@@ -39,30 +38,27 @@ export const routes = [
       { path: "about", element: <About /> },
       { path: "services", element: <Service /> },
       { path: "program", element: <Program /> },
-      // { path: "contact", element: <Contact /> },
       {
-        path: "login",
+        path: "",
         element: (
           <PrivateRoute requiresGuest>
-            <Login />
+            <Outlet />
           </PrivateRoute>
         ),
-      },
-      {
-        path: "register",
-        element: (
-          <PrivateRoute requiresGuest>
-            <Register />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: "forgot-password",
-        element: (
-          <PrivateRoute requiresGuest>
-            <ForgotPassword />
-          </PrivateRoute>
-        ),
+        children: [
+          {
+            path: "login",
+            element: <Login />
+          },
+          {
+            path: "register",
+            element: <Register />
+          },
+          {
+            path: "forgot-password",
+            element: <ForgotPassword />
+          },
+        ]
       },
       {
         path: "",

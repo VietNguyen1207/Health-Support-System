@@ -110,15 +110,14 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
               key={formatAppointmentDate(item)}
               className={`
                min-w-14 p-0 cursor-pointer border-none transition-all
-              ${
-                selectedDate &&
-                formatAppointmentDate(selectedDate) ===
+              ${selectedDate &&
+                  formatAppointmentDate(selectedDate) ===
                   formatAppointmentDate(item)
                   ? selectedPsychologist
                     ? "bg-[#5C8C6B]"
                     : "bg-gray-400"
                   : "bg-gray-100 hover:bg-gray-200"
-              }
+                }
             `}
               onClick={() => {
                 if (!selectedPsychologist) return;
@@ -138,23 +137,21 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
               }}>
               <div className="text-center">
                 <div
-                  className={`text-base font-medium ${
-                    selectedDate &&
-                    formatAppointmentDate(selectedDate) ===
+                  className={`text-base font-medium ${selectedDate &&
+                      formatAppointmentDate(selectedDate) ===
                       formatAppointmentDate(item)
                       ? "text-white"
                       : "text-gray-800"
-                  }`}>
+                    }`}>
                   {formatRegularDate(item)}
                 </div>
                 <div
-                  className={`text-sm ${
-                    selectedDate &&
-                    formatAppointmentDate(selectedDate) ===
+                  className={`text-sm ${selectedDate &&
+                      formatAppointmentDate(selectedDate) ===
                       formatAppointmentDate(item)
                       ? "text-white"
                       : "text-gray-500"
-                  }`}>
+                    }`}>
                   {formatWeekDay(item)}
                 </div>
               </div>
@@ -185,13 +182,12 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
               key={"other"}
               className={`
               min-w-14 cursor-pointer border-none transition-all
-              ${
-                isOtherDate
+              ${isOtherDate
                   ? selectedPsychologist
                     ? "bg-[#5C8C6B]"
                     : "bg-gray-400"
                   : "bg-gray-100 hover:bg-gray-200"
-              }
+                }
             `}
               onClick={() => {
                 if (!selectedPsychologist) return;
@@ -210,9 +206,8 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
               }}>
               <div className="text-center">
                 <div
-                  className={`text-base font-medium ${
-                    isOtherDate ? "text-white" : "text-gray-800"
-                  }`}>
+                  className={`text-base font-medium ${isOtherDate ? "text-white" : "text-gray-800"
+                    }`}>
                   {!otherDate ? (
                     <CalendarOutlined className="text-xl" />
                   ) : (
@@ -220,9 +215,8 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
                   )}
                 </div>
                 <div
-                  className={`text-sm ${
-                    isOtherDate ? "text-white" : "text-gray-500"
-                  }`}>
+                  className={`text-sm ${isOtherDate ? "text-white" : "text-gray-500"
+                    }`}>
                   Other Date
                 </div>
               </div>
@@ -245,13 +239,12 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
                 disabled={!slot.isAvailable}
                 className={`
                        w-1/12 min-w-20 p-0 border-none transition-all
-                      ${
-                        formData?.appointmentTime === slot.timeSlots
-                          ? "bg-[#5C8C6B] text-white"
-                          : slot.isAvailable
-                          ? "bg-gray-100 hover:bg-gray-200  cursor-pointer"
-                          : " cursor-not-allowed bg-gray-50 text-gray-300"
-                      }
+                      ${formData?.appointmentTime === slot.timeSlots
+                    ? "bg-[#5C8C6B] text-white"
+                    : slot.isAvailable
+                      ? "bg-gray-100 hover:bg-gray-200  cursor-pointer"
+                      : " cursor-not-allowed bg-gray-50 text-gray-300"
+                  }
                     `}
                 onClick={() => {
                   if (slot.isAvailable) {
