@@ -65,7 +65,7 @@ export const useAuthStore = create(
           set(initialState);
 
           // Clear axios default header - Fix header name
-          delete api.defaults.headers.common["Authorization"];
+          delete api.defaults.headers.common["Authentication"];
         } catch (error) {
           if (axios.isAxiosError(error)) {
             throw new Error(error.response?.data?.message || "Logout failed");
@@ -127,7 +127,7 @@ export const useAuthStore = create(
 // Add initialization of token from persisted state
 const token = useAuthStore.getState().token?.accessToken;
 if (token) {
-  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  api.defaults.headers.common["Authentication"] = `Bearer ${token}`;
 }
 
 // Interceptor để handle refresh token
