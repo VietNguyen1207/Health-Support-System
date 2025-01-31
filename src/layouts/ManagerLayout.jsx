@@ -41,7 +41,7 @@ export const ManagerLayout = () => {
   ];
 
   const handleMenuClick = (e) => {
-    console.log(e);
+    // console.log(e);
 
     switch (e.key) {
       case "home":
@@ -51,8 +51,8 @@ export const ManagerLayout = () => {
         handleLogout();
         break;
       default:
-        navigate(e.key)
-        break
+        navigate(e.key);
+        break;
     }
   };
 

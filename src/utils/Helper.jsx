@@ -20,20 +20,17 @@ export function transformString(str) {
     .concat(String(str).slice(1).toLowerCase());
 }
 
-export function mergeNestedObject(inputObject, nestedKey) {
-  // Check if the nested key exists in the input object
-  if (!inputObject[nestedKey]) {
-    throw new Error(`Key "${nestedKey}" does not exist in the input object.`);
-  }
+export function mergeNestedObject(arr, nestedKey) {
+  return arr.map((object) => {
+    // Destructure the nested object using the provided key
+    const { [nestedKey]: nestedInfo, ...otherAttributes } = object;
 
-  // Destructure the nested object using the provided key
-  const { [nestedKey]: nestedInfo, ...otherAttributes } = inputObject;
-
-  // Merge nested attributes with top-level attributes
-  return {
-    ...otherAttributes,
-    ...nestedInfo,
-  };
+    // Merge nested attributes with top-level attributes
+    return {
+      ...otherAttributes,
+      ...nestedInfo,
+    };
+  });
 }
 
 export function splitParentArrays(parentArray) {
@@ -68,24 +65,28 @@ export function splitParentArrays(parentArray) {
 // Lọc menu dựa trên role, mặc định cho phép truy cập nếu không có roles
 export const filterMenuItemsByRole = (items, role) => {
   return items
-    .filter(
-      (item) => !item.roles || (role && item.roles.includes(role))
-    ) // Không có `roles` thì cho phép
+    .filter((item) => !item.roles || (role && item.roles.includes(role))) // Không có `roles` thì cho phép
     .map((item) => ({
       key: item.key,
-      label: <Link to={item.key} className={`${item.special && "px-4 bg-primary rounded-full flex items-center"}`}>
-        <span className={`${item.special && "text-white font-semibold"}`}>{item.label}</span>
-      </Link>,
+      label: (
+        <Link
+          to={item.key}
+          className={`${
+            item.special && "px-4 bg-primary rounded-full flex items-center"
+          }`}>
+          <span className={`${item.special && "text-white font-semibold"}`}>
+            {item.label}
+          </span>
+        </Link>
+      ),
       children: item.children
         ? filterMenuItemsByRole(item.children, role)
         : undefined,
     }));
 };
 
-
 export const filterDropdownItemsByRole = (items, role) => {
-  return items
-    .filter(
-      (item) => !item.roles || (role && item.roles.includes(role.toLowerCase()))
-    )
+  return items.filter(
+    (item) => !item.roles || (role && item.roles.includes(role.toLowerCase()))
+  );
 };

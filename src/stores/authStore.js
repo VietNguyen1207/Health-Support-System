@@ -28,8 +28,6 @@ export const useAuthStore = create(
       // Action login
       login: async (credentials) => {
         try {
-          console.log(credentials);
-
           const { data } = await api.post(
             AUTH_URL + AUTH_ENDPOINT.LOGIN,
             credentials
@@ -44,7 +42,7 @@ export const useAuthStore = create(
             isAuthenticated: true,
           });
 
-          // Set token cho axios
+          // Set token cho axios - Fix header name to Authorization
           api.defaults.headers.common[
             "Authentication"
           ] = `Bearer ${accessToken}`;
@@ -60,22 +58,17 @@ export const useAuthStore = create(
 
       // Action logout
       logout: async () => {
-        // Clear both storages to be safe
-        // localStorage.removeItem("token");
-        // localStorage.removeItem("user");
-        // sessionStorage.removeItem("token");
-        // sessionStorage.removeItem("user");
         try {
           await api.post(AUTH_URL + AUTH_ENDPOINT.LOGOUT);
 
           // Reset state
           set(initialState);
 
-          // Clear axios default header
-          delete axios.defaults.headers.common["Authentication"];
+          // Clear axios default header - Fix header name
+          delete api.defaults.headers.common["Authorization"];
         } catch (error) {
           if (axios.isAxiosError(error)) {
-            throw new Error(error.response?.data?.message || "Login failed");
+            throw new Error(error.response?.data?.message || "Logout failed");
           }
           throw error;
         }
@@ -96,7 +89,7 @@ export const useAuthStore = create(
 
           const { accessToken, refreshToken } = data;
 
-          // Cập nhật token mới
+          // Cập nhật token mới - Fix header name
           set({ token: { accessToken, refreshToken } });
           api.defaults.headers.common[
             "Authentication"
@@ -130,6 +123,12 @@ export const useAuthStore = create(
     }
   )
 );
+
+// Add initialization of token from persisted state
+const token = useAuthStore.getState().token?.accessToken;
+if (token) {
+  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+}
 
 // Interceptor để handle refresh token
 api.interceptors.response.use(
