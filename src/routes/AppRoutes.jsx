@@ -48,17 +48,17 @@ export const routes = [
         children: [
           {
             path: "login",
-            element: <Login />
+            element: <Login />,
           },
           {
             path: "register",
-            element: <Register />
+            element: <Register />,
           },
           {
             path: "forgot-password",
-            element: <ForgotPassword />
+            element: <ForgotPassword />,
           },
-        ]
+        ],
       },
       {
         path: "",
@@ -87,7 +87,6 @@ export const routes = [
           { path: "appointment", element: <Appointment /> },
           { path: "patient-record", element: <PatientRecord /> },
           { path: "create-test", element: <CreateTest /> },
-          { path: "add-program", element: <AddProgram /> },
         ],
       },
       {
@@ -98,6 +97,15 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [{ path: "children-record", element: <ChildrenRecord /> }],
+      },
+      {
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["manager", "psychologist"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [{ path: "add-program", element: <AddProgram /> }],
       },
       {
         path: "",
