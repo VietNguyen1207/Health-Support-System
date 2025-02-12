@@ -63,13 +63,15 @@ const AddProgram = () => {
             form={form}
             layout="vertical"
             onFinish={onFinish}
-            className="space-y-4">
+            className="space-y-4"
+          >
             <Form.Item
               name="title"
               label="Program Title"
               rules={[
                 { required: true, message: "Please enter program title" },
-              ]}>
+              ]}
+            >
               <Input placeholder="Enter program title" />
             </Form.Item>
 
@@ -78,7 +80,8 @@ const AddProgram = () => {
               label="Description"
               rules={[
                 { required: true, message: "Please enter program description" },
-              ]}>
+              ]}
+            >
               <TextArea rows={4} placeholder="Enter program description" />
             </Form.Item>
 
@@ -88,7 +91,8 @@ const AddProgram = () => {
                 label="Category"
                 rules={[
                   { required: true, message: "Please select a category" },
-                ]}>
+                ]}
+              >
                 <Select placeholder="Select program category">
                   {categories.map((category) => (
                     <Option key={category} value={category}>
@@ -103,7 +107,8 @@ const AddProgram = () => {
                 label="Start Date"
                 rules={[
                   { required: true, message: "Please select start date" },
-                ]}>
+                ]}
+              >
                 <DatePicker className="w-full" />
               </Form.Item>
             </div>
@@ -112,7 +117,8 @@ const AddProgram = () => {
               <Form.Item
                 name="duration"
                 label="Duration (weeks)"
-                rules={[{ required: true, message: "Please enter duration" }]}>
+                rules={[{ required: true, message: "Please enter duration" }]}
+              >
                 <InputNumber
                   min={1}
                   max={52}
@@ -124,7 +130,8 @@ const AddProgram = () => {
               <Form.Item
                 name="capacity"
                 label="Maximum Capacity"
-                rules={[{ required: true, message: "Please enter capacity" }]}>
+                rules={[{ required: true, message: "Please enter capacity" }]}
+              >
                 <InputNumber
                   min={1}
                   max={100}
@@ -139,7 +146,8 @@ const AddProgram = () => {
               label="Facilitator"
               rules={[
                 { required: true, message: "Please enter facilitator name" },
-              ]}>
+              ]}
+            >
               <Input placeholder="Enter facilitator name" />
             </Form.Item>
 
@@ -148,7 +156,8 @@ const AddProgram = () => {
               label="Tags"
               rules={[
                 { required: true, message: "Please add at least one tag" },
-              ]}>
+              ]}
+            >
               <Select mode="tags" placeholder="Add tags" className="w-full" />
             </Form.Item>
 
@@ -157,7 +166,8 @@ const AddProgram = () => {
               <Button
                 type="primary"
                 htmlType="submit"
-                className="bg-custom-green hover:bg-custom-green/90">
+                className="bg-primary-green hover:bg-primary-green/90"
+              >
                 Create Program
               </Button>
             </div>

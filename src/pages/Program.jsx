@@ -220,72 +220,100 @@ const Program = () => {
 
   return (
     <div className="general-wrapper">
+      {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">Available Programs</h1>
           <p className="hero-subtitle">
             Join our mental health and wellness programs designed to support
-            your well-being
+            your well-being journey
           </p>
         </div>
       </div>
-      <div className="page-content">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      {/* Programs Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {programs.map((program) => (
             <Card
               key={program.id}
-              className="shadow-md hover transition-shadow duration-300"
+              className="group hover:shadow-xl transition-all duration-300 border-0 overflow-hidden"
+              bodyStyle={{ padding: "1.5rem" }}
               actions={[
-                <Tooltip>
+                <Tooltip title="Click to join this program">
                   <Button
                     type="primary"
-                    className="bg-custom-green hover:bg-custom-green/90 w-[90%] flex items-center justify-center gap-2 mx-auto group"
+                    className="bg-primary-green hover:bg-primary-green/90 w-[90%] flex items-center justify-center gap-2 mx-auto group"
                     icon={
-                      <ArrowRightOutlined className="group-hover:translate-x-1 transition-transform duration-300" />
-                    }>
+                      <ArrowRightOutlined className="transition-transform duration-300 group-hover:translate-x-1" />
+                    }
+                  >
                     <span>Join Program</span>
                   </Button>
                 </Tooltip>,
-              ]}>
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              ]}
+            >
+              <div>
+                {/* Category Badge */}
+                {/* <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-primary-green/10 text-primary-green mb-4">
+                  {program.category}
+                </span> */}
+
+                {/* Title and Description */}
+                <h2 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-primary-green transition-colors">
                   {program.title}
                 </h2>
-                <p className="text-gray-600 mb-4">{program.description}</p>
+                <p className="text-gray-600 mb-4 line-clamp-2 text-sm">
+                  {program.description}
+                </p>
 
-                <Space className="mb-4" wrap>
+                {/* Tags */}
+                <Space className="mb-6" wrap>
                   {program.tags.map((tag) => (
                     <Tag
                       key={tag}
-                      className="bg-custom-green/10 text-custom-green border-custom-green">
+                      className="m-0 bg-gray-50 text-gray-600 border border-gray-200"
+                    >
                       {tag}
                     </Tag>
                   ))}
                 </Space>
 
-                <div className="space-y-2 text-sm text-gray-500">
-                  <div className="flex items-center gap-2">
-                    <CalendarOutlined className="text-custom-green" />
+                {/* Program Details */}
+                <div className="space-y-3 text-sm text-gray-500">
+                  <div className="flex items-center gap-3">
+                    <CalendarOutlined className="text-primary-green text-base" />
                     <span>
                       Starts: {new Date(program.startDate).toLocaleDateString()}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <FieldTimeOutlined className="text-custom-green" />
+                  <div className="flex items-center gap-3">
+                    <FieldTimeOutlined className="text-primary-green text-base" />
                     <span>Duration: {program.duration}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <TeamOutlined className="text-custom-green" />
+                  <div className="flex items-center gap-3">
+                    <TeamOutlined className="text-primary-green text-base" />
                     <span>
-                      Capacity: {program.enrolled}/{program.capacity} enrolled
+                      {program.enrolled}/{program.capacity} enrolled
                     </span>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <p className="text-sm text-gray-600">
-                    Facilitator: {program.facilitator}
-                  </p>
+                {/* Facilitator */}
+                <div className="mt-6 pt-4 border-t border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary-green/10 flex items-center justify-center text-primary-green">
+                      {program.facilitator.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {program.facilitator}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Program Facilitator
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Card>
