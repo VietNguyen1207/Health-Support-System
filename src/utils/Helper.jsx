@@ -69,19 +69,18 @@ export const filterMenuItemsByRole = (items, role) => {
     .map((item) => ({
       key: item.key,
       label: (
-        <Link
-          to={item.key}
-          className={`${
-            item.special && "px-4 bg-primary rounded-full flex items-center"
-          }`}>
-          <span className={`${item.special && "text-white font-semibold"}`}>
-            {item.label}
-          </span>
+        <Link to={item.key} className={`hover:text-primary-green`}>
+          <div
+          //  className={"bg-primary rounded-full px-4"}
+          >
+            <span className={`text-sm`}>{item.label}</span>
+          </div>
         </Link>
       ),
       children: item.children
         ? filterMenuItemsByRole(item.children, role)
         : undefined,
+      special: item.special,
     }));
 };
 

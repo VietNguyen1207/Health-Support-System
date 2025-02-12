@@ -219,37 +219,34 @@ const Program = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Available Programs
-          </h1>
-          <p className="text-gray-600">
+    <div className="general-wrapper">
+      <div className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">Available Programs</h1>
+          <p className="hero-subtitle">
             Join our mental health and wellness programs designed to support
             your well-being
           </p>
         </div>
-
+      </div>
+      <div className="page-content">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {programs.map((program) => (
             <Card
               key={program.id}
               className="shadow-md hover transition-shadow duration-300"
               actions={[
-                <Tooltip title="">
+                <Tooltip>
                   <Button
                     type="primary"
                     className="bg-custom-green hover:bg-custom-green/90 w-[90%] flex items-center justify-center gap-2 mx-auto group"
                     icon={
                       <ArrowRightOutlined className="group-hover:translate-x-1 transition-transform duration-300" />
-                    }
-                  >
+                    }>
                     <span>Join Program</span>
                   </Button>
                 </Tooltip>,
-              ]}
-            >
+              ]}>
               <div className="mb-4">
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">
                   {program.title}
@@ -260,8 +257,7 @@ const Program = () => {
                   {program.tags.map((tag) => (
                     <Tag
                       key={tag}
-                      className="bg-custom-green/10 text-custom-green border-custom-green"
-                    >
+                      className="bg-custom-green/10 text-custom-green border-custom-green">
                       {tag}
                     </Tag>
                   ))}
