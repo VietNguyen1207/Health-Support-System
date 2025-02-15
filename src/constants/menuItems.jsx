@@ -22,7 +22,7 @@ export const menuItems = [
         key: "/program",
         label: "Program List",
         path: "/program",
-        roles: ["psychologist", "manager"],
+        // roles: ["psychologist", "manager", "student"],
       },
       {
         key: "/add-program",
