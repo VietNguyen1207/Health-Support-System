@@ -59,15 +59,9 @@ export const useAuthStore = create(
       // Action logout
       logout: async () => {
         try {
-          // Clear axios default header - Fix header name
-          delete api.defaults.headers.common["Authorization"];
-          const token = useAuthStore.getState().token?.accessToken;
-          await api.post(AUTH_URL + AUTH_ENDPOINT.LOGOUT, null, {
-            headers: {
-              Authentication: `Bearer ${token}`,
-            },
-          });
+          await api.post(AUTH_URL + AUTH_ENDPOINT.LOGOUT, null);
 
+          delete api.defaults.headers.common["Authorization"];
           // Reset state
           set(initialState);
         } catch (error) {
@@ -81,8 +75,6 @@ export const useAuthStore = create(
       // Action refresh token
       refreshToken: async () => {
         try {
-          // Clear axios default header - Fix header name
-          delete api.defaults.headers.common["Authorization"];
           const { data } = await api.post(
             AUTH_URL + AUTH_ENDPOINT.REFRESH_TOKEN,
             {
@@ -90,11 +82,6 @@ export const useAuthStore = create(
               refreshToken: useAuthStore.getState().token.refreshToken,
               userId: useAuthStore.getState().user.userId,
               role: useAuthStore.getState().user.role,
-            },
-            {
-              headers: {
-                Authentication: `Bearer ${token}`,
-              },
             }
           );
 

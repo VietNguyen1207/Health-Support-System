@@ -20,18 +20,13 @@ export const useProgramStore = create((set) => ({
   createProgram: async (credentials) => {
     set({ loading: true, error: null });
     try {
-      const { data } = await api.post(
-        PROGRAM_URL + PROGRAM_ENDPOINT.CREATE,
-        credentials
-      );
+      await api.post(PROGRAM_URL + PROGRAM_ENDPOINT.CREATE, credentials);
 
       // Update programs list with new program
       set((state) => ({
-        programs: [...state.programs, data],
+        programs: [...state.programs, credentials],
         loading: false,
       }));
-
-      return data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Failed to create program";
