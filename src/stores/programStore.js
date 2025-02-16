@@ -37,7 +37,7 @@ export const useProgramStore = create((set) => ({
     }
   },
 
-  //Create A New Program
+  // Create A New Program
   createProgram: async (credentials) => {
     set({ loading: true, error: null });
     try {
