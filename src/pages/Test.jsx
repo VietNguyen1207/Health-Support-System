@@ -410,7 +410,7 @@ const Test = () => {
                     </button>
                     <button
                       onClick={() => handleStartTest(selectedTest)}
-                      className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green hover:bg-custom-green/90"
+                      className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary -green hover:bg-custom-green/90"
                     >
                       Start Test
                     </button>
