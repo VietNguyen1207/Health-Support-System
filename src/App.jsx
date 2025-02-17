@@ -7,7 +7,18 @@ function App() {
   const element = useRoutes(routes);
 
   return (
-    <ConfigProvider>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: "#4a7c59", // or whatever your custom-green color value is
+        },
+        components: {
+          Notification: {
+            colorPrimary: "#4a7c59",
+            marginXL: 50,
+          },
+        },
+      }}>
       <ScrollToTop />
       {element}
     </ConfigProvider>

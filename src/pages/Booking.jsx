@@ -3,17 +3,13 @@ import { useNavigate } from "react-router-dom";
 import DateTimeSelector from "../components/DateTimeSelector";
 import { useAuthStore } from "../stores/authStore";
 import dayjs from "dayjs";
-import { Button, message, Spin } from "antd";
+import { Button, Spin, notification } from "antd";
 import { useAppointmentStore } from "../stores/appointmentStore";
 import { useUserStore } from "../stores/userStore";
 import {
   getPsychologistSpecializations,
   getPsychologistsBySpecialization,
 } from "../utils/Helper";
-
-const SUCCESS_PROP = {
-  content: "Your submission was successful! Thank you!",
-};
 
 const Booking = () => {
   const navigate = useNavigate();
@@ -38,7 +34,9 @@ const Booking = () => {
         await getAllUsers();
       } catch (error) {
         console.error("Error fetching users:", error);
-        message.error("Failed to load user data");
+        notification.error({
+          message: "Failed to load user data",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -94,6 +92,25 @@ const Booking = () => {
     }));
   };
 
+  const showSuccessNotification = () => {
+    notification.success({
+      message: "Booking Confirmed",
+      description: "Your booking has been successfully confirmed!",
+      duration: 0,
+      btn: (
+        <Button
+          className="border-primary text-primary-green"
+          onClick={() => {
+            notification.destroy();
+            navigate("/appointment");
+          }}>
+          View Calendar
+        </Button>
+      ),
+      placement: "bottomRight",
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateFormData()) {
@@ -105,11 +122,12 @@ const Booking = () => {
         };
 
         await CreateBooking(bookingData);
-        message.success(SUCCESS_PROP);
+        showSuccessNotification();
         resetFormData();
       } catch (error) {
-        message.error({
-          content: "Failed to create booking. Please try again.",
+        notification.error({
+          message: "Booking Failed",
+          description: "Failed to create booking. Please try again.",
         });
         console.error("Booking error:", error);
       }
@@ -249,7 +267,7 @@ const Booking = () => {
                   checked={formData.consent}
                   onChange={handleChange}
                   required
-                  className="form-checkbox h-4 w-4"
+                  className="form-checkbox h-4 w-4 text-primary-green border-gray-300 focus:ring-primary-green"
                 />
                 <span className="ml-2 text-sm text-gray-600">
                   I consent to the processing of my personal information and
@@ -259,18 +277,17 @@ const Booking = () => {
             </div>
 
             {/* Submit Buttons */}
-            <div className="flex justify-end space-x-4 pt-6">
-              <button
-                type="button"
+            <div className="flex justify-end space-x-6 pt-6">
+              <Button
+                danger
                 onClick={() => {
                   resetFormData();
                   navigate(-1);
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                }}>
                 Cancel
-              </button>
+              </Button>
               <Button
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-custom-green focus:outline-none"
+                type="primary"
                 disabled={disabledButton}
                 onClick={handleSubmit}>
                 Book Appointment

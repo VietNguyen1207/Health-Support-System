@@ -47,9 +47,9 @@ export const StandardLayout = () => {
         )}
       </Header> */}
       <Layout style={{ minHeight: "100vh" }}>
-        <div className="main-wrapper">
+        <div className="flex flex-col justify-end min-h-screen">
           <Header />
-          <div className="lg:mb-28 md:mb-72 mb-96 pb-20 min-h-screen">
+          <div className="flex-1">
             <Outlet />
           </div>
           <Footer />
