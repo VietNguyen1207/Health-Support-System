@@ -129,7 +129,7 @@ const TestQuestion = () => {
               type="primary"
               onClick={handleNext}
               disabled={!answers[currentQuestion]}
-              className="bg-custom-green hover:bg-custom-green/90"
+              className="bg-primary-green hover:bg-primary-green/90"
             >
               Next
             </Button>

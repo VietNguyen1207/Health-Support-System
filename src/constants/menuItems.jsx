@@ -16,7 +16,7 @@ export const menuItems = [
     key: "program",
     label: "Program",
     path: "/program",
-    roles: ["psychologist", "manager"],
+    roles: ["psychologist", "manager", "student"],
     children: [
       {
         key: "/program",
