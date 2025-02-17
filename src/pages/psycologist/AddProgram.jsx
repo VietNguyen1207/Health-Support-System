@@ -64,7 +64,10 @@ const AddProgram = () => {
         startDate: new Date(values.startDate),
       };
 
-      await createProgram(newProgram);
+      // await createProgram(newProgram);
+      console.log("====================================");
+      console.log(newProgram);
+      console.log("====================================");
       message.success("Program created successfully!");
       navigate("/program");
     } catch (error) {
@@ -74,7 +77,7 @@ const AddProgram = () => {
     }
   };
 
-  const categories = ["Mental Health", "Support Group"];
+  const departments = ["Mental Health", "Support Group"];
 
   return (
     <div className="bg-gradient-to-b from-blue-50 to-white pt-24 pb-28 px-4 sm:px-6 lg:px-8">
@@ -136,17 +139,19 @@ const AddProgram = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Form.Item
-                  name="category"
+                  name="department"
                   label={
-                    <span className="text-gray-700 font-medium">Category</span>
+                    <span className="text-gray-700 font-medium">
+                      Department
+                    </span>
                   }
                   rules={[
-                    { required: true, message: "Please select a category" },
+                    { required: true, message: "Please select a department" },
                   ]}>
-                  <Select placeholder="Select program category">
-                    {categories.map((category) => (
-                      <Option key={category} value={category}>
-                        {category}
+                  <Select placeholder="Select program department">
+                    {departments.map((department) => (
+                      <Option key={department} value={department}>
+                        {department}
                       </Option>
                     ))}
                   </Select>

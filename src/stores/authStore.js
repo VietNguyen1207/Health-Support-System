@@ -42,7 +42,10 @@ export const useAuthStore = create(
             isAuthenticated: true,
           });
 
-          // Set token cho axios - Fix header name to Authorization
+          // Set token cho axios - Fix header name to Authentication
+          api.defaults.headers.common[
+            "Authentication"
+          ] = `Bearer ${accessToken}`;
           api.defaults.headers.common[
             "Authorization"
           ] = `Bearer ${accessToken}`;
@@ -59,9 +62,10 @@ export const useAuthStore = create(
       // Action logout
       logout: async () => {
         try {
-          await api.post(AUTH_URL + AUTH_ENDPOINT.LOGOUT, null);
-
           delete api.defaults.headers.common["Authorization"];
+          await api.post(AUTH_URL + AUTH_ENDPOINT.LOGOUT);
+
+          delete api.defaults.headers.common["Authentication"];
           // Reset state
           set(initialState);
         } catch (error) {
@@ -75,25 +79,45 @@ export const useAuthStore = create(
       // Action refresh token
       refreshToken: async () => {
         try {
+          // Get current state once to avoid multiple calls
+          const state = useAuthStore.getState();
+
+          // Check if we have the required tokens
+          if (!state.token?.refreshToken) {
+            throw new Error("No refresh token available");
+          }
+
           const { data } = await api.post(
             AUTH_URL + AUTH_ENDPOINT.REFRESH_TOKEN,
             {
               accessToken: useAuthStore.getState().token.accessToken,
               refreshToken: useAuthStore.getState().token.refreshToken,
-              userId: useAuthStore.getState().user.userId,
-              role: useAuthStore.getState().user.role,
+              userId: useAuthStore.getState().user?.userId,
+              role: useAuthStore.getState().user?.role,
             }
           );
 
+          if (!data.accessToken || !data.refreshToken) {
+            throw new Error("Invalid token response");
+          }
+
           const { accessToken, refreshToken } = data;
 
-          // Cập nhật token mới - Fix header name
+          // Update tokens in state and headers
           set({ token: { accessToken, refreshToken } });
           api.defaults.headers.common[
             "Authorization"
           ] = `Bearer ${accessToken}`;
+          api.defaults.headers.common[
+            "Authentication"
+          ] = `Bearer ${accessToken}`;
+
+          return data;
         } catch (error) {
-          useAuthStore.getState().logout();
+          // Only logout if it's not already a logout attempt
+          if (!error.config?.url?.includes(AUTH_ENDPOINT.LOGOUT)) {
+            await useAuthStore.getState().logout();
+          }
           throw error;
         }
       },
@@ -125,6 +149,7 @@ export const useAuthStore = create(
 // Add initialization of token from persisted state
 const token = useAuthStore.getState().token?.accessToken;
 if (token) {
+  api.defaults.headers.common["Authentication"] = `Bearer ${token}`;
   api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 }
 
@@ -149,5 +174,3 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// export { api };

@@ -11,6 +11,7 @@ export default {
       },
       backgroundColor: {
         primary: "#4a7c59",
+        "custom-green": "#4a7c59",
       },
     },
   },
