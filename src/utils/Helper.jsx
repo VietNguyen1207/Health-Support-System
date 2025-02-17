@@ -12,6 +12,12 @@ export function formatAppointmentDate(date) {
   return date && date.format("YYYY-MM-DD");
 }
 
+export const formatTimeDisplay = (timeSlot) => {
+  // Assuming timeSlot is in format "HH:mm"
+  const [hours, minutes] = timeSlot.split(":");
+  return `${parseInt(hours)}:${minutes}`; // This will remove leading zero
+};
+
 export function transformString(str) {
   return String(str)
     .trim()
@@ -88,4 +94,56 @@ export const filterDropdownItemsByRole = (items, role) => {
   return items.filter(
     (item) => !item.roles || (role && item.roles.includes(role.toLowerCase()))
   );
+};
+
+// Filter Users By Role
+export const filterUsersByRole = (arr, role) => {
+  return arr.filter(
+    (user) =>
+      !user.role || (role && user.role.toLowerCase() === role.toLowerCase())
+  );
+};
+
+export const getPsychologistSpecializations = (users) => {
+  // Lọc users có role là psychologist
+  const psychologists = filterUsersByRole(users, "psychologist");
+
+  const mergedPsychologists = mergeNestedObject(
+    psychologists,
+    "psychologistInfo"
+  );
+
+  // Tạo Set để lưu trữ các specialization duy nhất
+  const specializationSet = new Set();
+
+  // Lặp qua danh sách psychologists để lấy specialization
+  mergedPsychologists.forEach((psychologist) => {
+    specializationSet.add(psychologist.departmentName);
+  });
+
+  // Chuyển Set thành mảng và trả về
+  return Array.from(specializationSet);
+};
+
+export const getPsychologistsBySpecialization = (users, specialization) => {
+  if (!specialization) return [];
+
+  // Lọc users có role là psychologist
+  const psychologists = filterUsersByRole(users, "psychologist");
+
+  const mergedPsychologists = mergeNestedObject(
+    psychologists,
+    "psychologistInfo"
+  );
+  return mergedPsychologists
+    .filter(
+      (psych) =>
+        psych.departmentName &&
+        psych.departmentName.toLowerCase() === specialization.toLowerCase()
+    )
+    .map((psych) => ({
+      id: psych.psychologistId,
+      name: psych.fullName,
+      experience: `${psych.yearsOfExperience} years experience`,
+    }));
 };

@@ -74,6 +74,7 @@ export const routes = [
           { path: "appointment-record", element: <AppointmentRecord /> },
           { path: "test-record", element: <TestRecord /> },
           { path: "test-results", element: <TestResult /> },
+          { path: "program", element: <Program /> },
         ],
       },
       {

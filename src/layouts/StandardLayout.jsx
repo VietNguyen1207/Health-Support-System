@@ -49,7 +49,7 @@ export const StandardLayout = () => {
       <Layout style={{ minHeight: "100vh" }}>
         <div className="main-wrapper">
           <Header />
-          <div className="lg:mb-28 md:mb-72 mb-96 pb-32 min-h-screen">
+          <div className="lg:mb-28 md:mb-72 mb-96 pb-20 min-h-screen">
             <Outlet />
           </div>
           <Footer />
