@@ -12,6 +12,10 @@ export default {
       backgroundColor: {
         primary: "#4a7c59",
         "custom-green": "#4a7c59",
+        "hover-green": "#4A7C59",
+      },
+      borderColor: {
+        "hover-green": "#4A7C59",
       },
     },
   },
