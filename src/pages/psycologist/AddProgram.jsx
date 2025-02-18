@@ -105,10 +105,10 @@ const AddProgram = () => {
       // Log the data being sent
       console.log("Form data being sent:", newProgram);
 
-      await createProgram(newProgram);
-      console.log("====================================");
-      console.log(newProgram);
-      console.log("====================================");
+      // await createProgram(newProgram);
+      // console.log("====================================");
+      // console.log(newProgram);
+      // console.log("====================================");
 
       await createProgram(newProgram);
       message.success("Program created successfully!");

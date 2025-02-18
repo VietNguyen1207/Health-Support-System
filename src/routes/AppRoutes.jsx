@@ -86,10 +86,7 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [
-<<<<<<< HEAD
           // { path: "appointment", element: <Appointment /> },
-=======
->>>>>>> 1986374d8444a60409aeb490ee038668741390fa
           { path: "patient-record", element: <PatientRecord /> },
           { path: "create-test", element: <CreateTest /> },
         ],
