@@ -71,6 +71,7 @@ export const routes = [
           { path: "student-profile", element: <StudentProfile /> },
           { path: "test-question", element: <TestQuestion /> },
           { path: "book-appointment", element: <Booking /> },
+          // { path: "appointment", element: <Appointment /> },
           { path: "appointment-record", element: <AppointmentRecord /> },
           { path: "test-record", element: <TestRecord /> },
           { path: "test-results", element: <TestResult /> },
@@ -80,14 +81,27 @@ export const routes = [
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={["psychologist"]}>
+          <PrivateRoute allowedRoles={["psychologist", "manager"]}>
             <Outlet />
           </PrivateRoute>
         ),
         children: [
+<<<<<<< HEAD
+          // { path: "appointment", element: <Appointment /> },
+=======
+>>>>>>> 1986374d8444a60409aeb490ee038668741390fa
           { path: "patient-record", element: <PatientRecord /> },
           { path: "create-test", element: <CreateTest /> },
         ],
+      },
+      {
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["psychologist", "manager", "student"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [{ path: "appointment", element: <Appointment /> }],
       },
       {
         path: "",

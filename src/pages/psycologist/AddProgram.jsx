@@ -8,84 +8,104 @@ import {
   Card,
   message,
   Switch,
-  Spin,
+  Space,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useProgramStore } from "../../stores/programStore";
 import { useState, useEffect } from "react";
 import { useUserStore } from "../../stores/userStore";
 import { useAppointmentStore } from "../../stores/appointmentStore";
-import { useAuthStore } from "../../stores/authStore";
-import { filterUsersByRole, formatAppointmentDate } from "../../utils/Helper";
+import { usePsychologistStore } from "../../stores/psychologistStore";
 
 const { TextArea } = Input;
 const { Option } = Select;
 
-const TAGS = [
-  { label: "Anxiety", value: "Anxiety" },
-  { label: "Mindfulness", value: "Mindfulness" },
-  { label: "Stress", value: "Stress" },
-];
+// const TAGS = [
+//   { label: "Anxiety", value: "TAGS067" },
+//   { label: "Mindfulness", value: "Mindfulness" },
+//   { label: "Stress", value: "Stress" },
+// ];
 
 const AddProgram = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [isOnline, setIsOnline] = useState(false);
-  const [psychologists, setPsychologists] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingData, setIsFetchingData] = useState(false);
   const { getAllUsers } = useUserStore();
-  const { createProgram } = useProgramStore();
-  const { GetAllDepartments } = useAppointmentStore();
+  const { createProgram, fetchTags, tags } = useProgramStore();
+  const { fetchDepartments } = useAppointmentStore();
   const [departments, setDepartments] = useState([]);
-  const { user } = useAuthStore();
+  const { fetchPsychologists } = usePsychologistStore();
+  const [psychologists, setPsychologists] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsFetchingData(true);
       try {
-        //Get and Filter Users With Role Is Psych
-        const users = await getAllUsers();
-        const psychologists = filterUsersByRole(users, "psychologist");
-        const filteredPsychologists = psychologists.map((user) => ({
-          label: user.fullName,
-          value: user.psychologistId,
-        }));
-        setPsychologists(filteredPsychologists);
-
-        //Get Departments
-        const departmentList = await GetAllDepartments();
-
-        setDepartments(
-          departmentList.map((department) => ({
-            id: department.departmentId,
-            name: department.departmentName,
-          }))
-        );
-        form.resetFields();
+        await fetchTags();
       } catch (error) {
-        console.error("Failed to fetch data:", error);
-        message.error("Failed to load data");
-      } finally {
-        setIsFetchingData(false);
+        console.error("Failed to fetch tags:", error);
+        message.error("Failed to load tags");
+      }
+    };
+    fetchData();
+  }, [fetchTags]);
+
+  useEffect(() => {
+    const loadPsychologists = async () => {
+      try {
+        const data = await fetchPsychologists();
+        const psychologistOptions = data.map((psy) => ({
+          label: psy.info.fullName,
+          value: psy.psychologistId,
+          // department: psy.departmentName,
+        }));
+        setPsychologists(psychologistOptions);
+      } catch (error) {
+        console.error("Failed to fetch psychologists:", error);
+        message.error("Failed to load psychologists");
       }
     };
 
-    fetchData();
-  }, []);
+    loadPsychologists();
+  }, [fetchPsychologists]);
+
+  useEffect(() => {
+    const loadDepartments = async () => {
+      try {
+        const departmentsData = await fetchDepartments();
+        setDepartments(departmentsData);
+      } catch (error) {
+        console.error("Failed to fetch departments:", error);
+        message.error("Failed to load departments");
+      }
+    };
+
+    loadDepartments();
+  }, [fetchDepartments]);
 
   const onFinish = async (values) => {
     setIsLoading(true);
     try {
       const newProgram = {
-        ...values,
-        userId: user.userId,
+        userId: "US001",
         name: values.title,
+        description: values.description,
+        numberParticipants: parseInt(values.numberParticipants),
+        duration: parseInt(values.duration),
+        startDate: values.startDate.format("YYYY-MM-DD"),
         status: "Active",
-        type: values.type || "Offline",
-        startDate: formatAppointmentDate(values.startDate),
+        tags: values.tags,
+        facilitatorId: values.facilitatorId,
+        departmentId: values.departmentId,
+        type: values.type,
+        meetingLink: values.type === "Online" ? values.meetingLink : null,
       };
 
+      // Log the data being sent
+      console.log("Form data being sent:", newProgram);
+
+      await createProgram(newProgram);
       console.log("====================================");
       console.log(newProgram);
       console.log("====================================");
@@ -94,12 +114,17 @@ const AddProgram = () => {
       message.success("Program created successfully!");
       navigate("/program");
     } catch (error) {
-      message.error("Failed to create program");
-      console.log(error);
+      console.error("Creation error:", error);
+      message.error(
+        "Failed to create program: " +
+          (error.response?.data?.message || error.message || "Unknown error")
+      );
     } finally {
       setIsLoading(false);
     }
   };
+
+  // const departments = ["Mental Health", "Support Group"];
 
   return (
     <div className="bg-gradient-to-b from-blue-50 to-white pt-24 pb-28 px-4 sm:px-6 lg:px-8">
@@ -125,7 +150,8 @@ const AddProgram = () => {
               form={form}
               layout="vertical"
               onFinish={onFinish}
-              className="space-y-6">
+              className="space-y-6"
+            >
               {/* Program Basic Information Section */}
               <div className="bg-gray-50 p-6 rounded-lg mb-8">
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">
@@ -140,7 +166,8 @@ const AddProgram = () => {
                   }
                   rules={[
                     { required: true, message: "Please enter program title" },
-                  ]}>
+                  ]}
+                >
                   <Input
                     placeholder="Enter program title"
                     className="rounded-lg h-11"
@@ -159,7 +186,8 @@ const AddProgram = () => {
                       required: true,
                       message: "Please enter program description",
                     },
-                  ]}>
+                  ]}
+                >
                   <TextArea
                     rows={4}
                     placeholder="Enter program description"
@@ -177,11 +205,22 @@ const AddProgram = () => {
                     }
                     rules={[
                       { required: true, message: "Please select a department" },
-                    ]}>
-                    <Select placeholder="Select program department">
-                      {departments.map((department) => (
-                        <Option key={department.id} value={department.id}>
-                          {department.name}
+                    ]}
+                  >
+                    {/* <Select placeholder="Select program department">
+                    {departments.map((department) => (
+                      <Option key={department} value={department}>
+                        {department} */}
+                    <Select
+                      placeholder="Select program department"
+                      loading={isLoading}
+                    >
+                      {departments.map((dept) => (
+                        <Option
+                          key={dept.departmentId}
+                          value={dept.departmentId}
+                        >
+                          {dept.departmentName}
                         </Option>
                       ))}
                     </Select>
@@ -197,11 +236,14 @@ const AddProgram = () => {
                         required: true,
                         message: "Please add at least one tag",
                       },
-                    ]}>
+                    ]}
+                  >
                     <Select
                       mode="multiple"
                       placeholder="Select relevant tags"
-                      options={TAGS}
+                      // options={TAGS}
+                      options={tags}
+                      loading={isLoading}
                     />
                   </Form.Item>
                 </div>
@@ -222,7 +264,8 @@ const AddProgram = () => {
                     }
                     rules={[
                       { required: true, message: "Please select start date" },
-                    ]}>
+                    ]}
+                  >
                     <DatePicker
                       style={{ width: "100%" }}
                       className="rounded-lg"
@@ -245,7 +288,8 @@ const AddProgram = () => {
                         type: "number",
                         message: "Please enter a valid number",
                       },
-                    ]}>
+                    ]}
+                  >
                     <InputNumber
                       min={1}
                       max={52}
@@ -270,7 +314,8 @@ const AddProgram = () => {
                         type: "number",
                         message: "Please enter a valid number",
                       },
-                    ]}>
+                    ]}
+                  >
                     <InputNumber
                       min={1}
                       max={100}
@@ -292,12 +337,21 @@ const AddProgram = () => {
                         required: true,
                         message: "Please select a facilitator",
                       },
-                    ]}>
+                    ]}
+                  >
                     <Select
                       placeholder="Select facilitator"
                       options={psychologists}
                       className="rounded-lg"
-                      loading={isFetchingData}
+                      loading={isLoading}
+                      optionRender={(option) => (
+                        <Space>
+                          <span>{option.data.label}</span>
+                          <span className="text-gray-400">
+                            {/* ({option.data.department}) */}
+                          </span>
+                        </Space>
+                      )}
                     />
                   </Form.Item>
                 </div>
@@ -315,7 +369,8 @@ const AddProgram = () => {
                       <span className="text-gray-700 font-medium">
                         Program Type
                       </span>
-                    }>
+                    }
+                  >
                     <div className="flex items-center space-x-3">
                       <Switch
                         checked={isOnline}
@@ -351,7 +406,8 @@ const AddProgram = () => {
                           message: "Please enter meeting link",
                         },
                         { type: "url", message: "Please enter a valid URL" },
-                      ]}>
+                      ]}
+                    >
                       <Input
                         placeholder="https://example.com/meeting"
                         className="rounded-lg h-11"
@@ -365,14 +421,16 @@ const AddProgram = () => {
                 <Button
                   onClick={() => form.resetFields()}
                   className="h-11 px-6 rounded-lg hover:bg-gray-100"
-                  disabled={isLoading}>
+                  disabled={isLoading}
+                >
                   Cancel
                 </Button>
                 <Button
                   type="primary"
                   htmlType="submit"
                   loading={isLoading}
-                  className="h-11 px-8 rounded-lg bg-primary-green hover:bg-primary-green/90 text-white font-medium">
+                  className="h-11 px-8 rounded-lg bg-primary-green hover:bg-primary-green/90 text-white font-medium"
+                >
                   Create Program
                 </Button>
               </div>

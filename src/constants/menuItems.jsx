@@ -65,7 +65,7 @@ export const menuItems = [
     label: "Appointment",
     path: "/appointment",
     special: true,
-    roles: ["psychologist"],
+    roles: ["psychologist", "student", "manager"],
   },
 ];
 
