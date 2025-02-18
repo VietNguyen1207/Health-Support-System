@@ -84,4 +84,21 @@ export const useAppointmentStore = create((set) => ({
       throw new Error(errorMessage);
     }
   },
+
+  //Get Department List
+  GetAllDepartments: async () => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.get(
+        APPOINTMENT_URL + APPOINTMENT_ENDPOINT.GET_ALL_DEPARTMENT
+      );
+
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch department list";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
 }));
