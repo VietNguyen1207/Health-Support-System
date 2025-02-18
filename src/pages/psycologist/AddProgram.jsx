@@ -17,11 +17,11 @@ import { useUserStore } from "../../stores/userStore";
 const { TextArea } = Input;
 const { Option } = Select;
 
-const TAGS = [
-  { label: "Anxiety", value: "Anxiety" },
-  { label: "Mindfulness", value: "Mindfulness" },
-  { label: "Stress", value: "Stress" },
-];
+// const TAGS = [
+//   { label: "Anxiety", value: "TAGS067" },
+//   { label: "Mindfulness", value: "Mindfulness" },
+//   { label: "Stress", value: "Stress" },
+// ];
 
 const AddProgram = () => {
   const [form] = Form.useForm();
@@ -31,7 +31,19 @@ const AddProgram = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingUsers, setIsFetchingUsers] = useState(false);
   const { getAllUsers } = useUserStore();
-  const { createProgram } = useProgramStore();
+  const { createProgram, fetchTags, tags } = useProgramStore();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await fetchTags();
+      } catch (error) {
+        console.error("Failed to fetch tags:", error);
+        message.error("Failed to load tags");
+      }
+    };
+    fetchData();
+  }, [fetchTags]);
 
   useEffect(() => {
     const fetchPsychologists = async () => {
@@ -61,17 +73,23 @@ const AddProgram = () => {
     try {
       const newProgram = {
         ...values,
-        startDate: new Date(values.startDate),
+        // startDate: new Date(values.startDate),
+
+        // change date format
+        startDate: values.startDate.toISOString(),
       };
 
-      // await createProgram(newProgram);
+      await createProgram(newProgram);
       console.log("====================================");
       console.log(newProgram);
       console.log("====================================");
       message.success("Program created successfully!");
       navigate("/program");
     } catch (error) {
-      message.error("Failed to create program: " + error.message);
+      console.error("Error creating program:", error);
+      message.error(
+        "Failed to create program: " + (error.message || "Unknown error")
+      );
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +115,8 @@ const AddProgram = () => {
             form={form}
             layout="vertical"
             onFinish={onFinish}
-            className="space-y-6">
+            className="space-y-6"
+          >
             {/* Program Basic Information Section */}
             <div className="bg-gray-50 p-6 rounded-lg mb-8">
               <h2 className="text-xl font-semibold text-gray-700 mb-4">
@@ -112,7 +131,8 @@ const AddProgram = () => {
                 }
                 rules={[
                   { required: true, message: "Please enter program title" },
-                ]}>
+                ]}
+              >
                 <Input
                   placeholder="Enter program title"
                   className="rounded-lg h-11"
@@ -129,7 +149,8 @@ const AddProgram = () => {
                     required: true,
                     message: "Please enter program description",
                   },
-                ]}>
+                ]}
+              >
                 <TextArea
                   rows={4}
                   placeholder="Enter program description"
@@ -147,7 +168,8 @@ const AddProgram = () => {
                   }
                   rules={[
                     { required: true, message: "Please select a department" },
-                  ]}>
+                  ]}
+                >
                   <Select placeholder="Select program department">
                     {departments.map((department) => (
                       <Option key={department} value={department}>
@@ -164,11 +186,14 @@ const AddProgram = () => {
                   }
                   rules={[
                     { required: true, message: "Please add at least one tag" },
-                  ]}>
+                  ]}
+                >
                   <Select
                     mode="multiple"
                     placeholder="Select relevant tags"
-                    options={TAGS}
+                    // options={TAGS}
+                    options={tags}
+                    loading={isLoading}
                   />
                 </Form.Item>
               </div>
@@ -189,7 +214,8 @@ const AddProgram = () => {
                   }
                   rules={[
                     { required: true, message: "Please select start date" },
-                  ]}>
+                  ]}
+                >
                   <DatePicker
                     style={{ width: "100%" }}
                     className="rounded-lg"
@@ -207,7 +233,8 @@ const AddProgram = () => {
                   rules={[
                     { required: true, message: "Please enter duration" },
                     { type: "number", message: "Please enter a valid number" },
-                  ]}>
+                  ]}
+                >
                   <InputNumber
                     min={1}
                     max={52}
@@ -229,7 +256,8 @@ const AddProgram = () => {
                   rules={[
                     { required: true, message: "Please enter capacity" },
                     { type: "number", message: "Please enter a valid number" },
-                  ]}>
+                  ]}
+                >
                   <InputNumber
                     min={1}
                     max={100}
@@ -251,7 +279,8 @@ const AddProgram = () => {
                       required: true,
                       message: "Please select a facilitator",
                     },
-                  ]}>
+                  ]}
+                >
                   <Select
                     placeholder="Select facilitator"
                     options={psychologists}
@@ -277,7 +306,8 @@ const AddProgram = () => {
                   }
                   rules={[
                     { required: true, message: "Please select program type" },
-                  ]}>
+                  ]}
+                >
                   <div className="flex items-center space-x-3">
                     <Switch
                       checked={isOnline}
@@ -313,7 +343,8 @@ const AddProgram = () => {
                         message: "Please enter meeting link",
                       },
                       { type: "url", message: "Please enter a valid URL" },
-                    ]}>
+                    ]}
+                  >
                     <Input
                       placeholder="https://example.com/meeting"
                       className="rounded-lg h-11"
@@ -327,14 +358,16 @@ const AddProgram = () => {
               <Button
                 onClick={() => navigate("/program")}
                 className="h-11 px-6 rounded-lg hover:bg-gray-100"
-                disabled={isLoading}>
+                disabled={isLoading}
+              >
                 Cancel
               </Button>
               <Button
                 type="primary"
                 htmlType="submit"
                 loading={isLoading}
-                className="h-11 px-8 rounded-lg bg-primary-green hover:bg-primary-green/90 text-white font-medium">
+                className="h-11 px-8 rounded-lg bg-primary-green hover:bg-primary-green/90 text-white font-medium"
+              >
                 Create Program
               </Button>
             </div>

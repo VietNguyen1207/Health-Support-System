@@ -322,8 +322,18 @@ const Program = () => {
                   </div>
                 </div>
 
-                {/* Facilitator */}
+                {/* Facilitator and Department */}
                 <div className="mt-6 pt-4 border-t border-gray-100">
+                  <p className="text-sm text-gray-600">
+                    Facilitator: {program.facilitatorName}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Department: {program.departmentName}
+                  </p>
+                </div>
+
+                {/* Type Badge */}
+                <div className="mt-2">
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
                       program.type === "Online"
