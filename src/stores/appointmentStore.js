@@ -3,6 +3,7 @@ import { api } from "./apiConfig";
 
 const initialState = {
   appointments: [],
+  departments: [],
   loading: false,
   error: null,
 };
@@ -11,10 +12,32 @@ const APPOINTMENT_URL = "/appointments";
 
 const APPOINTMENT_ENDPOINT = {
   CREATE: "/book",
+  DEPARTMENTS: "/departments",
 };
 
 export const useAppointmentStore = create((set) => ({
   ...initialState,
+
+  // Fetch Departments
+  fetchDepartments: async () => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.get(
+        `${APPOINTMENT_URL}${APPOINTMENT_ENDPOINT.DEPARTMENTS}`
+      );
+      set({
+        departments: data,
+        loading: false,
+      });
+      return data;
+    } catch (error) {
+      console.error("Department fetch error:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch departments";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
 
   //Get TimeSlots
   GetTimeSlots: async (id, date) => {

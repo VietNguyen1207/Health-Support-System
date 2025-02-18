@@ -8,11 +8,14 @@ import {
   Card,
   message,
   Switch,
+  Space,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useProgramStore } from "../../stores/programStore";
 import { useState, useEffect } from "react";
 import { useUserStore } from "../../stores/userStore";
+import { useAppointmentStore } from "../../stores/appointmentStore";
+import { usePsychologistStore } from "../../stores/psychologistStore";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -27,11 +30,14 @@ const AddProgram = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [isOnline, setIsOnline] = useState(false);
-  const [psychologists, setPsychologists] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingUsers, setIsFetchingUsers] = useState(false);
   const { getAllUsers } = useUserStore();
   const { createProgram, fetchTags, tags } = useProgramStore();
+  const { fetchDepartments } = useAppointmentStore();
+  const [departments, setDepartments] = useState([]);
+  const { fetchPsychologists } = usePsychologistStore();
+  const [psychologists, setPsychologists] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,38 +52,58 @@ const AddProgram = () => {
   }, [fetchTags]);
 
   useEffect(() => {
-    const fetchPsychologists = async () => {
-      setIsFetchingUsers(true);
+    const loadPsychologists = async () => {
       try {
-        const users = await getAllUsers();
-        const filteredPsychologists = users
-          .filter((user) => user.role.toLowerCase() === "psychologist")
-          .map((user) => ({
-            label: user.fullName,
-            value: user.userId,
-          }));
-        setPsychologists(filteredPsychologists);
+        const data = await fetchPsychologists();
+        const psychologistOptions = data.map((psy) => ({
+          label: psy.info.fullName,
+          value: psy.psychologistId,
+          // department: psy.departmentName,
+        }));
+        setPsychologists(psychologistOptions);
       } catch (error) {
         console.error("Failed to fetch psychologists:", error);
         message.error("Failed to load psychologists");
-      } finally {
-        setIsFetchingUsers(false);
       }
     };
 
-    fetchPsychologists();
-  }, [getAllUsers]);
+    loadPsychologists();
+  }, [fetchPsychologists]);
+
+  useEffect(() => {
+    const loadDepartments = async () => {
+      try {
+        const departmentsData = await fetchDepartments();
+        setDepartments(departmentsData);
+      } catch (error) {
+        console.error("Failed to fetch departments:", error);
+        message.error("Failed to load departments");
+      }
+    };
+
+    loadDepartments();
+  }, [fetchDepartments]);
 
   const onFinish = async (values) => {
     setIsLoading(true);
     try {
       const newProgram = {
-        ...values,
-        // startDate: new Date(values.startDate),
-
-        // change date format
-        startDate: values.startDate.toISOString(),
+        userId: "US001",
+        name: values.title,
+        description: values.description,
+        numberParticipants: parseInt(values.numberParticipants),
+        duration: parseInt(values.duration),
+        startDate: values.startDate.format("YYYY-MM-DD"),
+        status: "Active",
+        tags: values.tags,
+        facilitatorId: values.facilitatorId,
+        departmentId: values.departmentId,
+        type: values.type,
+        meetingLink: values.type === "Online" ? values.meetingLink : null,
       };
+
+      // Log the data being sent
+      console.log("Form data being sent:", newProgram);
 
       await createProgram(newProgram);
       console.log("====================================");
@@ -86,16 +112,17 @@ const AddProgram = () => {
       message.success("Program created successfully!");
       navigate("/program");
     } catch (error) {
-      console.error("Error creating program:", error);
+      console.error("Creation error:", error);
       message.error(
-        "Failed to create program: " + (error.message || "Unknown error")
+        "Failed to create program: " +
+          (error.response?.data?.message || error.message || "Unknown error")
       );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const departments = ["Mental Health", "Support Group"];
+  // const departments = ["Mental Health", "Support Group"];
 
   return (
     <div className="bg-gradient-to-b from-blue-50 to-white pt-24 pb-28 px-4 sm:px-6 lg:px-8">
@@ -160,7 +187,7 @@ const AddProgram = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Form.Item
-                  name="department"
+                  name="departmentId"
                   label={
                     <span className="text-gray-700 font-medium">
                       Department
@@ -170,10 +197,17 @@ const AddProgram = () => {
                     { required: true, message: "Please select a department" },
                   ]}
                 >
-                  <Select placeholder="Select program department">
+                  {/* <Select placeholder="Select program department">
                     {departments.map((department) => (
                       <Option key={department} value={department}>
-                        {department}
+                        {department} */}
+                  <Select
+                    placeholder="Select program department"
+                    loading={isLoading}
+                  >
+                    {departments.map((dept) => (
+                      <Option key={dept.departmentId} value={dept.departmentId}>
+                        {dept.departmentName}
                       </Option>
                     ))}
                   </Select>
@@ -268,7 +302,7 @@ const AddProgram = () => {
                 </Form.Item>
 
                 <Form.Item
-                  name="managedByStaffID"
+                  name="facilitatorId"
                   label={
                     <span className="text-gray-700 font-medium">
                       Facilitator
@@ -285,7 +319,15 @@ const AddProgram = () => {
                     placeholder="Select facilitator"
                     options={psychologists}
                     className="rounded-lg"
-                    loading={isFetchingUsers}
+                    loading={isLoading}
+                    optionRender={(option) => (
+                      <Space>
+                        <span>{option.data.label}</span>
+                        <span className="text-gray-400">
+                          {/* ({option.data.department}) */}
+                        </span>
+                      </Space>
+                    )}
                   />
                 </Form.Item>
               </div>
