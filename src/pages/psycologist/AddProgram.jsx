@@ -9,13 +9,14 @@ import {
   message,
   Switch,
   Space,
+  Spin,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useProgramStore } from "../../stores/programStore";
 import { useState, useEffect } from "react";
-import { useUserStore } from "../../stores/userStore";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 import { usePsychologistStore } from "../../stores/psychologistStore";
+import { useAuthStore } from "../../stores/authStore";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -32,7 +33,7 @@ const AddProgram = () => {
   const [isOnline, setIsOnline] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingData, setIsFetchingData] = useState(false);
-  const { getAllUsers } = useUserStore();
+  const { user } = useAuthStore();
   const { createProgram, fetchTags, tags } = useProgramStore();
   const { fetchDepartments } = useAppointmentStore();
   const [departments, setDepartments] = useState([]);
@@ -41,18 +42,19 @@ const AddProgram = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsFetchingData(true);
       try {
         await fetchTags();
       } catch (error) {
         console.error("Failed to fetch tags:", error);
         message.error("Failed to load tags");
+      } finally {
+        setIsFetchingData(false);
       }
     };
-    fetchData();
-  }, [fetchTags]);
 
-  useEffect(() => {
     const loadPsychologists = async () => {
+      setIsFetchingData(true);
       try {
         const data = await fetchPsychologists();
         const psychologistOptions = data.map((psy) => ({
@@ -64,31 +66,34 @@ const AddProgram = () => {
       } catch (error) {
         console.error("Failed to fetch psychologists:", error);
         message.error("Failed to load psychologists");
+      } finally {
+        setIsFetchingData(false);
       }
     };
 
-    loadPsychologists();
-  }, [fetchPsychologists]);
-
-  useEffect(() => {
     const loadDepartments = async () => {
+      setIsFetchingData(true);
       try {
         const departmentsData = await fetchDepartments();
         setDepartments(departmentsData);
       } catch (error) {
         console.error("Failed to fetch departments:", error);
         message.error("Failed to load departments");
+      } finally {
+        setIsFetchingData(false);
       }
     };
 
     loadDepartments();
-  }, [fetchDepartments]);
+    loadPsychologists();
+    fetchData();
+  }, []);
 
   const onFinish = async (values) => {
     setIsLoading(true);
     try {
       const newProgram = {
-        userId: "US001",
+        userId: user?.userId,
         name: values.title,
         description: values.description,
         numberParticipants: parseInt(values.numberParticipants),
@@ -98,17 +103,12 @@ const AddProgram = () => {
         tags: values.tags,
         facilitatorId: values.facilitatorId,
         departmentId: values.departmentId,
-        type: values.type,
-        meetingLink: values.type === "Online" ? values.meetingLink : null,
+        type: isOnline ? "Online" : "Offline",
+        meetingLink: isOnline ? values.meetingLink : null,
       };
 
       // Log the data being sent
       console.log("Form data being sent:", newProgram);
-
-      // await createProgram(newProgram);
-      // console.log("====================================");
-      // console.log(newProgram);
-      // console.log("====================================");
 
       await createProgram(newProgram);
       message.success("Program created successfully!");
@@ -123,8 +123,6 @@ const AddProgram = () => {
       setIsLoading(false);
     }
   };
-
-  // const departments = ["Mental Health", "Support Group"];
 
   return (
     <div className="bg-gradient-to-b from-blue-50 to-white pt-24 pb-28 px-4 sm:px-6 lg:px-8">
@@ -150,8 +148,7 @@ const AddProgram = () => {
               form={form}
               layout="vertical"
               onFinish={onFinish}
-              className="space-y-6"
-            >
+              className="space-y-6">
               {/* Program Basic Information Section */}
               <div className="bg-gray-50 p-6 rounded-lg mb-8">
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">
@@ -166,8 +163,7 @@ const AddProgram = () => {
                   }
                   rules={[
                     { required: true, message: "Please enter program title" },
-                  ]}
-                >
+                  ]}>
                   <Input
                     placeholder="Enter program title"
                     className="rounded-lg h-11"
@@ -186,8 +182,7 @@ const AddProgram = () => {
                       required: true,
                       message: "Please enter program description",
                     },
-                  ]}
-                >
+                  ]}>
                   <TextArea
                     rows={4}
                     placeholder="Enter program description"
@@ -205,21 +200,18 @@ const AddProgram = () => {
                     }
                     rules={[
                       { required: true, message: "Please select a department" },
-                    ]}
-                  >
+                    ]}>
                     {/* <Select placeholder="Select program department">
                     {departments.map((department) => (
                       <Option key={department} value={department}>
                         {department} */}
                     <Select
                       placeholder="Select program department"
-                      loading={isLoading}
-                    >
+                      loading={isLoading}>
                       {departments.map((dept) => (
                         <Option
                           key={dept.departmentId}
-                          value={dept.departmentId}
-                        >
+                          value={dept.departmentId}>
                           {dept.departmentName}
                         </Option>
                       ))}
@@ -236,8 +228,7 @@ const AddProgram = () => {
                         required: true,
                         message: "Please add at least one tag",
                       },
-                    ]}
-                  >
+                    ]}>
                     <Select
                       mode="multiple"
                       placeholder="Select relevant tags"
@@ -264,8 +255,7 @@ const AddProgram = () => {
                     }
                     rules={[
                       { required: true, message: "Please select start date" },
-                    ]}
-                  >
+                    ]}>
                     <DatePicker
                       style={{ width: "100%" }}
                       className="rounded-lg"
@@ -288,8 +278,7 @@ const AddProgram = () => {
                         type: "number",
                         message: "Please enter a valid number",
                       },
-                    ]}
-                  >
+                    ]}>
                     <InputNumber
                       min={1}
                       max={52}
@@ -314,8 +303,7 @@ const AddProgram = () => {
                         type: "number",
                         message: "Please enter a valid number",
                       },
-                    ]}
-                  >
+                    ]}>
                     <InputNumber
                       min={1}
                       max={100}
@@ -337,8 +325,7 @@ const AddProgram = () => {
                         required: true,
                         message: "Please select a facilitator",
                       },
-                    ]}
-                  >
+                    ]}>
                     <Select
                       placeholder="Select facilitator"
                       options={psychologists}
@@ -369,8 +356,7 @@ const AddProgram = () => {
                       <span className="text-gray-700 font-medium">
                         Program Type
                       </span>
-                    }
-                  >
+                    }>
                     <div className="flex items-center space-x-3">
                       <Switch
                         checked={isOnline}
@@ -406,8 +392,7 @@ const AddProgram = () => {
                           message: "Please enter meeting link",
                         },
                         { type: "url", message: "Please enter a valid URL" },
-                      ]}
-                    >
+                      ]}>
                       <Input
                         placeholder="https://example.com/meeting"
                         className="rounded-lg h-11"
@@ -421,16 +406,14 @@ const AddProgram = () => {
                 <Button
                   onClick={() => form.resetFields()}
                   className="h-11 px-6 rounded-lg hover:bg-gray-100"
-                  disabled={isLoading}
-                >
+                  disabled={isLoading}>
                   Cancel
                 </Button>
                 <Button
                   type="primary"
                   htmlType="submit"
                   loading={isLoading}
-                  className="h-11 px-8 rounded-lg bg-primary-green hover:bg-primary-green/90 text-white font-medium"
-                >
+                  className="h-11 px-8 rounded-lg bg-primary-green hover:bg-primary-green/90 text-white font-medium">
                   Create Program
                 </Button>
               </div>

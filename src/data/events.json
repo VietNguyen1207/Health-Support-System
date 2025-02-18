@@ -1,0 +1,26 @@
+{
+  "events": [
+    {
+      "2025-02-18": {
+        "appointments": [
+          {
+            "appointmentId": "APP001",
+            "timeSlot": "8:30:00",
+            "studentResponse": {
+              "studentId": "S001",
+              "fullName": "a"
+            }
+          }
+        ],
+        "programs": [
+          {
+            "programId": "PRG001",
+            "timeSlot": "8:30:00",
+            "startDate": "2025-02-15",
+            "duration": 4
+          }
+        ]
+      }
+    }
+  ]
+}

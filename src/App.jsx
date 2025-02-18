@@ -17,6 +17,14 @@ function App() {
             colorPrimary: "#4a7c59",
             marginXL: 50,
           },
+          Calendar: {
+            itemActiveBg: "#e8f5e9",
+          },
+          Tag: {
+            margin: 0,
+            paddingContentHorizontal: 0,
+            paddingContentVertical: 0,
+          },
         },
       }}>
       <ScrollToTop />
