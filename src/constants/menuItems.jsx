@@ -1,4 +1,5 @@
 import {
+  CalendarOutlined,
   FileDoneOutlined,
   HistoryOutlined,
   PoweroffOutlined,
@@ -69,6 +70,12 @@ export const menuItems = [
 ];
 
 export const dropdownMenu = [
+  {
+    label: "Schedule",
+    key: "/appointment",
+    icon: <CalendarOutlined />,
+    roles: ["student", "manager"],
+  },
   {
     label: "Student Profile",
     key: "/student-profile",

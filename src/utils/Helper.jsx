@@ -98,26 +98,23 @@ export const filterDropdownItemsByRole = (items, role) => {
 
 // Filter Users By Role
 export const filterUsersByRole = (arr, role) => {
-  return arr.filter(
+  const psychologists = arr.filter(
     (user) =>
       !user.role || (role && user.role.toLowerCase() === role.toLowerCase())
   );
+
+  return mergeNestedObject(psychologists, "psychologistInfo");
 };
 
 export const getPsychologistSpecializations = (users) => {
   // Lọc users có role là psychologist
   const psychologists = filterUsersByRole(users, "psychologist");
 
-  const mergedPsychologists = mergeNestedObject(
-    psychologists,
-    "psychologistInfo"
-  );
-
   // Tạo Set để lưu trữ các specialization duy nhất
   const specializationSet = new Set();
 
   // Lặp qua danh sách psychologists để lấy specialization
-  mergedPsychologists.forEach((psychologist) => {
+  psychologists.forEach((psychologist) => {
     specializationSet.add(psychologist.departmentName);
   });
 
@@ -131,11 +128,7 @@ export const getPsychologistsBySpecialization = (users, specialization) => {
   // Lọc users có role là psychologist
   const psychologists = filterUsersByRole(users, "psychologist");
 
-  const mergedPsychologists = mergeNestedObject(
-    psychologists,
-    "psychologistInfo"
-  );
-  return mergedPsychologists
+  return psychologists
     .filter(
       (psych) =>
         psych.departmentName &&

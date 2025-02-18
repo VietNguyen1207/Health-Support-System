@@ -266,7 +266,7 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
         </div>
       ) : availableSlots.length > 0 ? (
         <ConfigProvider theme={{ components: { Card: { bodyPadding: 5 } } }}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+          <div className="max-w-2/3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-4 gap-2 pr-8">
             {availableSlots.map((slot) => (
               <Card
                 key={slot.id}
@@ -291,7 +291,7 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
                     }));
                   }
                 }}>
-                <div className="text-center py-2">
+                <div className="text-center py-1">
                   {formatTimeDisplay(slot.startTime)}
                 </div>
               </Card>

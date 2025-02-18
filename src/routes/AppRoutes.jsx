@@ -86,7 +86,10 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [
+<<<<<<< HEAD
           // { path: "appointment", element: <Appointment /> },
+=======
+>>>>>>> 1986374d8444a60409aeb490ee038668741390fa
           { path: "patient-record", element: <PatientRecord /> },
           { path: "create-test", element: <CreateTest /> },
         ],
@@ -121,11 +124,14 @@ export const routes = [
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={["student", "psychologist"]}>
+          <PrivateRoute allowedRoles={["student", "psychologist", "manager"]}>
             <Outlet />
           </PrivateRoute>
         ),
-        children: [{ path: "test", element: <Test /> }],
+        children: [
+          { path: "test", element: <Test /> },
+          { path: "appointment", element: <Appointment /> },
+        ],
       },
       { path: "unauthorized", element: <Unauthorized /> },
     ],
