@@ -9,13 +9,14 @@ import {
   message,
   Switch,
   Space,
+  Spin,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useProgramStore } from "../../stores/programStore";
 import { useState, useEffect } from "react";
-import { useUserStore } from "../../stores/userStore";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 import { usePsychologistStore } from "../../stores/psychologistStore";
+import { useAuthStore } from "../../stores/authStore";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -41,18 +42,19 @@ const AddProgram = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsFetchingData(true);
       try {
         await fetchTags();
       } catch (error) {
         console.error("Failed to fetch tags:", error);
         message.error("Failed to load tags");
+      } finally {
+        setIsFetchingData(false);
       }
     };
-    fetchData();
-  }, [fetchTags]);
 
-  useEffect(() => {
     const loadPsychologists = async () => {
+      setIsFetchingData(true);
       try {
         const data = await fetchPsychologists();
         const psychologistOptions = data.map((psy) => ({
@@ -64,31 +66,34 @@ const AddProgram = () => {
       } catch (error) {
         console.error("Failed to fetch psychologists:", error);
         message.error("Failed to load psychologists");
+      } finally {
+        setIsFetchingData(false);
       }
     };
 
-    loadPsychologists();
-  }, [fetchPsychologists]);
-
-  useEffect(() => {
     const loadDepartments = async () => {
+      setIsFetchingData(true);
       try {
         const departmentsData = await fetchDepartments();
         setDepartments(departmentsData);
       } catch (error) {
         console.error("Failed to fetch departments:", error);
         message.error("Failed to load departments");
+      } finally {
+        setIsFetchingData(false);
       }
     };
 
     loadDepartments();
-  }, [fetchDepartments]);
+    loadPsychologists();
+    fetchData();
+  }, []);
 
   const onFinish = async (values) => {
     setIsLoading(true);
     try {
       const newProgram = {
-        userId: "US001",
+        userId: user?.userId,
         name: values.title,
         description: values.description,
         numberParticipants: parseInt(values.numberParticipants),
@@ -98,17 +103,12 @@ const AddProgram = () => {
         tags: values.tags,
         facilitatorId: values.facilitatorId,
         departmentId: values.departmentId,
-        type: values.type,
-        meetingLink: values.type === "Online" ? values.meetingLink : null,
+        type: isOnline ? "Online" : "Offline",
+        meetingLink: isOnline ? values.meetingLink : null,
       };
 
       // Log the data being sent
       console.log("Form data being sent:", newProgram);
-
-      // await createProgram(newProgram);
-      // console.log("====================================");
-      // console.log(newProgram);
-      // console.log("====================================");
 
       await createProgram(newProgram);
       message.success("Program created successfully!");
@@ -123,8 +123,6 @@ const AddProgram = () => {
       setIsLoading(false);
     }
   };
-
-  // const departments = ["Mental Health", "Support Group"];
 
   return (
     <div className="bg-gradient-to-b from-blue-50 to-white pt-24 pb-28 px-4 sm:px-6 lg:px-8">
@@ -241,7 +239,7 @@ const AddProgram = () => {
                     <Select
                       mode="multiple"
                       placeholder="Select relevant tags"
-                      // options={TAGS}
+                      maxCount={3}
                       options={tags}
                       loading={isLoading}
                     />
