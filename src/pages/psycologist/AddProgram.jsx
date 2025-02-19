@@ -32,7 +32,7 @@ const AddProgram = () => {
   const [isOnline, setIsOnline] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingData, setIsFetchingData] = useState(false);
-  const { getAllUsers } = useUserStore();
+  // const { getAllUsers } = useUserStore();
   const { createProgram, fetchTags, tags } = useProgramStore();
   const { fetchDepartments } = useAppointmentStore();
   const [departments, setDepartments] = useState([]);
