@@ -8,6 +8,7 @@ import {
   filterDropdownItemsByRole,
   filterMenuItemsByRole,
 } from "../utils/Helper";
+import NotificationBell from "./NotificationBell";
 
 const Header = () => {
   const location = useLocation();
@@ -134,6 +135,10 @@ const Header = () => {
                 </Link>
               </>
             )}
+
+            <div>
+                {user && <NotificationBell/> }
+            </div>
 
             <div className="nav-actions" id="authButtons">
               {checkAuthUI()}
