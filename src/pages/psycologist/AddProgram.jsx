@@ -232,7 +232,7 @@ const AddProgram = () => {
                     <Select
                       mode="multiple"
                       placeholder="Select relevant tags"
-                      // options={TAGS}
+                      maxCount={3}
                       options={tags}
                       loading={isLoading}
                     />
