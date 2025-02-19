@@ -3,7 +3,9 @@ import { api } from "./apiConfig";
 
 const initialState = {
   programs: [],
+  selectedProgram: null,
   loading: false,
+  loadingDetails: false,
   error: null,
 };
 
@@ -12,13 +14,29 @@ const PROGRAM_URL = "/programs";
 const PROGRAM_ENDPOINT = {
   CREATE: "/create",
   TAGS: "/tags",
+  DETAILS: (id) => `/${id}/details`,
 };
 
 export const useProgramStore = create((set) => ({
   ...initialState,
   tags: [],
 
-  //fetch tags
+  // fetch program details
+  fetchProgramDetails: async (programId) => {
+    set({ loadingDetails: true, error: null });
+    try {
+      const { data } = await api.get(`/programs/${programId}/details`);
+      set({ selectedProgram: data, loadingDetails: false });
+      return data;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch program details";
+      set({ error: errorMessage, loadingDetails: false });
+      throw new Error(errorMessage);
+    }
+  },
+
+  // fetch tags for adding new program
   fetchTags: async () => {
     set({ loading: true, error: null });
     try {
@@ -83,4 +101,6 @@ export const useProgramStore = create((set) => ({
       throw new Error(errorMessage);
     }
   },
+
+  clearSelectedProgram: () => set({ selectedProgram: null }),
 }));

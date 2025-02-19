@@ -33,7 +33,7 @@ const AddProgram = () => {
   const [isOnline, setIsOnline] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingData, setIsFetchingData] = useState(false);
-  const { user } = useAuthStore();
+  // const { getAllUsers } = useUserStore();
   const { createProgram, fetchTags, tags } = useProgramStore();
   const { fetchDepartments } = useAppointmentStore();
   const [departments, setDepartments] = useState([]);
@@ -148,7 +148,8 @@ const AddProgram = () => {
               form={form}
               layout="vertical"
               onFinish={onFinish}
-              className="space-y-6">
+              className="space-y-6"
+            >
               {/* Program Basic Information Section */}
               <div className="bg-gray-50 p-6 rounded-lg mb-8">
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">
@@ -163,7 +164,8 @@ const AddProgram = () => {
                   }
                   rules={[
                     { required: true, message: "Please enter program title" },
-                  ]}>
+                  ]}
+                >
                   <Input
                     placeholder="Enter program title"
                     className="rounded-lg h-11"
@@ -182,7 +184,8 @@ const AddProgram = () => {
                       required: true,
                       message: "Please enter program description",
                     },
-                  ]}>
+                  ]}
+                >
                   <TextArea
                     rows={4}
                     placeholder="Enter program description"
@@ -200,18 +203,21 @@ const AddProgram = () => {
                     }
                     rules={[
                       { required: true, message: "Please select a department" },
-                    ]}>
+                    ]}
+                  >
                     {/* <Select placeholder="Select program department">
                     {departments.map((department) => (
                       <Option key={department} value={department}>
                         {department} */}
                     <Select
                       placeholder="Select program department"
-                      loading={isLoading}>
+                      loading={isLoading}
+                    >
                       {departments.map((dept) => (
                         <Option
                           key={dept.departmentId}
-                          value={dept.departmentId}>
+                          value={dept.departmentId}
+                        >
                           {dept.departmentName}
                         </Option>
                       ))}
@@ -228,7 +234,8 @@ const AddProgram = () => {
                         required: true,
                         message: "Please add at least one tag",
                       },
-                    ]}>
+                    ]}
+                  >
                     <Select
                       mode="multiple"
                       placeholder="Select relevant tags"
@@ -255,7 +262,8 @@ const AddProgram = () => {
                     }
                     rules={[
                       { required: true, message: "Please select start date" },
-                    ]}>
+                    ]}
+                  >
                     <DatePicker
                       style={{ width: "100%" }}
                       className="rounded-lg"
@@ -278,7 +286,8 @@ const AddProgram = () => {
                         type: "number",
                         message: "Please enter a valid number",
                       },
-                    ]}>
+                    ]}
+                  >
                     <InputNumber
                       min={1}
                       max={52}
@@ -303,7 +312,8 @@ const AddProgram = () => {
                         type: "number",
                         message: "Please enter a valid number",
                       },
-                    ]}>
+                    ]}
+                  >
                     <InputNumber
                       min={1}
                       max={100}
@@ -325,7 +335,8 @@ const AddProgram = () => {
                         required: true,
                         message: "Please select a facilitator",
                       },
-                    ]}>
+                    ]}
+                  >
                     <Select
                       placeholder="Select facilitator"
                       options={psychologists}
@@ -356,7 +367,8 @@ const AddProgram = () => {
                       <span className="text-gray-700 font-medium">
                         Program Type
                       </span>
-                    }>
+                    }
+                  >
                     <div className="flex items-center space-x-3">
                       <Switch
                         checked={isOnline}
@@ -392,7 +404,8 @@ const AddProgram = () => {
                           message: "Please enter meeting link",
                         },
                         { type: "url", message: "Please enter a valid URL" },
-                      ]}>
+                      ]}
+                    >
                       <Input
                         placeholder="https://example.com/meeting"
                         className="rounded-lg h-11"
@@ -406,14 +419,16 @@ const AddProgram = () => {
                 <Button
                   onClick={() => form.resetFields()}
                   className="h-11 px-6 rounded-lg hover:bg-gray-100"
-                  disabled={isLoading}>
+                  disabled={isLoading}
+                >
                   Cancel
                 </Button>
                 <Button
                   type="primary"
                   htmlType="submit"
                   loading={isLoading}
-                  className="h-11 px-8 rounded-lg bg-primary-green hover:bg-primary-green/90 text-white font-medium">
+                  className="h-11 px-8 rounded-lg bg-primary-green hover:bg-primary-green/90 text-white font-medium"
+                >
                   Create Program
                 </Button>
               </div>

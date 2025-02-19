@@ -977,3 +977,47 @@ h3 {
   padding-bottom: 5rem;
   margin-top: 4rem;
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.program-details-modal {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.program-details-modal .ant-modal-content {
+  overflow: hidden;
+  border-radius: 12px;
+  transform: translateZ(0);
+}
+
+.program-details-modal .ant-modal-body {
+  padding: 24px;
+  overscroll-behavior: contain;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+.animate-pulse {
+  background: linear-gradient(to right, #f6f7f8 8%, #edeef1 18%, #f6f7f8 33%);
+  background-size: 800px 104px;
+  animation: shimmer 1.5s infinite linear;
+}
