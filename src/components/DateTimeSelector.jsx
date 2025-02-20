@@ -21,6 +21,7 @@ import {
   formatWeekDay,
 } from "../utils/Helper";
 import { useAppointmentStore } from "../stores/appointmentStore";
+import { months } from "../constants/calendar";
 const { Text } = Typography;
 
 const dates = [dayjs(), dayjs().add(1, "day"), dayjs().add(2, "day")];
@@ -112,21 +113,6 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
   };
 
   const headerRender = ({ value, onChange }) => {
-    const months = [
-      { label: "Jan", value: 0 },
-      { label: "Feb", value: 1 },
-      { label: "Mar", value: 2 },
-      { label: "Apr", value: 3 },
-      { label: "May", value: 4 },
-      { label: "Jun", value: 5 },
-      { label: "Jul", value: 6 },
-      { label: "Aug", value: 7 },
-      { label: "Sep", value: 8 },
-      { label: "Oct", value: 9 },
-      { label: "Nov", value: 10 },
-      { label: "Dec", value: 11 },
-    ];
-
     return (
       <div className="flex justify-end py-3">
         <Select
@@ -265,35 +251,51 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
       ) : availableSlots.length > 0 ? (
         <ConfigProvider theme={{ components: { Card: { bodyPadding: 5 } } }}>
           <div className="max-w-2/3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-4 gap-2 pr-8">
-            {availableSlots.map((slot) => (
-              <Card
-                key={slot.id}
-                disabled={!slot.isAvailable}
-                className={`
+            {availableSlots.map((slot) => {
+              const currentTime = dayjs();
+              const startTime = dayjs(slot.startTime, "HH:mm:ss");
+
+              const isSameDate =
+                dayjs(selectedDate)
+                  .startOf("day")
+                  .isSame(currentTime.startOf("day")) ||
+                (otherDate &&
+                  dayjs(otherDate)
+                    .startOf("day")
+                    .isSame(currentTime.startOf("day")));
+
+              const checkedTime = isSameDate && startTime.isBefore(currentTime);
+
+              return (
+                <Card
+                  key={slot.id}
+                  disabled={!slot.isAvailable}
+                  className={`
                   p-0 border-none transition-all select-none
                   ${
                     selectedTimeSlot === slot.id
                       ? "bg-[#5C8C6B] text-white"
-                      : slot.isAvailable
+                      : !checkedTime && slot.isAvailable
                       ? "bg-gray-100 hover:bg-gray-200 cursor-pointer"
                       : "cursor-not-allowed bg-gray-50 text-gray-300"
                   }
                 `}
-                onClick={() => {
-                  if (slot.isAvailable) {
-                    console.log(slot);
-                    setSelectedTimeSlot(slot.id);
-                    setFormData((prev) => ({
-                      ...prev,
-                      timeSlotId: slot.id,
-                    }));
-                  }
-                }}>
-                <div className="text-center py-1">
-                  {formatTimeDisplay(slot.startTime)}
-                </div>
-              </Card>
-            ))}
+                  onClick={() => {
+                    if (slot.isAvailable) {
+                      console.log(slot);
+                      setSelectedTimeSlot(slot.id);
+                      setFormData((prev) => ({
+                        ...prev,
+                        timeSlotId: slot.id,
+                      }));
+                    }
+                  }}>
+                  <div className="text-center py-1">
+                    {formatTimeDisplay(slot.startTime)}
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         </ConfigProvider>
       ) : (
