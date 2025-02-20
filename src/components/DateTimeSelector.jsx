@@ -105,8 +105,10 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
   };
 
   const onChange = (value) => {
-    setOtherDate(value);
-    handleDateSelection(value, "OtherDate");
+    if (!value.isBefore(dayjs())) {
+      setOtherDate(value);
+      handleDateSelection(value, "OtherDate");
+    }
   };
 
   const headerRender = ({ value, onChange }) => {
@@ -200,7 +202,7 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
                   onChange={onChange}
                   headerRender={headerRender}
                   disabledDate={(current) => {
-                    return current.isAfter(dayjs().subtract(1, "year"));
+                    return current.isBefore(dayjs());
                   }}
                 />
               </div>
