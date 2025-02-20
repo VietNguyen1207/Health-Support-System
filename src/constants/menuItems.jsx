@@ -1,5 +1,4 @@
 import {
-  CalendarOutlined,
   FileDoneOutlined,
   HistoryOutlined,
   PoweroffOutlined,
@@ -37,7 +36,7 @@ export const menuItems = [
     key: "test",
     label: "Survey",
     path: "/test",
-    roles: ["student", "psychologist"],
+    roles: ["student", "psychologist", "manager"],
     children: [
       {
         key: "/test",
@@ -49,7 +48,7 @@ export const menuItems = [
         key: "/create-test",
         label: "Create New Survey",
         path: "/create-test",
-        roles: ["psychologist"],
+        roles: ["psychologist", "manager"],
       },
     ],
   },
@@ -65,17 +64,11 @@ export const menuItems = [
     label: "Appointment",
     path: "/appointment",
     special: true,
-    roles: ["psychologist", "student", "manager"],
+    roles: ["psychologist"],
   },
 ];
 
 export const dropdownMenu = [
-  {
-    label: "Schedule",
-    key: "/appointment",
-    icon: <CalendarOutlined />,
-    roles: ["student", "manager"],
-  },
   {
     label: "Student Profile",
     key: "/student-profile",

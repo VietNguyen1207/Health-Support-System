@@ -1,10 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { Dropdown, Menu, ConfigProvider } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { CalendarFilled, UserOutlined } from "@ant-design/icons";
 import { dropdownMenu, menuItems } from "../constants/menuItems";
 import {
+  checkRole,
   filterDropdownItemsByRole,
   filterMenuItemsByRole,
 } from "../utils/Helper";
@@ -136,8 +137,20 @@ const Header = () => {
               </>
             )}
 
-            <div>
-                {user && <NotificationBell/> }
+            <div className="flex item-center gap-3">
+              {user && !checkRole(user.role, "psychologist") && (
+                <span className="h-full flex items-center justify-center">
+                  <div
+                    className={`rounded-full border-[10px] text-[12px] flex justify-center items-center cursor-pointer 
+                    transition-all duration-300`}
+                    onClick={() => {
+                      navigate("/appointment");
+                    }}>
+                    <CalendarFilled className="text-lg" />
+                  </div>
+                </span>
+              )}
+              {user && <NotificationBell />}
             </div>
 
             <div className="nav-actions" id="authButtons">

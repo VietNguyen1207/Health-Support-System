@@ -26,6 +26,10 @@ export function transformString(str) {
     .concat(String(str).slice(1).toLowerCase());
 }
 
+export function checkRole(currRole, role) {
+  return currRole.toLowerCase() === role.toLowerCase();
+}
+
 export function mergeNestedObject(arr, nestedKey) {
   return arr.map((object) => {
     // Destructure the nested object using the provided key

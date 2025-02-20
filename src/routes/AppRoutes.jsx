@@ -63,7 +63,7 @@ export const routes = [
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={["student"]}>
+          <PrivateRoute allowedRoles={["student", "manager"]}>
             <Outlet />
           </PrivateRoute>
         ),
@@ -103,7 +103,7 @@ export const routes = [
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={["parent"]}>
+          <PrivateRoute allowedRoles={["parent", "manager"]}>
             <Outlet />
           </PrivateRoute>
         ),
