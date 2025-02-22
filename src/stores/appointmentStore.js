@@ -11,8 +11,8 @@ const initialState = {
 const APPOINTMENT_URL = "/appointments/";
 
 const APPOINTMENT_ENDPOINT = {
-  CREATE: "/book",
-  DEPARTMENTS: "/departments",
+  CREATE: "book",
+  DEPARTMENTS: "departments",
   DETAILS: (id) => id,
 };
 

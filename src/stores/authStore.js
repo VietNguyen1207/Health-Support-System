@@ -33,19 +33,31 @@ export const useAuthStore = create(
             credentials
           );
 
-          const { userId, accessToken, refreshToken, role } = data;
+          const {
+            userId,
+            studentId,
+            fullName,
+            accessToken,
+            refreshToken,
+            role,
+          } = data;
 
           // Cập nhật state
           set({
-            user: { userId, role: String(role).toLowerCase() },
+            user: {
+              userId,
+              studentId,
+              fullName,
+              role: String(role).toLowerCase(),
+            },
             token: { accessToken, refreshToken },
             isAuthenticated: true,
           });
 
           // Set token cho axios - Fix header name to Authentication
-          api.defaults.headers.common[
-            "Authentication"
-          ] = `Bearer ${accessToken}`;
+          // api.defaults.headers.common[
+          //   "Authentication"
+          // ] = `Bearer ${accessToken}`;
           api.defaults.headers.common[
             "Authorization"
           ] = `Bearer ${accessToken}`;
@@ -65,7 +77,7 @@ export const useAuthStore = create(
           delete api.defaults.headers.common["Authorization"];
           await api.post(AUTH_URL + AUTH_ENDPOINT.LOGOUT);
 
-          delete api.defaults.headers.common["Authentication"];
+          // delete api.defaults.headers.common["Authentication"];
           // Reset state
           set(initialState);
         } catch (error) {
@@ -149,7 +161,7 @@ export const useAuthStore = create(
 // Add initialization of token from persisted state
 const token = useAuthStore.getState().token?.accessToken;
 if (token) {
-  api.defaults.headers.common["Authentication"] = `Bearer ${token}`;
+  // api.defaults.headers.common["Authentication"] = `Bearer ${token}`;
   api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 }
 
