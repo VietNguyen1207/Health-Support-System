@@ -52,12 +52,6 @@ function DetailCalendar({ events, visible, onClose }) {
     }
   };
 
-  const sortAppointmentsByTime = (appointments) => {
-    return appointments.sort(
-      (a, b) => new Date(a.startTime) - new Date(b.startTime)
-    );
-  };
-
   useEffect(() => {
     const fetchFormattedItem = async () => {
       try {
@@ -65,15 +59,15 @@ function DetailCalendar({ events, visible, onClose }) {
         const appointments = events?.appointment || [];
         const programs = events?.program || [];
 
-        const sortedAppointments = sortAppointmentsByTime(appointments);
-
         const formatAppt = await Promise.all(
-          sortedAppointments.map(async (appt) => {
+          appointments.map(async (appt) => {
             const data = await formattedAppointment(appt.appointmentID);
             if (data)
               return {
                 key: data.appointmentID,
-                label: `${appt.startTime} - ${appt.psychologistName}`,
+                label: `${appt.startTime} - ${
+                  appt?.psychologistName || appt?.studentName
+                }`,
                 icon: <UserOutlined />,
                 children: (
                   <AppointmentDetailContent
@@ -155,6 +149,8 @@ DetailCalendar.propTypes = {
         appointmentID: PropTypes.string.isRequired,
         psychologistID: PropTypes.string.isRequired,
         psychologistName: PropTypes.string.isRequired,
+        studentID: PropTypes.string.isRequired,
+        studentName: PropTypes.string.isRequired,
         startTime: PropTypes.string.isRequired,
         endTime: PropTypes.string.isRequired,
         status: PropTypes.string.isRequired,
