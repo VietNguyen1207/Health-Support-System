@@ -8,11 +8,12 @@ const initialState = {
   error: null,
 };
 
-const APPOINTMENT_URL = "/appointments";
+const APPOINTMENT_URL = "/appointments/";
 
 const APPOINTMENT_ENDPOINT = {
   CREATE: "/book",
   DEPARTMENTS: "/departments",
+  DETAILS: (id) => id,
 };
 
 export const useAppointmentStore = create((set) => ({
@@ -65,7 +66,7 @@ export const useAppointmentStore = create((set) => ({
   CreateBooking: async (credentials) => {
     set({ loading: true, error: null });
     try {
-      console.log(credentials);
+      // console.log(credentials);
 
       const res = await api.post(
         APPOINTMENT_URL + APPOINTMENT_ENDPOINT.CREATE,
@@ -86,17 +87,34 @@ export const useAppointmentStore = create((set) => ({
   },
 
   //Get Department List
-  GetAllDepartments: async () => {
+  // GetAllDepartments: async () => {
+  //   set({ loading: true, error: null });
+  //   try {
+  //     const response = await api.get(
+  //       APPOINTMENT_URL + APPOINTMENT_ENDPOINT.GET_ALL_DEPARTMENT
+  //     );
+
+  //     return Array.isArray(response.data) ? response.data : [];
+  //   } catch (error) {
+  //     const errorMessage =
+  //       error.response?.data?.message || "Failed to fetch department list";
+  //     set({ error: errorMessage, loading: false });
+  //     throw new Error(errorMessage);
+  //   }
+  // },
+
+  //Get Detail Program
+  GetDetails: async (id) => {
     set({ loading: true, error: null });
     try {
       const response = await api.get(
-        APPOINTMENT_URL + APPOINTMENT_ENDPOINT.GET_ALL_DEPARTMENT
+        APPOINTMENT_URL + APPOINTMENT_ENDPOINT.DETAILS(id)
       );
-
-      return Array.isArray(response.data) ? response.data : [];
+      set({ loading: false });
+      return response.data ? response.data : {};
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || "Failed to fetch department list";
+        error.response?.data?.message || "Failed to fetch detail";
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }

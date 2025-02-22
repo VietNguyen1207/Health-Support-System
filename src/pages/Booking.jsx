@@ -102,7 +102,7 @@ const Booking = () => {
           className="border-primary text-primary-green"
           onClick={() => {
             notification.destroy();
-            navigate("/appointment");
+            navigate("/calendar");
           }}>
           View Calendar
         </Button>

@@ -60,9 +60,9 @@ export const menuItems = [
     roles: ["student"],
   },
   {
-    key: "/appointment",
+    key: "/calendar",
     label: "Appointment",
-    path: "/appointment",
+    path: "/calendar",
     special: true,
     roles: ["psychologist"],
   },

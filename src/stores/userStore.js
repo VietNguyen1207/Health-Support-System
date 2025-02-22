@@ -3,6 +3,7 @@ import { api } from "./apiConfig";
 
 const initialState = {
   users: [],
+  events: [],
   loading: false,
   error: null,
 };
@@ -15,6 +16,7 @@ const USER_ENDPOINT = {
   GET_PROGRAMS: (id) => id + "/programs",
   GET_SURVEYS: (id) => id + "/surveys",
   GET_APPOINTMENTS: (id) => id + "/appointments",
+  GET_EVENTS: (id) => id + "/events",
 };
 
 export const useUserStore = create((set, get) => ({
@@ -84,6 +86,23 @@ export const useUserStore = create((set, get) => ({
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Failed to update user";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
+  //Get events of a user
+  getEvents: async (userId) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.get(USER_URL + `${userId}/events`);
+
+      set({ loading: false });
+
+      return data;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to get events";
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
