@@ -44,13 +44,11 @@ const ProgramDetailsModal = ({
             type="primary"
             className="bg-primary-green hover:bg-primary-green/90"
             onClick={() => program && onJoinProgram(program.programID)}
-            disabled={loading}
-          >
+            disabled={loading}>
             Join Program
           </Button>
         </div>
-      }
-    >
+      }>
       <ModalContent program={program} loading={loading} />
     </Modal>
   );
@@ -114,8 +112,7 @@ const ModalContent = React.memo(({ program, loading }) => {
           </div>
           <Tag
             color={program.type === "Online" ? "blue" : "green"}
-            className="mt-1"
-          >
+            className="mt-1">
             {program.type}
           </Tag>
         </div>
@@ -146,8 +143,7 @@ const ModalContent = React.memo(({ program, loading }) => {
               href={program.meetingLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-0 h-auto text-primary-green hover:text-primary-green/80"
-            >
+              className="p-0 h-auto text-primary-green hover:text-primary-green/80">
               Join Meeting
             </Button>
           </div>
@@ -161,8 +157,7 @@ const ModalContent = React.memo(({ program, loading }) => {
             {program.tags.map((tag) => (
               <Tag
                 key={tag}
-                className="bg-gray-50 border border-gray-200 text-sm"
-              >
+                className="bg-gray-50 border border-gray-200 text-sm">
                 {tag}
               </Tag>
             ))}
@@ -173,15 +168,15 @@ const ModalContent = React.memo(({ program, loading }) => {
   );
 });
 
-const LoadingSkeleton = () => (
+export const LoadingSkeleton = () => (
   <div className="space-y-4">
     <Skeleton.Input active block style={{ height: 32 }} />
     <Skeleton active paragraph={{ rows: 2 }} />
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="bg-gray-50 p-3 rounded-lg">
-          <Skeleton.Input active size="small" style={{ width: 80 }} />
-          <Skeleton.Input active style={{ width: 120, marginTop: 8 }} />
+        <div key={i} className="bg-gray-50 p-3 rounded-lg flex flex-col">
+          <Skeleton.Input active size="small" style={{ width: "50%" }} />
+          <Skeleton.Input active style={{ width: "100%", marginTop: 8 }} />
         </div>
       ))}
     </div>

@@ -86,7 +86,7 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [
-          // { path: "appointment", element: <Appointment /> },
+          { path: "add-program", element: <AddProgram /> },
           { path: "patient-record", element: <PatientRecord /> },
           { path: "create-test", element: <CreateTest /> },
         ],
@@ -98,7 +98,10 @@ export const routes = [
             <Outlet />
           </PrivateRoute>
         ),
-        children: [{ path: "appointment", element: <Appointment /> }],
+        children: [
+          { path: "test", element: <Test /> },
+          { path: "calendar", element: <Appointment /> },
+        ],
       },
       {
         path: "",
@@ -108,27 +111,6 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [{ path: "children-record", element: <ChildrenRecord /> }],
-      },
-      {
-        path: "",
-        element: (
-          <PrivateRoute allowedRoles={["manager", "psychologist"]}>
-            <Outlet />
-          </PrivateRoute>
-        ),
-        children: [{ path: "add-program", element: <AddProgram /> }],
-      },
-      {
-        path: "",
-        element: (
-          <PrivateRoute allowedRoles={["student", "psychologist", "manager"]}>
-            <Outlet />
-          </PrivateRoute>
-        ),
-        children: [
-          { path: "test", element: <Test /> },
-          { path: "appointment", element: <Appointment /> },
-        ],
       },
       { path: "unauthorized", element: <Unauthorized /> },
     ],

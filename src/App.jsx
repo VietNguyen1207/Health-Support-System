@@ -25,6 +25,13 @@ function App() {
             paddingContentHorizontal: 0,
             paddingContentVertical: 0,
           },
+          Menu: {
+            // itemSelectedBg: "#CBECD5",
+          },
+          Tabs: {
+            itemSelectedColor: "#007824",
+            cardBg: "#D3D3D3",
+          },
         },
       }}>
       <ScrollToTop />

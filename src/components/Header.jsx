@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { Dropdown, Menu, ConfigProvider } from "antd";
@@ -144,7 +144,7 @@ const Header = () => {
                     className={`rounded-full border-[10px] text-[12px] flex justify-center items-center cursor-pointer 
                     transition-all duration-300`}
                     onClick={() => {
-                      navigate("/appointment");
+                      navigate("/calendar");
                     }}>
                     <CalendarFilled className="text-lg" />
                   </div>

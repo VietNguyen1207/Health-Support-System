@@ -1,9 +1,17 @@
-import { Button, Divider, Flex, Popover, Select, Tag } from "antd";
-import { useMemo, useState } from "react";
-import AppointmentData from "../../data/appointments.json";
+import {
+  Button,
+  Divider,
+  Flex,
+  message,
+  Popover,
+  Select,
+  Spin,
+  Tag,
+} from "antd";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import {
-  AudioOutlined,
+  CarryOutOutlined,
   QuestionCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -11,13 +19,32 @@ import CustomCalendar from "../../components/CalendarComponent";
 import { formatAppointmentDate } from "../../utils/Helper";
 import DetailCalendar from "../DetailCalendar";
 import { months } from "../../constants/calendar";
+import { useUserStore } from "../../stores/userStore";
+import { useAuthStore } from "../../stores/authStore";
 
 export default function Appointment() {
   // const calendarRef = useRef(null);
   const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [nextDate, setNextDate] = useState(dayjs());
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedDateDetails, setSelectedDateDetails] = useState(null);
+  const { loading, getEvents } = useUserStore();
+  const [events, setEvents] = useState([]);
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getEvents(user.userId);
+        const eventList = data.event;
+        setEvents(eventList);
+      } catch (error) {
+        console.log("Falied to fetch events: ", error);
+        message.error("Failed to fetch events");
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const content = (
     <>
@@ -26,7 +53,7 @@ export default function Appointment() {
           Appointment
           <UserOutlined />
         </p>
-        <div className="w-full flex gap-3 justify-between">
+        <div className="w-full h-full flex gap-3 justify-between">
           <Tag color="red">Morning</Tag>
           <Tag color="blue">Afternoon</Tag>
         </div>
@@ -35,95 +62,62 @@ export default function Appointment() {
       <div className="space-y-3">
         <p className="font-semibold w-4/5 flex justify-between">
           Program
-          <AudioOutlined />
+          <CarryOutOutlined />
         </p>
         <div className="flex flex-row gap-2 items-center"></div>
       </div>
     </>
   );
 
-  const eventData = useMemo(() => {
-    const events = {};
-    let type;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    AppointmentData.appointments.forEach((appointment) => {
-      const date = new Date(appointment.timeSlot.slotDate);
-      if (date >= today) {
-        const dateKey = date.toISOString().split("T")[0];
-        const appointmentStatus = appointment.status;
-
-        if (!events[dateKey]) {
-          events[dateKey] = [];
-        }
-
-        const timeHour = parseInt(appointment.timeSlot.time.split(":")[0]);
-
-        if (timeHour >= 7 && timeHour <= 11) {
-          type = "red";
-        } else if (timeHour >= 13) {
-          type = "blue";
-        }
-
-        appointmentStatus === "confirmed" &&
-          events[dateKey].push({
-            type: type,
-            content: `${appointment.timeSlot.time} - ${appointment.studentID.name}`,
-            appointment,
-            timeHour,
-          });
-      }
-    });
-
-    Object.keys(events).forEach((dateKey) => {
-      events[dateKey].sort((a, b) => a.timeHour - b.timeHour);
-    });
-
-    const sortedEvents = Object.keys(events)
-      .sort((a, b) => new Date(a) - new Date(b))
-      .reduce((obj, key) => {
-        obj[key] = events[key];
-        return obj;
-      }, {});
-
-    return sortedEvents;
-  }, []);
-
-  const getListData = (value) => {
-    const dateKey = formatAppointmentDate(value);
-    return eventData[dateKey] || [];
-  };
-
   const dateCellRender = (value) => {
-    const listData = getListData(value);
+    const dateKey = formatAppointmentDate(value);
+
+    const appointments = events[dateKey]?.appointment || [];
+
+    const programs = events[dateKey]?.program || [];
 
     return (
-      <ul className="w-full h-full flex flex-col gap-2 justify-start">
-        {listData.map((item) => {
-          return (
-            <li key={item.content}>
-              <Tag
-                color={item.type}
-                className="text-sm"
-                icon={<UserOutlined />}>
-                {item.content}
-              </Tag>
-            </li>
-          );
-        })}
-      </ul>
+      <div
+        className="flex flex-col gap-2 py-2 overflow-y-clip"
+        key={dateKey}
+        onClick={() => handleDateClick(dateKey)}>
+        {appointments.length ? (
+          appointments.map((item) => (
+            <Tag
+              key={item.appointmentId}
+              color={"volcano"}
+              className="text-sm w-fit"
+              icon={<UserOutlined />}>
+              {item.startTime + " - " + item.psychologistName}
+            </Tag>
+          ))
+        ) : (
+          <></>
+        )}
+
+        {programs.length ? (
+          programs.map((item) => (
+            <Tag
+              key={item.programId}
+              color={"blue"}
+              className="text-sm w-fit"
+              icon={<CarryOutOutlined />}>
+              {item.title + " - " + item.type}
+            </Tag>
+          ))
+        ) : (
+          <></>
+        )}
+      </div>
     );
   };
 
-  const handleAppointmentClick = (date) => {
-    const formattedDate = formatAppointmentDate(date);
+  const handleDateClick = (date) => {
+    const eventList = events[date];
 
-    const appointment = formattedDate;
-
-    if (appointment) {
-      // setSelectedDateDetails(appointment);
-      // setIsModalVisible(true);
+    if (eventList) {
+      setSelectedDateDetails(eventList);
+      setIsModalVisible(true);
     } else {
       console.error("No appointment data available");
     }
@@ -174,12 +168,11 @@ export default function Appointment() {
           <Button
             onClick={() => {
               const newDate = selectedDate.subtract(1, "month");
-              setNextDate(newDate);
-              if (!newDate.isBefore(dayjs(), "month")) {
+              if (!newDate.isBefore(dayjs(), "day")) {
                 onChange(newDate);
-              }
+              } else onChange(dayjs());
             }}
-            disabled={nextDate.isSame(selectedDate, "month")}>
+            disabled={selectedDate.isSame(dayjs(), "month")}>
             Previous
           </Button>
           <Button
@@ -200,13 +193,18 @@ export default function Appointment() {
   };
 
   return (
-    <>
+    <div className="relative">
+      {loading && (
+        <div className="absolute inset-0 bg-white/70 z-50 flex justify-center items-center">
+          <Spin size="large" />
+        </div>
+      )}
       <div className="general-wrapper pt-16 mx-20">
         <CustomCalendar
           mode="month"
           value={selectedDate}
           onChange={onChange}
-          onSelect={(details) => handleAppointmentClick(details)}
+          // onSelect={handleDateClick}
           cellRender={dateCellRender}
           headerRender={headerRender}
           disabledDate={(current) => {
@@ -219,10 +217,10 @@ export default function Appointment() {
       </div>
 
       <DetailCalendar
-        appointment={selectedDateDetails}
+        events={selectedDateDetails}
         visible={isModalVisible}
         onClose={handleModalClose}
       />
-    </>
+    </div>
   );
 }
