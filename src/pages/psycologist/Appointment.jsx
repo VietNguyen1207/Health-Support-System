@@ -31,20 +31,53 @@ export default function Appointment() {
   const [events, setEvents] = useState([]);
   const { user } = useAuthStore();
 
+  const sortAppointmentsByTime = (appointments) => {
+    if (!Array.isArray(appointments)) {
+      return []; // Return an empty array if appointments is not an array
+    }
+
+    const uniqueAppointments = [];
+    const seenStartTimes = new Set();
+
+    appointments.forEach((appt) => {
+      if (!seenStartTimes.has(appt.startTime)) {
+        seenStartTimes.add(appt.startTime);
+        uniqueAppointments.push(appt);
+      }
+    });
+
+    // Sort unique appointments by start time
+    return uniqueAppointments.sort(
+      (a, b) => new Date(a.startTime) - new Date(b.startTime)
+    );
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getEvents(user.userId);
-        const eventList = data.event;
-        setEvents(eventList);
+        const eventList = data.event || {}; // Ensure eventList is an object
+        // console.log(eventList);
+
+        // Sort and filter unique appointments by start time
+        const sortedAppointments = Object.keys(eventList).reduce((acc, key) => {
+          const event = eventList[key];
+          acc[key] = {
+            ...event,
+            appointment: sortAppointmentsByTime(event.appointment || []), // Ensure appointment is an array
+          };
+          return acc;
+        }, {});
+
+        setEvents(sortedAppointments); // Update events with sorted appointments
       } catch (error) {
-        console.log("Falied to fetch events: ", error);
+        console.log("Failed to fetch events: ", error);
         message.error("Failed to fetch events");
       }
     };
 
     fetchData();
-  }, []);
+  }, [user.userId]); // Added user.userId as a dependency
 
   const content = (
     <>
@@ -88,7 +121,9 @@ export default function Appointment() {
               color={"volcano"}
               className="text-sm w-fit"
               icon={<UserOutlined />}>
-              {item.startTime + " - " + item.psychologistName}
+              {item.startTime +
+                " - " +
+                (item?.psychologistName || item?.studentName)}
             </Tag>
           ))
         ) : (
