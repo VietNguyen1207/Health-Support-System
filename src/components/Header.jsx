@@ -53,7 +53,7 @@ const Header = () => {
       </div>
     ) : (
       <Dropdown.Button menu={menuProps} align="end">
-        <UserOutlined /> {user.name}
+        <UserOutlined /> {user.fullName}
       </Dropdown.Button>
     );
 
