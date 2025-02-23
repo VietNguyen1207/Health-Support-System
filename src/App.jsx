@@ -32,6 +32,9 @@ function App() {
             itemSelectedColor: "#007824",
             cardBg: "#D3D3D3",
           },
+          Button: {
+            colorPrimary: "#4a7c59",
+          },
         },
       }}>
       <ScrollToTop />

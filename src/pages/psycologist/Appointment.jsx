@@ -1,20 +1,7 @@
-import {
-  Button,
-  Divider,
-  Flex,
-  message,
-  Popover,
-  Select,
-  Spin,
-  Tag,
-} from "antd";
+import { Badge, Button, Flex, message, Popover, Select, Spin } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import {
-  CarryOutOutlined,
-  QuestionCircleOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { QuestionCircleOutlined } from "@ant-design/icons";
 import CustomCalendar from "../../components/CalendarComponent";
 import { formatAppointmentDate } from "../../utils/Helper";
 import DetailCalendar from "../DetailCalendar";
@@ -81,41 +68,44 @@ export default function Appointment() {
 
   const content = (
     <>
-      <div className="space-y-3">
-        <p className="font-semibold w-4/5 flex justify-between">
-          Appointment
-          <UserOutlined />
+      <div className="space-y-3 min-w-[120px]">
+        <p className="w-5/6 flex justify-between">
+          Program
+          {/* <CarryOutOutlined /> */}
+          <Badge color="blue" />
         </p>
-        <div className="w-full h-full flex gap-3 justify-between">
+        {/* <div className="flex flex-row gap-2 items-center"></div> */}
+      </div>
+      {/* <Divider className="border-[#668f0f]" /> */}
+      <div className="space-y-3">
+        <p className="w-5/6 flex justify-between">
+          Appointment
+          {/* <UserOutlined /> */}
+          <Badge color="volcano" />
+        </p>
+        {/* <div className="w-full h-full flex gap-3 justify-between">
           <Tag color="red">Morning</Tag>
           <Tag color="blue">Afternoon</Tag>
-        </div>
-      </div>
-      <Divider className="border-[#668f0f]" />
-      <div className="space-y-3">
-        <p className="font-semibold w-4/5 flex justify-between">
-          Program
-          <CarryOutOutlined />
-        </p>
-        <div className="flex flex-row gap-2 items-center"></div>
+        </div> */}
       </div>
     </>
   );
 
   const dateCellRender = (value) => {
     const dateKey = formatAppointmentDate(value);
-
     const appointments = events[dateKey]?.appointment || [];
-
     const programs = events[dateKey]?.program || [];
 
     return (
       <div
-        className="flex flex-col gap-2 py-2 overflow-y-clip"
+        className="flex gap-2 py-2"
         key={dateKey}
         onClick={() => handleDateClick(dateKey)}>
         {appointments.length ? (
-          appointments.map((item) => (
+          <Badge color={"volcano"} count={appointments.length} />
+        ) : (
+          /* appointments.map((item) => (
+            <>
             <Tag
               key={item.appointmentId}
               color={"volcano"}
@@ -125,13 +115,16 @@ export default function Appointment() {
                 " - " +
                 (item?.psychologistName || item?.studentName)}
             </Tag>
-          ))
-        ) : (
+
+            </>
+          )) */
           <></>
         )}
 
         {programs.length ? (
-          programs.map((item) => (
+          <Badge color="blue" count={programs.length} />
+        ) : (
+          /* programs.map((item) => (
             <Tag
               key={item.programId}
               color={"blue"}
@@ -139,8 +132,7 @@ export default function Appointment() {
               icon={<CarryOutOutlined />}>
               {item.title + " - " + item.type}
             </Tag>
-          ))
-        ) : (
+          )) */
           <></>
         )}
       </div>
@@ -189,7 +181,7 @@ export default function Appointment() {
               const now = value.clone().month(newMonth);
               onChange(now);
             }}
-            style={{ width: 120 }}
+            style={{ maxWidth: 120 }}
           />
           <Select
             value={value.year()}
@@ -198,7 +190,7 @@ export default function Appointment() {
               const now = value.clone().year(newYear);
               onChange(now);
             }}
-            style={{ width: 120 }}
+            style={{ maxWidth: 120 }}
           />
           <Button
             onClick={() => {
@@ -234,7 +226,7 @@ export default function Appointment() {
           <Spin size="large" />
         </div>
       )}
-      <div className="general-wrapper pt-16 mx-20">
+      <div className="general-wrapper pt-16 px-20 min-w-fit">
         <CustomCalendar
           mode="month"
           value={selectedDate}
