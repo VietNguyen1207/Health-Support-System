@@ -21,10 +21,34 @@ const AUTH_ENDPOINT = {
   REFRESH_TOKEN: "refresh-token",
 };
 
+const isTokenExpired = (token) => {
+  if (!token) return true;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const expiryTime = payload.exp * 1000; // Convert to milliseconds
+    return Date.now() >= expiryTime;
+  } catch (error) {
+    return true;
+  }
+};
+
 export const useAuthStore = create(
   persist(
     (set) => ({
       ...initialState,
+
+      checkAuthStatus: () => {
+        const state = useAuthStore.getState();
+        const accessToken = state.token?.accessToken;
+
+        if (!accessToken || isTokenExpired(accessToken)) {
+          // Token is expired or missing, logout user
+          useAuthStore.getState().logout();
+          return false;
+        }
+        return true;
+      },
+
       // Action login
       login: async (credentials) => {
         try {
@@ -91,21 +115,27 @@ export const useAuthStore = create(
       // Action refresh token
       refreshToken: async () => {
         try {
-          // Get current state once to avoid multiple calls
           const state = useAuthStore.getState();
 
-          // Check if we have the required tokens
           if (!state.token?.refreshToken) {
             throw new Error("No refresh token available");
+          }
+
+          // Check if access token is expired
+          if (!isTokenExpired(state.token.accessToken)) {
+            return {
+              accessToken: state.token.accessToken,
+              refreshToken: state.token.refreshToken,
+            };
           }
 
           const { data } = await api.post(
             AUTH_URL + AUTH_ENDPOINT.REFRESH_TOKEN,
             {
-              accessToken: useAuthStore.getState().token.accessToken,
-              refreshToken: useAuthStore.getState().token.refreshToken,
-              userId: useAuthStore.getState().user?.userId,
-              role: useAuthStore.getState().user?.role,
+              accessToken: state.token.accessToken,
+              refreshToken: state.token.refreshToken,
+              userId: state.user?.userId,
+              role: state.user?.role,
             }
           );
 
@@ -120,9 +150,9 @@ export const useAuthStore = create(
           api.defaults.headers.common[
             "Authorization"
           ] = `Bearer ${accessToken}`;
-          api.defaults.headers.common[
-            "Authentication"
-          ] = `Bearer ${accessToken}`;
+          // api.defaults.headers.common[
+          //   "Authentication"
+          // ] = `Bearer ${accessToken}`;
 
           return data;
         } catch (error) {
@@ -161,8 +191,14 @@ export const useAuthStore = create(
 // Add initialization of token from persisted state
 const token = useAuthStore.getState().token?.accessToken;
 if (token) {
-  // api.defaults.headers.common["Authentication"] = `Bearer ${token}`;
-  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  if (isTokenExpired(token)) {
+    // If token is expired, reset the store to initial state
+    useAuthStore.setState(initialState);
+    delete api.defaults.headers.common["Authorization"];
+  } else {
+    // Only set the Authorization header if token is valid
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  }
 }
 
 // Interceptor để handle refresh token
@@ -171,7 +207,12 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Check if the error is due to an expired token or 401 unauthorized
+    if (
+      (error.response?.status === 401 ||
+        isTokenExpired(useAuthStore.getState().token?.accessToken)) &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       try {
