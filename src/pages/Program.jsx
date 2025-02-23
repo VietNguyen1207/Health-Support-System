@@ -20,216 +20,6 @@ import { useProgramStore } from "../stores/programStore";
 import ProgramDetailsModal from "../components/ProgramDetailsModal";
 
 const Program = () => {
-  // Mock data - replace with API call later
-  // const programs = [
-  //   {
-  //     id: 1,
-  //     title: "Stress Management Workshop",
-  //     description:
-  //       "Learn effective techniques to manage academic stress and anxiety.",
-  //     category: "Mental Health",
-  //     startDate: "2024-04-01",
-  //     duration: "6 weeks",
-  //     capacity: 20,
-  //     enrolled: 12,
-  //     status: "Open",
-  //     facilitator: "Dr. Sarah Johnson",
-  //     tags: ["Stress", "Anxiety", "Self-Care"],
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Peer Support Group",
-  //     description:
-  //       "Weekly group sessions for students to share experiences and support each other.",
-  //     category: "Support Group",
-  //     startDate: "2024-04-15",
-  //     duration: "8 weeks",
-  //     capacity: 15,
-  //     enrolled: 8,
-  //     status: "Open",
-  //     facilitator: "Dr. Michael Chen",
-  //     tags: ["Peer Support", "Communication", "Social Skills"],
-  //   },
-  //   {
-  //     id: 3,
-  //     title: "Mindfulness and Meditation",
-  //     description:
-  //       "Introduction to mindfulness practices for better mental well-being.",
-  //     category: "Wellness",
-  //     startDate: "2024-04-10",
-  //     duration: "4 weeks",
-  //     capacity: 25,
-  //     enrolled: 20,
-  //     status: "Open",
-  //     facilitator: "Ms. Emily Wong",
-  //     tags: ["Mindfulness", "Meditation", "Relaxation"],
-  //   },
-  //   {
-  //     id: 4,
-  //     title: "Academic Performance Anxiety Group",
-  //     description:
-  //       "Learn strategies to cope with test anxiety and academic pressure.",
-  //     category: "Academic Support",
-  //     startDate: "2024-04-20",
-  //     duration: "5 weeks",
-  //     capacity: 18,
-  //     enrolled: 15,
-  //     status: "Open",
-  //     facilitator: "Dr. James Wilson",
-  //     tags: ["Test Anxiety", "Academic Stress", "Performance"],
-  //   },
-  //   {
-  //     id: 5,
-  //     title: "Social Skills Development",
-  //     description:
-  //       "Build confidence in social situations and improve interpersonal relationships.",
-  //     category: "Social Skills",
-  //     startDate: "2024-05-01",
-  //     duration: "6 weeks",
-  //     capacity: 12,
-  //     enrolled: 6,
-  //     status: "Open",
-  //     facilitator: "Ms. Rachel Green",
-  //     tags: ["Social Skills", "Communication", "Confidence"],
-  //   },
-  //   {
-  //     id: 6,
-  //     title: "Emotional Intelligence Workshop",
-  //     description: "Develop better emotional awareness and management skills.",
-  //     category: "Personal Development",
-  //     startDate: "2024-05-05",
-  //     duration: "4 weeks",
-  //     capacity: 20,
-  //     enrolled: 10,
-  //     status: "Open",
-  //     facilitator: "Dr. Lisa Thompson",
-  //     tags: ["Emotional Intelligence", "Self-Awareness", "Relationships"],
-  //   },
-  //   {
-  //     id: 7,
-  //     title: "Resilience Building Program",
-  //     description:
-  //       "Strengthen your ability to bounce back from challenges and setbacks.",
-  //     category: "Mental Health",
-  //     startDate: "2024-05-10",
-  //     duration: "7 weeks",
-  //     capacity: 15,
-  //     enrolled: 9,
-  //     status: "Open",
-  //     facilitator: "Dr. Robert Martinez",
-  //     tags: ["Resilience", "Coping Skills", "Personal Growth"],
-  //   },
-  //   {
-  //     id: 8,
-  //     title: "Time Management Skills",
-  //     description:
-  //       "Master effective time management and organizational strategies.",
-  //     category: "Academic Support",
-  //     startDate: "2024-05-15",
-  //     duration: "3 weeks",
-  //     capacity: 25,
-  //     enrolled: 18,
-  //     status: "Open",
-  //     facilitator: "Prof. David Brown",
-  //     tags: ["Time Management", "Organization", "Productivity"],
-  //   },
-  //   {
-  //     id: 9,
-  //     title: "Healthy Relationships Workshop",
-  //     description:
-  //       "Learn about building and maintaining healthy relationships.",
-  //     category: "Relationships",
-  //     startDate: "2024-05-20",
-  //     duration: "5 weeks",
-  //     capacity: 16,
-  //     enrolled: 7,
-  //     status: "Open",
-  //     facilitator: "Dr. Anna Lee",
-  //     tags: ["Relationships", "Communication", "Boundaries"],
-  //   },
-  //   {
-  //     id: 10,
-  //     title: "Sleep Hygiene and Wellness",
-  //     description: "Improve your sleep habits and overall well-being.",
-  //     category: "Wellness",
-  //     startDate: "2024-06-01",
-  //     duration: "4 weeks",
-  //     capacity: 20,
-  //     enrolled: 11,
-  //     status: "Open",
-  //     facilitator: "Dr. Mark Stevens",
-  //     tags: ["Sleep", "Wellness", "Health"],
-  //   },
-  //   {
-  //     id: 11,
-  //     title: "Grief and Loss Support Group",
-  //     description:
-  //       "Supportive environment for students dealing with loss and grief.",
-  //     category: "Support Group",
-  //     startDate: "2024-06-05",
-  //     duration: "8 weeks",
-  //     capacity: 12,
-  //     enrolled: 5,
-  //     status: "Open",
-  //     facilitator: "Dr. Patricia Moore",
-  //     tags: ["Grief", "Support", "Healing"],
-  //   },
-  //   {
-  //     id: 12,
-  //     title: "Cultural Adjustment Support",
-  //     description:
-  //       "Help international students adapt to new cultural environments.",
-  //     category: "Cultural Support",
-  //     startDate: "2024-06-10",
-  //     duration: "6 weeks",
-  //     capacity: 15,
-  //     enrolled: 8,
-  //     status: "Open",
-  //     facilitator: "Ms. Sofia Rodriguez",
-  //     tags: ["Cultural Adjustment", "International", "Support"],
-  //   },
-  //   {
-  //     id: 13,
-  //     title: "Body Image and Self-Esteem",
-  //     description: "Build a healthy relationship with yourself and your body.",
-  //     category: "Mental Health",
-  //     startDate: "2024-06-15",
-  //     duration: "7 weeks",
-  //     capacity: 15,
-  //     enrolled: 10,
-  //     status: "Open",
-  //     facilitator: "Dr. Emma Watson",
-  //     tags: ["Self-Esteem", "Body Image", "Mental Health"],
-  //   },
-  //   {
-  //     id: 14,
-  //     title: "Mindful Leadership",
-  //     description:
-  //       "Develop leadership skills with a focus on mindfulness and emotional intelligence.",
-  //     category: "Leadership",
-  //     startDate: "2024-06-20",
-  //     duration: "5 weeks",
-  //     capacity: 20,
-  //     enrolled: 13,
-  //     status: "Open",
-  //     facilitator: "Prof. John Anderson",
-  //     tags: ["Leadership", "Mindfulness", "Personal Development"],
-  //   },
-  //   {
-  //     id: 15,
-  //     title: "Digital Wellness Workshop",
-  //     description: "Learn to maintain mental health in the digital age.",
-  //     category: "Digital Wellness",
-  //     startDate: "2024-07-01",
-  //     duration: "4 weeks",
-  //     capacity: 25,
-  //     enrolled: 15,
-  //     status: "Open",
-  //     facilitator: "Dr. Tech Smith",
-  //     tags: ["Digital Wellness", "Screen Time", "Mental Health"],
-  //   },
-  // ];
-
   const {
     programs,
     loading,
@@ -361,13 +151,15 @@ const Program = () => {
                   <div className="bg-gray-50 rounded-xl p-3">
                     <div className="flex items-center gap-2 mb-1.5">
                       <FieldTimeOutlined className="text-primary-green text-lg" />
-                      <span className="text-gray-500 text-xs font-medium">
+                      <span className="flex justify-center items-center text-gray-500 text-xs font-medium">
                         Duration
                       </span>
                     </div>
-                    <span className="text-sm text-gray-800 font-medium">
-                      {program.duration} weeks
-                    </span>
+                    <div className="flex items-center justitfy-center">
+                      <span className="flex justify-center items-center text-sm text-gray-800 font-medium">
+                        {program.duration} weeks
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -381,7 +173,7 @@ const Program = () => {
                       <p className="text-xs text-gray-500 font-medium mb-0.5">
                         Participants
                       </p>
-                      <p className="text-sm text-gray-800 font-medium">
+                      <p className="flex justify-center text-sm text-gray-800 font-medium">
                         {program.numberParticipants}
                       </p>
                     </div>
