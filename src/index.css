@@ -41,3 +41,9 @@
   /* width: 100px; */
   height: 70px;
 }
+
+/* .ant-tabs-content-holder
+  > .ant-tabs-content.ant-tabs-content-top.ant-picker-cell {
+  height: 72vh;
+  overflow: auto;
+} */
