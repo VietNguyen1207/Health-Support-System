@@ -359,8 +359,21 @@ const AppointmentDetailContent = ({ appointment }) => {
         </p>
       </Card>
 
-      <Card title="Scores" className="bg-gray-50">
-        <BarChart width={500} height={300} data={data}>
+      <Card
+        title="Scores"
+        className="bg-gray-50"
+        styles={{
+          title: {
+            textAlign: "start",
+            flex: 1,
+          },
+          body: {
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        }}>
+        <BarChart width={700} height={300} data={data}>
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />

@@ -95,8 +95,8 @@ export default function UserManagement() {
       },
       //Psychologist
       {
-        title: "Specialization",
-        dataIndex: "specialization",
+        title: "Department",
+        dataIndex: "departmentName",
         hidden: role !== "psychologist",
         width: "20%",
       },
