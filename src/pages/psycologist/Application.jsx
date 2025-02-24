@@ -6,6 +6,7 @@ import { Button, message, Popconfirm, Typography } from "antd";
 import { useAuthStore } from "../../stores/authStore";
 import TagComponent from "../../components/TagComponent";
 import { transformString } from "../../utils/Helper";
+import dayjs from "dayjs";
 
 function Application() {
   const { fetchLeaveRequests, cancelLeaveRequest, loading } =
@@ -42,11 +43,13 @@ function Application() {
     {
       title: "Start Date",
       dataIndex: "startDate",
+      render: (text) => new Date(text).toLocaleDateString(),
       sorter: (a, b) => new Date(a.startDate) - new Date(b.startDate),
     },
     {
       title: "End Date",
       dataIndex: "endDate",
+      render: (text) => new Date(text).toLocaleDateString(),
     },
     {
       title: "Reason",
@@ -56,8 +59,9 @@ function Application() {
     {
       title: "Created At",
       dataIndex: "createdAt",
-      render: (text) => new Date(text).toLocaleDateString(),
+      render: (text) => dayjs(text).format("DD/MM/YYYY HH:mm:ss"),
       sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+      width: "15%",
     },
     {
       title: "Status",
@@ -87,8 +91,8 @@ function Application() {
           value: "APPROVED",
         },
         {
-          text: "Rejected",
-          value: "REJECTED",
+          text: "Cancelled",
+          value: "CANCELLED",
         },
       ],
       onFilter: (value, record) => record.status.includes(value),
