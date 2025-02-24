@@ -30,6 +30,7 @@ import TestResult from "../pages/TestResult";
 import Blog from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetail";
 import Application from "../pages/psycologist/Application";
+import ApplicationManagement from "../pages/manager/ApplicationManagement ";
 
 export const routes = [
   {
@@ -134,6 +135,7 @@ export const routes = [
         element: <UserManagement />,
       },
       { path: "surveys", element: <SurveyManagement /> },
+      { path: "applications", element: <ApplicationManagement /> },
     ],
   },
   {

@@ -19,7 +19,7 @@ export const ManagerLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { borderRadiusLG },
   } = theme.useToken();
 
   const menuItems = [
@@ -33,10 +33,15 @@ export const ManagerLayout = () => {
       icon: <UserOutlined />,
       label: "User Management",
     },
+    // {
+    //   key: "/manager/surveys",
+    //   icon: <FileOutlined />,
+    //   label: "Survey Management",
+    // },
     {
-      key: "/manager/surveys",
+      key: "/manager/applications",
       icon: <FileOutlined />,
-      label: "Survey Management",
+      label: "Application Management",
     },
   ];
 
@@ -79,11 +84,12 @@ export const ManagerLayout = () => {
   };
   const sideMenu = (
     <Menu
+      theme="dark"
       mode="inline"
       selectedKeys={[location.pathname]}
       items={menuItems}
       onClick={(e) => handleMenuClick(e)}
-      className="min-h-full w-max pt-4"
+      className="min-h-full w-max"
     />
   );
 
@@ -112,9 +118,10 @@ export const ManagerLayout = () => {
           style={{ flex: 0, marginRight: 16 }}
         />
       </Header>
-      <Layout>
+      <Layout className="bg-white">
         <Sider
           trigger={null}
+          theme="dark"
           collapsible
           collapsed={collapsed}
           breakpoint="lg"
@@ -126,12 +133,14 @@ export const ManagerLayout = () => {
         </Sider>
         <Content
           style={{
-            margin: "24px 16px",
-            padding: 24,
-            background: colorBgContainer,
+            margin: "10px 16px",
+            padding: 30,
+            paddingLeft: 50,
+            paddingRight: 20,
+            background: "white",
             borderRadius: borderRadiusLG,
             overflow: "auto",
-            height: "calc(100vh - 110px)",
+            height: "90%",
           }}>
           <Outlet />
         </Content>

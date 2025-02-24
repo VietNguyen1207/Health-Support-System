@@ -57,17 +57,8 @@ const Blog = () => {
           </p>
         </div>
       </div>
-      {/* <div className="text-center mb-12">
-        <Title level={1} className="text-4xl font-bold text-gray-900 mb-4">
-          School Psychology Blog
-        </Title>
-        <Paragraph className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Discover insights about student mental health, well-being, and
-          academic success
-        </Paragraph>
-      </div> */}
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 2xl:px-0-">
         {/* Search Bar */}
         <div className="mb-8">
           <Input
