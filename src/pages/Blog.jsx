@@ -46,19 +46,28 @@ const Blog = () => {
   }, []);
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 general-wrapper">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <Title level={1} className="text-4xl font-bold text-gray-900 mb-4">
-            School Psychology Blog
-          </Title>
-          <Paragraph className="text-lg text-gray-600 max-w-2xl mx-auto">
+    <div className="general-wrapper">
+      {/* Header Section */}
+      <div className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">Psychology Blog</h1>
+          <p className="hero-subtitle">
             Discover insights about student mental health, well-being, and
             academic success
-          </Paragraph>
+          </p>
         </div>
+      </div>
+      {/* <div className="text-center mb-12">
+        <Title level={1} className="text-4xl font-bold text-gray-900 mb-4">
+          School Psychology Blog
+        </Title>
+        <Paragraph className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Discover insights about student mental health, well-being, and
+          academic success
+        </Paragraph>
+      </div> */}
 
+      <div className="max-w-7xl mx-auto">
         {/* Search Bar */}
         <div className="mb-8">
           <Input
