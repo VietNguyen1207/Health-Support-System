@@ -3,6 +3,7 @@ import { ConfigProvider } from "antd";
 import { routes } from "./routes/AppRoutes";
 import "./App.css";
 import ScrollToTop from "./components/ScrollToTop";
+
 function App() {
   const element = useRoutes(routes);
 
@@ -45,7 +46,8 @@ function App() {
 
 function WrappedApp() {
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
       <App />
     </BrowserRouter>
   );
