@@ -3,12 +3,12 @@ import { useState, useEffect } from "react";
 import {
   Card,
   ConfigProvider,
+  notification,
   Popover,
   Select,
   Space,
   Spin,
   Typography,
-  message,
 } from "antd";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
@@ -37,6 +37,7 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
   const { GetTimeSlots } = useAppointmentStore();
   const [isLoading, setIsLoading] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     setIsOtherDate(false);
@@ -64,18 +65,33 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
 
       setIsLoading(true);
       try {
-        const slots = await GetTimeSlots(selectedPsychologist, dateStr);
-
-        setAvailableSlots(
-          slots.map((slot) => ({
-            id: slot.timeSlotId,
-            isAvailable: slot.status === "Booked" ? false : true,
-            startTime: slot.startTime,
-          }))
+        const { timeSlots, message } = await GetTimeSlots(
+          selectedPsychologist,
+          dateStr
         );
+
+        if (timeSlots.length) {
+          setAvailableSlots(
+            timeSlots.map((slot) => ({
+              id: slot.timeSlotId,
+              isAvailable:
+                String(slot.status).toLocaleLowerCase() === "booked"
+                  ? false
+                  : true,
+              startTime: slot.startTime,
+            }))
+          );
+        } else {
+          setMessage(message);
+        }
       } catch (error) {
-        console.error("Failed to fetch timeslots:", error);
-        message.error("Failed to load available time slots. Please try again.");
+        console.error("Failed to fetch timeSlots:", error);
+        notification.destroy();
+        notification.error({
+          message: "Error",
+          description: "Failed to load available time slots. Please try again.",
+          placement: "bottomRight",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -87,22 +103,20 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
   const handleDateSelection = (date, cardType = "RegularDate") => {
     if (!selectedPsychologist) return;
 
-    try {
-      if (cardType === "RegularDate") {
-        setSelectedDate(date);
-        setIsOtherDate(false);
-        setIsOpen(false);
-      } else {
-        setIsOtherDate(true);
-        setIsOpen(false);
-        setSelectedDate(null);
-      }
+    setMessage(null);
+    setAvailableSlots([]);
 
-      setLastSelectedCard(cardType);
-    } catch (error) {
-      console.error("Failed to fetch timeslots:", error);
-      message.error("Failed to load available time slots. Please try again.");
+    if (cardType === "RegularDate") {
+      setSelectedDate(date);
+      setIsOtherDate(false);
+      setIsOpen(false);
+    } else {
+      setIsOtherDate(true);
+      setIsOpen(false);
+      setSelectedDate(null);
     }
+
+    setLastSelectedCard(cardType);
   };
 
   const onChange = (value) => {
@@ -248,7 +262,7 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
         <div className="w-full flex justify-center p-8">
           <Spin size="default" />
         </div>
-      ) : availableSlots.length > 0 ? (
+      ) : availableSlots.length ? (
         <ConfigProvider theme={{ components: { Card: { bodyPadding: 5 } } }}>
           <div className="max-w-2/3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-4 gap-2 pr-8">
             {availableSlots.map((slot) => {
@@ -300,7 +314,7 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
         </ConfigProvider>
       ) : (
         <Text className="text-gray-500">
-          No available slots for selected date.
+          {message || "No available slots for selected date."}
         </Text>
       )}
     </div>

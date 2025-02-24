@@ -298,68 +298,105 @@ ProgramDetailContent.propTypes = {
 const AppointmentDetailContent = ({ appointment }) => {
   const calculatePercentage = (score) => score * 10;
 
+  const getScoreColor = (score) => {
+    if (score <= 25) return "#4CAF50"; // Xanh lá - Mức độ nhẹ
+    if (score <= 50) return "#FFC107"; // Vàng - Mức độ trung bình
+    return "#F44336"; // Đỏ - Mức độ nặng
+  };
+
   const data = [
     {
       name: "Depression Score",
       score: calculatePercentage(appointment.studentResponse.depressionScore),
+      fill: getScoreColor(
+        calculatePercentage(appointment.studentResponse.depressionScore)
+      ),
     },
     {
       name: "Anxiety Score",
       score: calculatePercentage(appointment.studentResponse.anxietyScore),
+      fill: getScoreColor(
+        calculatePercentage(appointment.studentResponse.anxietyScore)
+      ),
     },
     {
       name: "Stress Score",
       score: calculatePercentage(appointment.studentResponse.stressScore),
+      fill: getScoreColor(
+        calculatePercentage(appointment.studentResponse.stressScore)
+      ),
     },
   ];
 
   return (
-    <div className="space-y-4 max-h-[69vh] overflow-auto">
+    <div className="space-y-4 max-h-[69vh] overflow-auto pr-5">
       <h2 className="text-xl font-bold">Appointment Details</h2>
 
-      {/* <Card title="Appointment Status" className="bg-gray-50">
-        <p>
-          <strong>Status:</strong> {appointment.status}
-        </p>
-        <p>
-          <strong>Created At:</strong>{" "}
-          {new Date(appointment.createdAt).toLocaleString()}
-        </p>
-        <p>
-          <strong>Updated At:</strong>{" "}
-          {new Date(appointment.updatedAt).toLocaleString()}
-        </p>
-      </Card> */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card
+          title={
+            <div className="flex items-center gap-2">
+              <UserOutlined className="text-primary-green text-lg" />
+              <span className="font-semibold">Psychologist Information</span>
+            </div>
+          }
+          className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+              <div className="w-28 text-gray-500">Name</div>
+              <div className="font-medium">
+                {appointment.psychologistResponse.info.fullName}
+              </div>
+            </div>
 
-      <Card title="Psychologist Information" className="bg-gray-50">
-        <p>
-          <strong>Name:</strong>{" "}
-          {appointment.psychologistResponse.info.fullName}
-        </p>
-        <p>
-          <strong>Department:</strong>{" "}
-          {appointment.psychologistResponse.departmentName}
-        </p>
-        <p>
-          <strong>Years of Experience:</strong>{" "}
-          {appointment.psychologistResponse.yearsOfExperience}
-        </p>
-        <p>
-          <strong>Status:</strong> {appointment.psychologistResponse.status}
-        </p>
-      </Card>
+            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+              <div className="w-28 text-gray-500">Department</div>
+              <div className="font-medium">
+                {appointment.psychologistResponse.departmentName}
+              </div>
+            </div>
 
-      <Card title="Student Information" className="bg-gray-50">
-        <p>
-          <strong>Name:</strong> {appointment.studentResponse.info.fullName}
-        </p>
-        <p>
-          <strong>Grade:</strong> {appointment.studentResponse.grade}
-        </p>
-        <p>
-          <strong>School:</strong> {appointment.studentResponse.schoolName}
-        </p>
-      </Card>
+            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+              <div className="w-28 text-gray-500">Experience</div>
+              <div className="font-medium">
+                {appointment.psychologistResponse.yearsOfExperience} years
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card
+          title={
+            <div className="flex items-center gap-2">
+              <TeamOutlined className="text-primary-green text-lg" />
+              <span className="font-semibold">Student Information</span>
+            </div>
+          }
+          className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+              <div className="w-28 text-gray-500">Name</div>
+              <div className="font-medium">
+                {appointment.studentResponse.info.fullName}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+              <div className="w-28 text-gray-500">Grade</div>
+              <div className="font-medium">
+                {appointment.studentResponse.grade}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+              <div className="w-28 text-gray-500">School</div>
+              <div className="font-medium">
+                {appointment.studentResponse.schoolName}
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
 
       <Card
         title="Scores"
@@ -381,7 +418,7 @@ const AppointmentDetailContent = ({ appointment }) => {
           <Tooltip />
           <CartesianGrid strokeDasharray="3 3" />
           <Legend />
-          <Bar dataKey="score" fill="#82ca9d" name="Score (%)" />
+          <Bar dataKey="score" name="Score (%)" fill={(entry) => entry.fill} />
         </BarChart>
       </Card>
     </div>

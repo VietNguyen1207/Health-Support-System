@@ -1,0 +1,23 @@
+#calendar-container
+  .ant-picker-cell
+  > .ant-picker-cell-inner.ant-picker-calendar-date {
+  /* width: 100px; */
+  height: 80px;
+}
+
+#calendar-container .ant-picker-calendar-date-value {
+  text-align: start;
+  padding-left: 2px;
+  width: 100%;
+}
+
+#calendar-container
+  .ant-picker-calendar.ant-picker-calendar-full
+  .ant-picker-panel
+  .ant-picker-body
+  th {
+  text-align: start;
+  width: 100%;
+  padding-left: 13px;
+  font-size: 1rem;
+}

@@ -12,6 +12,7 @@ import DetailCalendar from "../DetailCalendar";
 import { months } from "../../constants/calendar";
 import { useUserStore } from "../../stores/userStore";
 import { useAuthStore } from "../../stores/authStore";
+import "../../style/calendar.css";
 
 export default function Appointment() {
   // const calendarRef = useRef(null);
@@ -105,14 +106,14 @@ export default function Appointment() {
         className="pb-1 w-full max-h-[50px] space-y-1 overflow-y-auto"
         key={dateKey}
         onClick={() => handleDateClick(dateKey)}>
-        <Tag
+        {/* <Tag
           // key={item.appointmentId}
           color={"volcano"}
           size="small"
           className="text-xs w-fit"
           icon={<UserOutlined />}>
           13:00 - Dr. John Doe
-        </Tag>
+        </Tag> */}
 
         {appointments.length ? (
           /* <Badge color={"volcano"} count={appointments.length} /> */
@@ -133,13 +134,13 @@ export default function Appointment() {
           <></>
         )}
 
-        <Tag
+        {/* <Tag
           color={"blue"}
           className="text-xs w-fit"
           size="small"
           icon={<CarryOutOutlined />}>
           Stresssssssssssssssssssssssssss - Online
-        </Tag>
+        </Tag> */}
 
         {programs.length ? (
           /* <Badge color="blue" count={programs.length} /> */
@@ -240,7 +241,7 @@ export default function Appointment() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" id="calendar-container">
       {loading && (
         <div className="absolute inset-0 bg-white/70 z-50 flex justify-center items-center">
           <Spin size="large" />
