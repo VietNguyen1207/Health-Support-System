@@ -1,7 +1,11 @@
-import { Badge, Button, Flex, message, Popover, Select, Spin } from "antd";
+import { Badge, Button, Flex, message, Popover, Select, Spin, Tag } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { QuestionCircleOutlined } from "@ant-design/icons";
+import {
+  CarryOutOutlined,
+  QuestionCircleOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import CustomCalendar from "../../components/CalendarComponent";
 import { formatAppointmentDate } from "../../utils/Helper";
 import DetailCalendar from "../DetailCalendar";
@@ -98,33 +102,48 @@ export default function Appointment() {
 
     return (
       <div
-        className="flex gap-2 py-2"
+        className="pb-1 w-full max-h-[50px] space-y-1 overflow-y-auto"
         key={dateKey}
         onClick={() => handleDateClick(dateKey)}>
-        {appointments.length ? (
-          <Badge color={"volcano"} count={appointments.length} />
-        ) : (
-          /* appointments.map((item) => (
-            <>
-            <Tag
-              key={item.appointmentId}
-              color={"volcano"}
-              className="text-sm w-fit"
-              icon={<UserOutlined />}>
-              {item.startTime +
-                " - " +
-                (item?.psychologistName || item?.studentName)}
-            </Tag>
+        <Tag
+          // key={item.appointmentId}
+          color={"volcano"}
+          size="small"
+          className="text-xs w-fit"
+          icon={<UserOutlined />}>
+          13:00 - Dr. John Doe
+        </Tag>
 
+        {appointments.length ? (
+          /* <Badge color={"volcano"} count={appointments.length} /> */
+          appointments.map((item) => (
+            <>
+              <Tag
+                key={item.appointmentId}
+                color={"volcano"}
+                className="text-sm w-fit"
+                icon={<UserOutlined />}>
+                {item.startTime +
+                  " - " +
+                  (item?.psychologistName || item?.studentName)}
+              </Tag>
             </>
-          )) */
+          ))
+        ) : (
           <></>
         )}
 
+        <Tag
+          color={"blue"}
+          className="text-xs w-fit"
+          size="small"
+          icon={<CarryOutOutlined />}>
+          Stresssssssssssssssssssssssssss - Online
+        </Tag>
+
         {programs.length ? (
-          <Badge color="blue" count={programs.length} />
-        ) : (
-          /* programs.map((item) => (
+          /* <Badge color="blue" count={programs.length} /> */
+          programs.map((item) => (
             <Tag
               key={item.programId}
               color={"blue"}
@@ -132,7 +151,8 @@ export default function Appointment() {
               icon={<CarryOutOutlined />}>
               {item.title + " - " + item.type}
             </Tag>
-          )) */
+          ))
+        ) : (
           <></>
         )}
       </div>

@@ -296,18 +296,20 @@ ProgramDetailContent.propTypes = {
 };
 
 const AppointmentDetailContent = ({ appointment }) => {
+  const calculatePercentage = (score) => score * 10;
+
   const data = [
     {
       name: "Depression Score",
-      score: appointment.studentResponse.depressionScore,
+      score: calculatePercentage(appointment.studentResponse.depressionScore),
     },
     {
       name: "Anxiety Score",
-      score: appointment.studentResponse.anxietyScore,
+      score: calculatePercentage(appointment.studentResponse.anxietyScore),
     },
     {
       name: "Stress Score",
-      score: appointment.studentResponse.stressScore,
+      score: calculatePercentage(appointment.studentResponse.stressScore),
     },
   ];
 
@@ -375,11 +377,11 @@ const AppointmentDetailContent = ({ appointment }) => {
         }}>
         <BarChart width={700} height={300} data={data}>
           <XAxis dataKey="name" />
-          <YAxis />
+          <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} />
           <Tooltip />
           <CartesianGrid strokeDasharray="3 3" />
           <Legend />
-          <Bar dataKey="score" fill="#82ca9d" />
+          <Bar dataKey="score" fill="#82ca9d" name="Score (%)" />
         </BarChart>
       </Card>
     </div>

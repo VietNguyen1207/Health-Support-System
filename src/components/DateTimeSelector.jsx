@@ -142,15 +142,15 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
               key={formatAppointmentDate(item)}
               className={`
                 min-w-14 p-0 border-none transition-all
-                ${
-                  !selectedPsychologist
-                    ? "bg-gray-100 cursor-not-allowed"
-                    : formatAppointmentDate(selectedDate) ===
-                      formatAppointmentDate(item)
-                    ? "bg-[#5C8C6B]"
-                    : "bg-gray-100 hover:bg-gray-200 cursor-pointer"
-                }
-              `}
+              ${
+                !selectedPsychologist
+                  ? "bg-gray-100 cursor-not-allowed"
+                  : formatAppointmentDate(selectedDate) ===
+                    formatAppointmentDate(item)
+                  ? "bg-[#5C8C6B]"
+                  : "bg-gray-100 hover:bg-gray-200 cursor-pointer"
+              }
+            `}
               onClick={() => handleDateSelection(item, "RegularDate")}>
               <div className="text-center">
                 <div

@@ -27,6 +27,8 @@ import UserManagement from "../pages/manager/UserManagement";
 import SurveyManagement from "../pages/manager/SurveyManagement";
 import NotFound from "../pages/error/NotFound";
 import TestResult from "../pages/TestResult";
+import Blog from "../pages/Blog";
+import BlogDetail from "../pages/BlogDetail";
 
 export const routes = [
   {
@@ -38,6 +40,8 @@ export const routes = [
       { path: "about", element: <About /> },
       { path: "services", element: <Service /> },
       { path: "program", element: <Program /> },
+      { path: "blog", element: <Blog /> },
+      { path: "blog/:id", element: <BlogDetail /> },
       {
         path: "",
         element: (
