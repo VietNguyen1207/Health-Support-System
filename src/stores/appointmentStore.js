@@ -42,15 +42,20 @@ export const useAppointmentStore = create((set) => ({
 
   //Get TimeSlots
   GetTimeSlots: async (id, date) => {
-    set({ loading: true, error: null });
+    // set({ loading: true, error: null });
     try {
       if (date) {
         const response = await api.get(
           `/psychologists/${id}/timeslots?date=${date}`
         );
-        return Array.isArray(response.data) ? response.data : [];
+
+        set({ loading: false });
+
+        return {
+          timeSlots: response.data.timeSlots,
+          message: response.data?.message || null,
+        };
       }
-      set({ loading: false });
       // Ensure we return an array, even if empty
       return [];
     } catch (error) {

@@ -12,6 +12,7 @@ export const menuItems = [
   { key: "/", label: "Home", path: "/" },
   { key: "/about", label: "About", path: "/about" },
   { key: "/services", label: "Services", path: "/services" },
+  { key: "/blog", label: "Blog", path: "/blog" },
   {
     key: "program",
     label: "Program",
