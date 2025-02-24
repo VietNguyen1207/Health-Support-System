@@ -176,9 +176,19 @@ export default function Appointment() {
     setSelectedDateDetails(null);
   };
 
+  const handleDateChange = (newDate) => {
+    if (newDate.isBefore(dayjs(), "month")) {
+      onChange(dayjs());
+      setSelectedDate(dayjs());
+    } else {
+      onChange(newDate);
+      setSelectedDate(newDate);
+    }
+  };
+
   const headerRender = ({ value, onChange }) => {
     const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: 3 }, (_, index) => ({
+    const years = Array.from({ length: 2 }, (_, index) => ({
       label: String(currentYear + index),
       value: currentYear + index,
     }));
@@ -197,19 +207,33 @@ export default function Appointment() {
         <div className="flex flex-row gap-5">
           <Select
             value={value.month()}
-            options={months}
+            options={months.map((month) => ({
+              ...month,
+              disabled:
+                value.year() === dayjs().year() &&
+                month.value < dayjs().month(),
+            }))}
             onChange={(newMonth) => {
               const now = value.clone().month(newMonth);
-              onChange(now);
+              handleDateChange(now);
             }}
             style={{ maxWidth: 120 }}
           />
           <Select
             value={value.year()}
-            options={years}
+            options={years.map((year) => ({
+              ...year,
+              disabled: year.value < dayjs().year(),
+            }))}
             onChange={(newYear) => {
               const now = value.clone().year(newYear);
-              onChange(now);
+              if (
+                now.year() === dayjs().year() &&
+                now.month() < dayjs().month()
+              ) {
+                now.month(dayjs().month());
+              }
+              handleDateChange(now);
             }}
             style={{ maxWidth: 120 }}
           />
@@ -228,7 +252,11 @@ export default function Appointment() {
               const newDate = selectedDate.add(1, "month");
               setSelectedDate(newDate);
               onChange(newDate);
-            }}>
+            }}
+            disabled={selectedDate.isSame(
+              dayjs().add(1, "year").endOf("year"),
+              "month"
+            )}>
             Next
           </Button>
         </div>
@@ -257,8 +285,8 @@ export default function Appointment() {
           headerRender={headerRender}
           disabledDate={(current) => {
             return (
-              current.isBefore(dayjs().subtract(1, "day")) &&
-              current.isAfter(dayjs().subtract(1, "year"))
+              current.isBefore(dayjs().subtract(1, "day")) ||
+              current.isAfter(dayjs().add(1, "year").endOf("year"))
             );
           }}
         />

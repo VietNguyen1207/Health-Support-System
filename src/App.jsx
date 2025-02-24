@@ -35,6 +35,8 @@ function App() {
           },
           Button: {
             colorPrimary: "#4a7c59",
+            colorPrimaryHover: "#3a6349",
+            colorPrimaryActive: "#2d4d39",
           },
         },
       }}>

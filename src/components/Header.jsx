@@ -153,13 +153,14 @@ const Header = () => {
 
             {navItems.specialItem && (
               <>
-                <Link to={navItems.specialItem.key} className="">
-                  <div className="bg-primary rounded-full px-4 py-2">
-                    <span className="text-sm font-semibold text-white hover:text-white">
-                      {navItems.specialItem.label}
-                    </span>
-                  </div>
-                </Link>
+                <Button
+                  type="primary"
+                  className="rounded-full"
+                  onClick={() => navigate(navItems.specialItem.key)}>
+                  <p className="text-white w-full">
+                    {navItems.specialItem.label}
+                  </p>
+                </Button>
               </>
             )}
 
@@ -186,13 +187,13 @@ const Header = () => {
         </div>
       </header>
 
-      <style>
+      {/* <style>
         {`
           .ant-menu-submenu-selected .ant-menu-title-content {
             color: #4a7c59 !important;
           }
         `}
-      </style>
+      </style> */}
     </ConfigProvider>
   );
 };

@@ -29,6 +29,7 @@ import NotFound from "../pages/error/NotFound";
 import TestResult from "../pages/TestResult";
 import Blog from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetail";
+import Application from "../pages/psycologist/Application";
 
 export const routes = [
   {
@@ -75,7 +76,6 @@ export const routes = [
           { path: "student-profile", element: <StudentProfile /> },
           { path: "test-question", element: <TestQuestion /> },
           { path: "book-appointment", element: <Booking /> },
-          // { path: "appointment", element: <Appointment /> },
           { path: "appointment-record", element: <AppointmentRecord /> },
           { path: "test-record", element: <TestRecord /> },
           { path: "test-results", element: <TestResult /> },
@@ -90,6 +90,7 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [
+          { path: "application", element: <Application /> },
           { path: "add-program", element: <AddProgram /> },
           { path: "patient-record", element: <PatientRecord /> },
           { path: "create-test", element: <CreateTest /> },
