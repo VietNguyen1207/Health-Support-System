@@ -113,10 +113,10 @@ function DetailCalendar({ events, visible, onClose }) {
       onCancel={onClose}
       footer={null}
       width={1000}
-      style={{ top: "8%", overflow: "visible" }}
+      centered
       styles={{
         body: {
-          // maxHeight: "78vh",
+          maxHeight: "78vh",
           padding: "5px 50px",
         },
       }}>
@@ -126,10 +126,8 @@ function DetailCalendar({ events, visible, onClose }) {
         <Tabs
           defaultActiveKey="1"
           type="card"
-          size={"middle"}
           style={{
             width: "100%",
-            height: "100%",
             fontWeight: 400,
           }}
           items={formattedItem}
@@ -314,7 +312,7 @@ const AppointmentDetailContent = ({ appointment }) => {
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-h-[69vh] overflow-auto">
       <h2 className="text-xl font-bold">Appointment Details</h2>
 
       {/* <Card title="Appointment Status" className="bg-gray-50">
@@ -361,8 +359,21 @@ const AppointmentDetailContent = ({ appointment }) => {
         </p>
       </Card>
 
-      <Card title="Scores" className="bg-gray-50">
-        <BarChart width={500} height={300} data={data}>
+      <Card
+        title="Scores"
+        className="bg-gray-50"
+        styles={{
+          title: {
+            textAlign: "start",
+            flex: 1,
+          },
+          body: {
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        }}>
+        <BarChart width={700} height={300} data={data}>
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />

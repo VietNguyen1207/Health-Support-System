@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
-import { Dropdown, Menu, ConfigProvider } from "antd";
+import { Dropdown, Menu, ConfigProvider, Button } from "antd";
 import { CalendarFilled, UserOutlined } from "@ant-design/icons";
 import { dropdownMenu, menuItems } from "../constants/menuItems";
 import {
@@ -36,6 +36,18 @@ const Header = () => {
     }
   };
 
+  const handleDropdownButton = () => {
+    // if (user?.role === "student") {
+    //   navigate("/student-profile");
+    // } else if (user?.role === "psychologist") {
+    //   navigate("/psycologist-profile");
+    // } else if (user?.role === "parent") {
+    //   navigate("/parent-profile");
+    // }
+
+    navigate("/student-profile");
+  };
+
   const menuProps = {
     items: filterDropdownItemsByRole(dropdownMenu, user?.role),
     onClick: handleMenuClick,
@@ -52,9 +64,23 @@ const Header = () => {
         </Link>
       </div>
     ) : (
-      <Dropdown.Button menu={menuProps} align="end">
-        <UserOutlined /> {user.fullName}
-      </Dropdown.Button>
+      <Dropdown.Button
+        menu={menuProps}
+        align="end"
+        buttonsRender={([leftButton, rightButton]) => [
+          <Button
+            key={user?.role}
+            icon={<UserOutlined />}
+            onClick={handleDropdownButton}
+            className={`flex items-center gap-2 px-3 py-1 rounded-l-md border${
+              user?.role === "manager" && `w-full pointer-events-none`
+            }`}>
+            {user.fullName}
+          </Button>,
+          rightButton,
+        ]}
+        trigger={"click"}
+      />
     );
 
   const navItems = useMemo(() => {

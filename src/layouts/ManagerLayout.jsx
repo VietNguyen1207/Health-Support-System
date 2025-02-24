@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dropdown, Layout, Menu, theme } from "antd";
+import { Button, Dropdown, Layout, Menu, theme } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   HomeOutlined,
@@ -96,11 +96,21 @@ export const ManagerLayout = () => {
           alignItems: "center",
           justifyContent: "end",
         }}>
-        <div style={{ marginRight: 16 }}>
-          <Dropdown.Button menu={menuProps}>
-            <UserOutlined /> {user.name}
-          </Dropdown.Button>
-        </div>
+        <Dropdown.Button
+          menu={menuProps}
+          align="end"
+          buttonsRender={([leftButton, rightButton]) => [
+            <Button
+              key={user?.role}
+              icon={<UserOutlined />}
+              className={`flex items-center gap-2 px-3 py-1 rounded-l-md border w-full pointer-events-none`}>
+              {user.fullName}
+            </Button>,
+            rightButton,
+          ]}
+          trigger={"click"}
+          style={{ flex: 0, marginRight: 16 }}
+        />
       </Header>
       <Layout>
         <Sider

@@ -2,7 +2,7 @@ import {
   FileDoneOutlined,
   HistoryOutlined,
   PoweroffOutlined,
-  ProfileOutlined,
+  // ProfileOutlined,
   SwapOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -69,12 +69,12 @@ export const menuItems = [
 ];
 
 export const dropdownMenu = [
-  {
-    label: "Student Profile",
-    key: "/student-profile",
-    icon: <ProfileOutlined />,
-    roles: ["student"],
-  },
+  // {
+  //   label: "Student Profile",
+  //   key: "/student-profile",
+  //   icon: <ProfileOutlined />,
+  //   roles: ["student"],
+  // },
   {
     label: "Test Record",
     key: "/test-record",
