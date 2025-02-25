@@ -302,6 +302,41 @@ ProgramDetailContent.propTypes = {
 };
 
 const AppointmentDetailContent = ({ appointment }) => {
+  const { checkInAppointment, appointmentStatus, clearAppointmentStatus } =
+    useAppointmentStore();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Handle check-in
+  const handleCheckIn = async () => {
+    try {
+      setIsLoading(true);
+      await checkInAppointment(appointment.appointmentID);
+      message.success("Student checked in successfully!");
+    } catch (error) {
+      message.error("Failed to check in student");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle check-out
+  const handleCheckOut = () => {
+    message.success("Appointment completed successfully!");
+    clearAppointmentStatus(); // Clear the status when checking out
+    // TODO: Implement API call to update appointment status to "Completed"
+  };
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      clearAppointmentStatus();
+    };
+  }, [clearAppointmentStatus]);
+
+  // Determine if appointment is in progress
+  const isInProgress =
+    appointmentStatus === "IN_PROGRESS" || appointment.status === "IN_PROGRESS";
+
   const calculatePercentage = (score) => score * 10;
 
   const getScoreColor = (score) => {
@@ -334,23 +369,6 @@ const AppointmentDetailContent = ({ appointment }) => {
     },
   ];
 
-  // Track check-in status
-  const [isCheckedIn, setIsCheckedIn] = useState(false);
-
-  // Handle check-in
-  const handleCheckIn = () => {
-    setIsCheckedIn(true);
-    message.success("Student checked in successfully!");
-    // TODO: Implement API call to update appointment status to "In Progress"
-  };
-
-  // Handle check-out
-  const handleCheckOut = () => {
-    setIsCheckedIn(false);
-    message.success("Appointment completed successfully!");
-    // TODO: Implement API call to update appointment status to "Completed"
-  };
-
   return (
     <div className="space-y-4 max-h-[69vh] overflow-auto pr-5">
       {/* Status and Action Section */}
@@ -361,16 +379,16 @@ const AppointmentDetailContent = ({ appointment }) => {
             <span className="text-sm text-gray-500">Status:</span>
             <Tag
               color={
-                isCheckedIn
+                isInProgress
                   ? "processing"
-                  : appointment.status === "Completed"
+                  : appointment.status === "COMPLETED"
                   ? "success"
                   : "default"
               }
             >
-              {isCheckedIn
+              {isInProgress
                 ? "In Progress"
-                : appointment.status === "Completed"
+                : appointment.status === "COMPLETED"
                 ? "Completed"
                 : "Scheduled"}
             </Tag>
@@ -378,18 +396,19 @@ const AppointmentDetailContent = ({ appointment }) => {
         </div>
 
         <div className="flex gap-3">
-          {!isCheckedIn && appointment.status !== "Completed" && (
+          {!isInProgress && appointment.status !== "COMPLETED" && (
             <Button
               type="primary"
               className="bg-blue-500 hover:bg-blue-600"
               icon={<UserOutlined />}
               onClick={handleCheckIn}
+              loading={isLoading}
             >
               Check-in Student
             </Button>
           )}
 
-          {isCheckedIn && (
+          {isInProgress && (
             <Button
               type="primary"
               className="bg-primary-green hover:bg-primary-green/90"
@@ -476,7 +495,7 @@ const AppointmentDetailContent = ({ appointment }) => {
         title={
           <div className="flex items-center justify-between">
             <span>Assessment Scores</span>
-            {isCheckedIn && (
+            {isInProgress && (
               <Tag color="processing" className="ml-2">
                 Session in Progress
               </Tag>
@@ -507,7 +526,7 @@ const AppointmentDetailContent = ({ appointment }) => {
       </Card>
 
       {/* Session Notes - Only visible when checked in */}
-      {isCheckedIn && (
+      {isInProgress && (
         <Card
           title="Session Notes"
           className="bg-white"

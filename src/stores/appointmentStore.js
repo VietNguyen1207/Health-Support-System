@@ -18,6 +18,7 @@ const APPOINTMENT_ENDPOINT = {
 
 export const useAppointmentStore = create((set) => ({
   ...initialState,
+  appointmentStatus: null,
 
   // Fetch Departments
   fetchDepartments: async () => {
@@ -124,4 +125,27 @@ export const useAppointmentStore = create((set) => ({
       throw new Error(errorMessage);
     }
   },
+
+  // Check-in appointment
+  checkInAppointment: async (appointmentId) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.post(
+        `/appointments/${appointmentId}/check-in`
+      );
+      set({
+        loading: false,
+        appointmentStatus: data.status,
+      });
+      return data;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to check-in appointment";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
+  // Add this to clear status when modal closes
+  clearAppointmentStatus: () => set({ appointmentStatus: null }),
 }));
