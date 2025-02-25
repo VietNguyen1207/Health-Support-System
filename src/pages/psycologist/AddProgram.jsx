@@ -34,6 +34,7 @@ const AddProgram = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingData, setIsFetchingData] = useState(false);
   // const { getAllUsers } = useUserStore();
+  const { user } = useAuthStore();
   const { createProgram, fetchTags, tags } = useProgramStore();
   const { fetchDepartments } = useAppointmentStore();
   const [departments, setDepartments] = useState([]);
