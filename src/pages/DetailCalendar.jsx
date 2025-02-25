@@ -1,4 +1,4 @@
-import { Button, Modal, Space, Tabs, Tag, Typography, Card } from "antd";
+import { Button, Modal, Space, Tabs, Tag, Typography, Card, Input } from "antd";
 import PropTypes from "prop-types";
 import { useAppointmentStore } from "../stores/appointmentStore";
 import { useProgramStore } from "../stores/programStore";
@@ -10,6 +10,7 @@ import {
   LinkOutlined,
   TeamOutlined,
   UserOutlined,
+  CheckOutlined,
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import {
@@ -21,6 +22,7 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
+import { message } from "antd";
 
 const { Text } = Typography;
 
@@ -119,7 +121,8 @@ function DetailCalendar({ events, visible, onClose }) {
           maxHeight: "78vh",
           padding: "5px 50px",
         },
-      }}>
+      }}
+    >
       {isLoading ? (
         <LoadingSkeleton />
       ) : formattedItem.length ? (
@@ -222,7 +225,8 @@ const ProgramDetailContent = ({ program }) => {
           </div>
           <Tag
             color={program.type === "Online" ? "blue" : "green"}
-            className="mt-1">
+            className="mt-1"
+          >
             {program.type}
           </Tag>
         </div>
@@ -253,7 +257,8 @@ const ProgramDetailContent = ({ program }) => {
               href={program.meetingLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-0 h-auto text-primary-green hover:text-primary-green/80">
+              className="p-0 h-auto text-primary-green hover:text-primary-green/80"
+            >
               Join Meeting
             </Button>
           </div>
@@ -267,7 +272,8 @@ const ProgramDetailContent = ({ program }) => {
             {program.tags.map((tag) => (
               <Tag
                 key={tag}
-                className="bg-gray-50 border border-gray-200 text-sm">
+                className="bg-gray-50 border border-gray-200 text-sm"
+              >
                 {tag}
               </Tag>
             ))}
@@ -328,10 +334,75 @@ const AppointmentDetailContent = ({ appointment }) => {
     },
   ];
 
+  // Track check-in status
+  const [isCheckedIn, setIsCheckedIn] = useState(false);
+
+  // Handle check-in
+  const handleCheckIn = () => {
+    setIsCheckedIn(true);
+    message.success("Student checked in successfully!");
+    // TODO: Implement API call to update appointment status to "In Progress"
+  };
+
+  // Handle check-out
+  const handleCheckOut = () => {
+    setIsCheckedIn(false);
+    message.success("Appointment completed successfully!");
+    // TODO: Implement API call to update appointment status to "Completed"
+  };
+
   return (
     <div className="space-y-4 max-h-[69vh] overflow-auto pr-5">
-      <h2 className="text-xl font-bold">Appointment Details</h2>
+      {/* Status and Action Section */}
+      <div className="flex items-center justify-between mb-4 bg-white p-4 rounded-lg shadow-sm">
+        <div>
+          <h2 className="text-xl font-bold mb-2">Appointment Details</h2>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">Status:</span>
+            <Tag
+              color={
+                isCheckedIn
+                  ? "processing"
+                  : appointment.status === "Completed"
+                  ? "success"
+                  : "default"
+              }
+            >
+              {isCheckedIn
+                ? "In Progress"
+                : appointment.status === "Completed"
+                ? "Completed"
+                : "Scheduled"}
+            </Tag>
+          </div>
+        </div>
 
+        <div className="flex gap-3">
+          {!isCheckedIn && appointment.status !== "Completed" && (
+            <Button
+              type="primary"
+              className="bg-blue-500 hover:bg-blue-600"
+              icon={<UserOutlined />}
+              onClick={handleCheckIn}
+            >
+              Check-in Student
+            </Button>
+          )}
+
+          {isCheckedIn && (
+            <Button
+              type="primary"
+              className="bg-primary-green hover:bg-primary-green/90"
+              icon={<CheckOutlined />}
+              onClick={handleCheckOut}
+            >
+              Complete & Check-out
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Psychologist and Student Information Cards */}
       <div className="grid grid-cols-2 gap-4">
         <Card
           title={
@@ -340,7 +411,8 @@ const AppointmentDetailContent = ({ appointment }) => {
               <span className="font-semibold">Psychologist Information</span>
             </div>
           }
-          className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+          className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
+        >
           <div className="space-y-3">
             <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
               <div className="w-28 text-gray-500">Name</div>
@@ -372,7 +444,8 @@ const AppointmentDetailContent = ({ appointment }) => {
               <span className="font-semibold">Student Information</span>
             </div>
           }
-          className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+          className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
+        >
           <div className="space-y-3">
             <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
               <div className="w-28 text-gray-500">Name</div>
@@ -398,8 +471,18 @@ const AppointmentDetailContent = ({ appointment }) => {
         </Card>
       </div>
 
+      {/* Scores Card */}
       <Card
-        title="Scores"
+        title={
+          <div className="flex items-center justify-between">
+            <span>Assessment Scores</span>
+            {isCheckedIn && (
+              <Tag color="processing" className="ml-2">
+                Session in Progress
+              </Tag>
+            )}
+          </div>
+        }
         className="bg-gray-50"
         styles={{
           title: {
@@ -411,7 +494,8 @@ const AppointmentDetailContent = ({ appointment }) => {
             justifyContent: "center",
             alignItems: "center",
           },
-        }}>
+        }}
+      >
         <BarChart width={700} height={300} data={data}>
           <XAxis dataKey="name" />
           <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} />
@@ -421,11 +505,37 @@ const AppointmentDetailContent = ({ appointment }) => {
           <Bar dataKey="score" name="Score (%)" fill={(entry) => entry.fill} />
         </BarChart>
       </Card>
+
+      {/* Session Notes - Only visible when checked in */}
+      {isCheckedIn && (
+        <Card
+          title="Session Notes"
+          className="bg-white"
+          extra={
+            <Tag color="processing" className="mr-0">
+              Current Session
+            </Tag>
+          }
+        >
+          <div className="space-y-4">
+            <Input.TextArea
+              placeholder="Enter session notes here..."
+              rows={4}
+              className="w-full"
+            />
+            <div className="flex justify-end">
+              <Button type="primary" className="bg-primary-green">
+                Save Notes
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };
 
-// Add prop types validation
+// Update PropTypes
 AppointmentDetailContent.propTypes = {
   appointment: PropTypes.shape({
     appointmentID: PropTypes.string.isRequired,
@@ -463,7 +573,8 @@ AppointmentDetailContent.propTypes = {
         role: PropTypes.string.isRequired,
       }).isRequired,
     }).isRequired,
-    status: PropTypes.string.isRequired,
+    status: PropTypes.oneOf(["Scheduled", "In Progress", "Completed"])
+      .isRequired,
     createdAt: PropTypes.string.isRequired,
     updatedAt: PropTypes.string.isRequired,
   }).isRequired,
