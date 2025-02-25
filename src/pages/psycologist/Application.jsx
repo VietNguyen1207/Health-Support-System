@@ -19,7 +19,11 @@ function Application() {
   const fetchData = async () => {
     try {
       const data = await fetchLeaveRequests(user.psychologistId);
-      setData(data);
+      const formattedData = data.map((item) => ({
+        ...item,
+        duration: dayjs(item.endDate).diff(dayjs(item.startDate), "days") + 1,
+      }));
+      setData(formattedData);
     } catch (error) {
       console.error("Error fetching leave requests:", error);
     }
@@ -51,6 +55,11 @@ function Application() {
       title: "End Date",
       dataIndex: "endDate",
       render: (text) => new Date(text).toLocaleDateString(),
+    },
+    {
+      title: "Duration",
+      dataIndex: "duration",
+      render: (text) => `${text} days`,
     },
     {
       title: "Reason",
