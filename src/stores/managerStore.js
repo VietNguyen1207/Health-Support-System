@@ -10,7 +10,7 @@ const initialState = {
 const MANAGER_URL = "/managers/";
 
 const MANAGER_PATH = {
-  GET_LEAVE_REQUEST: "leave-requests",
+  GET_LEAVE_REQUEST: "leave-requests/all",
   UPDATE_LEAVE_REQUEST: (leaveRequestId, approve) =>
     `leave-requests/${leaveRequestId}?approve=${approve}`,
 };
