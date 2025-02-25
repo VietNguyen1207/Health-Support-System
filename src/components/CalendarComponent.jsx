@@ -1,4 +1,5 @@
 import { Calendar } from "antd";
+import dayjs from "dayjs";
 import PropTypes from "prop-types";
 
 function CustomCalendar({
@@ -10,6 +11,7 @@ function CustomCalendar({
   return (
     <Calendar
       {...props}
+      defaultValue={dayjs()}
       className={className}
       mode={mode}
       onSelect={onSelect}

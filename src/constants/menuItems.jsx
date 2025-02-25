@@ -1,5 +1,6 @@
 import {
   FileDoneOutlined,
+  FileOutlined,
   HistoryOutlined,
   PoweroffOutlined,
   // ProfileOutlined,
@@ -12,6 +13,7 @@ export const menuItems = [
   { key: "/", label: "Home", path: "/" },
   { key: "/about", label: "About", path: "/about" },
   { key: "/services", label: "Services", path: "/services" },
+  { key: "/blog", label: "Blog", path: "/blog" },
   {
     key: "program",
     label: "Program",
@@ -69,17 +71,17 @@ export const menuItems = [
 ];
 
 export const dropdownMenu = [
-  // {
-  //   label: "Student Profile",
-  //   key: "/student-profile",
-  //   icon: <ProfileOutlined />,
-  //   roles: ["student"],
-  // },
   {
     label: "Test Record",
     key: "/test-record",
     icon: <FileDoneOutlined />,
     roles: ["student"],
+  },
+  {
+    label: "Application",
+    key: "/application",
+    icon: <FileOutlined />,
+    roles: ["psychologist"],
   },
   {
     label: "Appointment Record",

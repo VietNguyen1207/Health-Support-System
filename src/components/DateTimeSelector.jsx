@@ -1,14 +1,14 @@
 // DateTimeSelector.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   ConfigProvider,
+  notification,
   Popover,
   Select,
   Space,
   Spin,
   Typography,
-  message,
 } from "antd";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
@@ -37,6 +37,7 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
   const { GetTimeSlots } = useAppointmentStore();
   const [isLoading, setIsLoading] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     setIsOtherDate(false);
@@ -49,67 +50,76 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
       ...prev,
       timeSlotId: null,
     }));
+    fetchSlots(formatAppointmentDate(dayjs()));
   }, [selectedPsychologist]);
 
-  useEffect(() => {
-    const fetchSlots = async () => {
+  const fetchSlots = useCallback(
+    async (dateStr) => {
       if (!selectedPsychologist) {
         setAvailableSlots([]);
         return;
       }
 
-      const dateStr = selectedDate
-        ? formatAppointmentDate(selectedDate)
-        : formatAppointmentDate(otherDate);
-
       setIsLoading(true);
       try {
-        const slots = await GetTimeSlots(selectedPsychologist, dateStr);
-
-        setAvailableSlots(
-          slots.map((slot) => ({
-            id: slot.timeSlotId,
-            isAvailable: slot.status === "Booked" ? false : true,
-            startTime: slot.startTime,
-          }))
+        const { timeSlots, message } = await GetTimeSlots(
+          selectedPsychologist,
+          dateStr
         );
+
+        if (timeSlots?.length) {
+          setAvailableSlots(
+            timeSlots.map((slot) => ({
+              id: slot.timeSlotId,
+              isAvailable:
+                String(slot.status).toLocaleLowerCase() === "booked"
+                  ? false
+                  : true,
+              startTime: slot.startTime,
+            }))
+          );
+        } else {
+          setMessage(message);
+        }
       } catch (error) {
-        console.error("Failed to fetch timeslots:", error);
-        message.error("Failed to load available time slots. Please try again.");
+        console.error("Failed to fetch timeSlots:", error);
+        notification.destroy();
+        notification.error({
+          message: "Error",
+          description: "Failed to load available time slots. Please try again.",
+          placement: "bottomRight",
+        });
       } finally {
         setIsLoading(false);
       }
-    };
+    },
+    [selectedPsychologist, selectedDate, otherDate]
+  );
 
-    fetchSlots();
-  }, [selectedDate, otherDate, selectedPsychologist]);
-
-  const handleDateSelection = (date, cardType = "RegularDate") => {
+  const handleDateSelection = async (date, cardType = "RegularDate") => {
     if (!selectedPsychologist) return;
 
-    try {
-      if (cardType === "RegularDate") {
-        setSelectedDate(date);
-        setIsOtherDate(false);
-        setIsOpen(false);
-      } else {
-        setIsOtherDate(true);
-        setIsOpen(false);
-        setSelectedDate(null);
-      }
+    setMessage(null);
+    setAvailableSlots([]);
 
-      setLastSelectedCard(cardType);
-    } catch (error) {
-      console.error("Failed to fetch timeslots:", error);
-      message.error("Failed to load available time slots. Please try again.");
+    if (cardType === "RegularDate") {
+      setSelectedDate(date);
+      setIsOtherDate(false);
+      setIsOpen(false);
+    } else {
+      setIsOtherDate(true);
+      setIsOpen(true);
+      setSelectedDate(null);
     }
+
+    setLastSelectedCard(cardType);
+
+    await fetchSlots(formatAppointmentDate(date));
   };
 
   const onChange = (value) => {
-    if (!value.isBefore(dayjs())) {
-      setOtherDate(value);
-      handleDateSelection(value, "OtherDate");
-    }
+    setOtherDate(value);
+    handleDateSelection(value, "OtherDate");
   };
 
   const headerRender = ({ value, onChange }) => {
@@ -142,15 +152,15 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
               key={formatAppointmentDate(item)}
               className={`
                 min-w-14 p-0 border-none transition-all
-                ${
-                  !selectedPsychologist
-                    ? "bg-gray-100 cursor-not-allowed"
-                    : formatAppointmentDate(selectedDate) ===
-                      formatAppointmentDate(item)
-                    ? "bg-[#5C8C6B]"
-                    : "bg-gray-100 hover:bg-gray-200 cursor-pointer"
-                }
-              `}
+              ${
+                !selectedPsychologist
+                  ? "bg-gray-100 cursor-not-allowed"
+                  : formatAppointmentDate(selectedDate) ===
+                    formatAppointmentDate(item)
+                  ? "bg-[#5C8C6B]"
+                  : "bg-gray-100 hover:bg-gray-200 cursor-pointer"
+              }
+            `}
               onClick={() => handleDateSelection(item, "RegularDate")}>
               <div className="text-center">
                 <div
@@ -185,10 +195,10 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
               <div className="w-[300px]">
                 <CustomCalendar
                   fullscreen={false}
-                  onChange={onChange}
+                  onSelect={onChange}
                   headerRender={headerRender}
                   disabledDate={(current) => {
-                    return current.isBefore(dayjs());
+                    return current.isBefore(dayjs().subtract(1, "day"));
                   }}
                 />
               </div>
@@ -196,13 +206,13 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
             <Card
               key="other"
               className={`
-                min-w-14 cursor-pointer border-none transition-all
+                min-w-14 border-none transition-all
                 ${
-                  isOtherDate
-                    ? selectedPsychologist
-                      ? "bg-[#5C8C6B]"
-                      : "bg-gray-400"
-                    : "bg-gray-100 hover:bg-gray-200"
+                  !selectedPsychologist
+                    ? "bg-gray-100 cursor-not-allowed"
+                    : isOtherDate
+                    ? "bg-[#5C8C6B]"
+                    : "bg-gray-100 hover:bg-gray-200 cursor-pointer"
                 }
               `}
               onClick={() => {
@@ -248,7 +258,7 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
         <div className="w-full flex justify-center p-8">
           <Spin size="default" />
         </div>
-      ) : availableSlots.length > 0 ? (
+      ) : availableSlots.length ? (
         <ConfigProvider theme={{ components: { Card: { bodyPadding: 5 } } }}>
           <div className="max-w-2/3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-4 gap-2 pr-8">
             {availableSlots.map((slot) => {
@@ -300,7 +310,7 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
         </ConfigProvider>
       ) : (
         <Text className="text-gray-500">
-          No available slots for selected date.
+          {message || "No available slots for selected date."}
         </Text>
       )}
     </div>

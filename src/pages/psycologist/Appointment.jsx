@@ -1,13 +1,18 @@
-import { Badge, Button, Flex, message, Popover, Select, Spin } from "antd";
+import { Badge, Button, Flex, message, Popover, Select, Spin, Tag } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { QuestionCircleOutlined } from "@ant-design/icons";
+import {
+  CarryOutOutlined,
+  QuestionCircleOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import CustomCalendar from "../../components/CalendarComponent";
 import { formatAppointmentDate } from "../../utils/Helper";
 import DetailCalendar from "../DetailCalendar";
 import { months } from "../../constants/calendar";
 import { useUserStore } from "../../stores/userStore";
 import { useAuthStore } from "../../stores/authStore";
+import "../../style/calendar.css";
 
 export default function Appointment() {
   // const calendarRef = useRef(null);
@@ -98,33 +103,48 @@ export default function Appointment() {
 
     return (
       <div
-        className="flex gap-2 py-2"
+        className="pb-1 w-full max-h-[50px] space-y-1 overflow-y-auto"
         key={dateKey}
         onClick={() => handleDateClick(dateKey)}>
-        {appointments.length ? (
-          <Badge color={"volcano"} count={appointments.length} />
-        ) : (
-          /* appointments.map((item) => (
-            <>
-            <Tag
-              key={item.appointmentId}
-              color={"volcano"}
-              className="text-sm w-fit"
-              icon={<UserOutlined />}>
-              {item.startTime +
-                " - " +
-                (item?.psychologistName || item?.studentName)}
-            </Tag>
+        {/* <Tag
+          // key={item.appointmentId}
+          color={"volcano"}
+          size="small"
+          className="text-xs w-fit"
+          icon={<UserOutlined />}>
+          13:00 - Dr. John Doe
+        </Tag> */}
 
+        {appointments.length ? (
+          /* <Badge color={"volcano"} count={appointments.length} /> */
+          appointments.map((item) => (
+            <>
+              <Tag
+                key={item.appointmentId}
+                color={"volcano"}
+                className="text-sm w-fit"
+                icon={<UserOutlined />}>
+                {item.startTime +
+                  " - " +
+                  (item?.psychologistName || item?.studentName)}
+              </Tag>
             </>
-          )) */
+          ))
+        ) : (
           <></>
         )}
 
+        {/* <Tag
+          color={"blue"}
+          className="text-xs w-fit"
+          size="small"
+          icon={<CarryOutOutlined />}>
+          Stresssssssssssssssssssssssssss - Online
+        </Tag> */}
+
         {programs.length ? (
-          <Badge color="blue" count={programs.length} />
-        ) : (
-          /* programs.map((item) => (
+          /* <Badge color="blue" count={programs.length} /> */
+          programs.map((item) => (
             <Tag
               key={item.programId}
               color={"blue"}
@@ -132,7 +152,8 @@ export default function Appointment() {
               icon={<CarryOutOutlined />}>
               {item.title + " - " + item.type}
             </Tag>
-          )) */
+          ))
+        ) : (
           <></>
         )}
       </div>
@@ -155,9 +176,19 @@ export default function Appointment() {
     setSelectedDateDetails(null);
   };
 
+  const handleDateChange = (newDate) => {
+    if (newDate.isBefore(dayjs(), "month")) {
+      onChange(dayjs());
+      setSelectedDate(dayjs());
+    } else {
+      onChange(newDate);
+      setSelectedDate(newDate);
+    }
+  };
+
   const headerRender = ({ value, onChange }) => {
     const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: 3 }, (_, index) => ({
+    const years = Array.from({ length: 2 }, (_, index) => ({
       label: String(currentYear + index),
       value: currentYear + index,
     }));
@@ -176,19 +207,33 @@ export default function Appointment() {
         <div className="flex flex-row gap-5">
           <Select
             value={value.month()}
-            options={months}
+            options={months.map((month) => ({
+              ...month,
+              disabled:
+                value.year() === dayjs().year() &&
+                month.value < dayjs().month(),
+            }))}
             onChange={(newMonth) => {
               const now = value.clone().month(newMonth);
-              onChange(now);
+              handleDateChange(now);
             }}
             style={{ maxWidth: 120 }}
           />
           <Select
             value={value.year()}
-            options={years}
+            options={years.map((year) => ({
+              ...year,
+              disabled: year.value < dayjs().year(),
+            }))}
             onChange={(newYear) => {
               const now = value.clone().year(newYear);
-              onChange(now);
+              if (
+                now.year() === dayjs().year() &&
+                now.month() < dayjs().month()
+              ) {
+                now.month(dayjs().month());
+              }
+              handleDateChange(now);
             }}
             style={{ maxWidth: 120 }}
           />
@@ -207,7 +252,11 @@ export default function Appointment() {
               const newDate = selectedDate.add(1, "month");
               setSelectedDate(newDate);
               onChange(newDate);
-            }}>
+            }}
+            disabled={selectedDate.isSame(
+              dayjs().add(1, "year").endOf("year"),
+              "month"
+            )}>
             Next
           </Button>
         </div>
@@ -220,7 +269,7 @@ export default function Appointment() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" id="calendar-container">
       {loading && (
         <div className="absolute inset-0 bg-white/70 z-50 flex justify-center items-center">
           <Spin size="large" />
@@ -236,8 +285,8 @@ export default function Appointment() {
           headerRender={headerRender}
           disabledDate={(current) => {
             return (
-              current.isBefore(dayjs().subtract(1, "day")) &&
-              current.isAfter(dayjs().subtract(1, "year"))
+              current.isBefore(dayjs().subtract(1, "day")) ||
+              current.isAfter(dayjs().add(1, "year").endOf("year"))
             );
           }}
         />

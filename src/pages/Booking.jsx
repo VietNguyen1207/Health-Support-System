@@ -14,7 +14,7 @@ import {
 const Booking = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { CreateBooking } = useAppointmentStore();
+  const { loading, CreateBooking } = useAppointmentStore();
   const { users, getAllUsers } = useUserStore();
   const [selectedSpecialization, setSelectedSpecialization] = useState("");
   const [formData, setFormData] = useState({
@@ -93,6 +93,7 @@ const Booking = () => {
   };
 
   const showSuccessNotification = () => {
+    notification.destroy();
     notification.success({
       message: "Booking Confirmed",
       description: "Your booking has been successfully confirmed!",
@@ -289,6 +290,7 @@ const Booking = () => {
               <Button
                 type="primary"
                 disabled={disabledButton}
+                loading={loading}
                 onClick={handleSubmit}>
                 Book Appointment
               </Button>

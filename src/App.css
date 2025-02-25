@@ -974,7 +974,7 @@ h3 {
 
 /* padding bottom */
 .general-wrapper {
-  padding-bottom: 5rem;
+  padding-bottom: 4rem;
   margin-top: 4rem;
 }
 
@@ -1021,3 +1021,9 @@ h3 {
   background-size: 800px 104px;
   animation: shimmer 1.5s infinite linear;
 }
+
+/* .ant-tabs-content-holder
+  > .ant-tabs-content.ant-tabs-content-top.ant-picker-cell {
+  height: 72vh;
+  overflow: auto;
+} */

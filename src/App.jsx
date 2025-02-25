@@ -28,6 +28,9 @@ function App() {
           },
           Menu: {
             // itemSelectedBg: "#CBECD5",
+            itemSelectedColor: "white",
+            itemSelectedBg: "#1677ff",
+            colorPrimary: "#1677ff",
           },
           Tabs: {
             itemSelectedColor: "#007824",
@@ -35,7 +38,10 @@ function App() {
           },
           Button: {
             colorPrimary: "#4a7c59",
+            colorPrimaryHover: "#3a6349",
+            colorPrimaryActive: "#2d4d39",
           },
+          Layout: {},
         },
       }}>
       <ScrollToTop />

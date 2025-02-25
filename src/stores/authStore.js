@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 // import account from "../data/account.json";
 import axios from "axios";
 import { api } from "./apiConfig";
+import { useUserStore } from "./userStore";
 
 const initialState = {
   user: null,
@@ -28,6 +29,7 @@ const isTokenExpired = (token) => {
     const expiryTime = payload.exp * 1000; // Convert to milliseconds
     return Date.now() >= expiryTime;
   } catch (error) {
+    console.log(error);
     return true;
   }
 };
@@ -59,32 +61,35 @@ export const useAuthStore = create(
 
           const {
             userId,
-            studentId,
+            studentId, // Basic ID from login
             fullName,
             accessToken,
             refreshToken,
             role,
           } = data;
 
-          // Cập nhật state
+          // Set authorization header for subsequent requests
+          api.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${accessToken}`;
+
+          // Get user details to fetch role-specific IDs
+          const userStore = useUserStore.getState();
+          const userDetails = await userStore.getDetail(userId);
+
+          // Set user state with role-specific IDs
           set({
             user: {
               userId,
               studentId,
               fullName,
               role: String(role).toLowerCase(),
+              psychologistId: userDetails?.psychologistInfo?.psychologistId,
+              parentId: userDetails?.parentInfo?.parentId,
             },
             token: { accessToken, refreshToken },
             isAuthenticated: true,
           });
-
-          // Set token cho axios - Fix header name to Authentication
-          // api.defaults.headers.common[
-          //   "Authentication"
-          // ] = `Bearer ${accessToken}`;
-          api.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${accessToken}`;
 
           return true;
         } catch (error) {

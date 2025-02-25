@@ -1,0 +1,59 @@
+{
+  "blog": [
+    {
+      "title": "Understanding School Psychology: Supporting Student Well-being",
+      "avatar": "https://images.unsplash.com/photo-1523240795612-9a054b0db644",
+      "department": "School Psychology",
+      "description": "School psychology plays a vital role in supporting students' mental health and academic success. Through understanding student psychology, we can create a more positive learning environment and help students reach their full potential.",
+      "createBy": "Manager",
+      "createDate": "15/02/2025",
+      "children": [
+        {
+          "headerSection": "🎓 The Importance of School Psychology",
+          "sectionContent": "School psychology is a specialized field focused on understanding and supporting students' psychological development in educational settings. Through research and application of psychological principles, experts can help students develop social skills, manage emotions, and achieve academic success.",
+          "imageSection": "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45"
+        },
+        {
+          "headerSection": "💡 Common Psychological Issues in Students",
+          "sectionContent": "Students often face various challenges including anxiety, stress from academic pressure, social difficulties, and adaptation problems. Understanding these issues helps counselors provide appropriate support and develop effective intervention strategies.",
+          "imageSection": "https://images.unsplash.com/photo-1516534775068-ba3e7458af70"
+        },
+        {
+          "headerSection": "🤝 The Role of School Counselors",
+          "sectionContent": "School counselors play a crucial role in supporting student mental health. They provide individual counseling, group sessions, and work with teachers and parents to create a supportive environment for student development.",
+          "imageSection": "https://images.unsplash.com/photo-1516534775068-ba3e7458af70"
+        },
+        {
+          "headerSection": "📞 Contact Us:",
+          "sectionContent": "For more information about our school psychology services:\nPhone: (123) 456-7890\nEmail: counseling@school.edu",
+          "imageSection": ""
+        }
+      ]
+    },
+    {
+      "title": "Building Resilience in Students: A Guide for Educators and Parents",
+      "avatar": "https://images.unsplash.com/photo-1509062522246-3755977927d7",
+      "department": "Clinical Psychology",
+      "description": "Resilience is a crucial life skill that helps students overcome challenges and adapt to change. Learn how educators and parents can help foster resilience in young people.",
+      "createBy": "Manager",
+      "createDate": "20/02/2025",
+      "children": [
+        {
+          "headerSection": "��� Understanding Resilience",
+          "sectionContent": "Resilience is the ability to bounce back from setbacks and adapt to challenging circumstances. It's a crucial skill that helps students navigate academic pressures, social challenges, and personal difficulties.",
+          "imageSection": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846"
+        },
+        {
+          "headerSection": "💪 Building Resilience Skills",
+          "sectionContent": "Key strategies for building resilience include developing problem-solving skills, maintaining positive relationships, practicing self-care, and learning from experiences. These skills help students face challenges with confidence.",
+          "imageSection": "https://images.unsplash.com/photo-1516534775068-ba3e7458af70"
+        },
+        {
+          "headerSection": "📞 Contact Us:",
+          "sectionContent": "For more information about resilience building programs:\nPhone: (123) 456-7890\nEmail: counseling@school.edu",
+          "imageSection": ""
+        }
+      ]
+    }
+  ]
+}
