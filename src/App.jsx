@@ -26,12 +26,6 @@ function App() {
             paddingContentHorizontal: 0,
             paddingContentVertical: 0,
           },
-          Menu: {
-            // itemSelectedBg: "#CBECD5",
-            itemSelectedColor: "white",
-            itemSelectedBg: "#1677ff",
-            colorPrimary: "#1677ff",
-          },
           Tabs: {
             itemSelectedColor: "#007824",
             cardBg: "#D3D3D3",

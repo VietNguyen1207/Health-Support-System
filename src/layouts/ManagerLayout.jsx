@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Dropdown, Layout, Menu, theme } from "antd";
+import { Button, ConfigProvider, Dropdown, Layout, Menu, theme } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   HomeOutlined,
@@ -94,57 +94,69 @@ export const ManagerLayout = () => {
   );
 
   return (
-    <Layout style={{ height: "100vh", overflow: "hidden" }}>
-      <Header
-        style={{
-          padding: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "end",
-        }}>
-        <Dropdown.Button
-          menu={menuProps}
-          align="end"
-          buttonsRender={([leftButton, rightButton]) => [
-            <Button
-              key={user?.role}
-              icon={<UserOutlined />}
-              className={`flex items-center gap-2 px-3 py-1 rounded-l-md border w-full pointer-events-none`}>
-              {user.fullName}
-            </Button>,
-            rightButton,
-          ]}
-          trigger={"click"}
-          style={{ flex: 0, marginRight: 16 }}
-        />
-      </Header>
-      <Layout className="bg-white">
-        <Sider
-          trigger={null}
-          theme="dark"
-          collapsible
-          collapsed={collapsed}
-          breakpoint="lg"
-          onBreakpoint={(broken) => {
-            setCollapsed(broken);
-          }}
-          className="w-fit">
-          {sideMenu}
-        </Sider>
-        <Content
+    <ConfigProvider
+      theme={{
+        components: {
+          Menu: {
+            // itemSelectedBg: "#CBECD5",
+            itemSelectedColor: "white",
+            itemSelectedBg: "#1677ff",
+            colorPrimary: "#1677ff",
+          },
+        },
+      }}>
+      <Layout style={{ height: "100vh", overflow: "hidden" }}>
+        <Header
           style={{
-            margin: "10px 16px",
-            padding: 30,
-            paddingLeft: 50,
-            paddingRight: 20,
-            background: "white",
-            borderRadius: borderRadiusLG,
-            overflow: "auto",
-            height: "90%",
+            padding: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "end",
           }}>
-          <Outlet />
-        </Content>
+          <Dropdown.Button
+            menu={menuProps}
+            align="end"
+            buttonsRender={([leftButton, rightButton]) => [
+              <Button
+                key={user?.role}
+                icon={<UserOutlined />}
+                className={`flex items-center gap-2 px-3 py-1 rounded-l-md border w-full pointer-events-none`}>
+                {user.fullName}
+              </Button>,
+              rightButton,
+            ]}
+            trigger={"click"}
+            style={{ flex: 0, marginRight: 16 }}
+          />
+        </Header>
+        <Layout className="bg-white">
+          <Sider
+            trigger={null}
+            theme="dark"
+            collapsible
+            collapsed={collapsed}
+            breakpoint="lg"
+            onBreakpoint={(broken) => {
+              setCollapsed(broken);
+            }}
+            className="w-fit">
+            {sideMenu}
+          </Sider>
+          <Content
+            style={{
+              margin: "10px 16px",
+              padding: 30,
+              paddingLeft: 50,
+              paddingRight: 20,
+              background: "white",
+              borderRadius: borderRadiusLG,
+              overflow: "auto",
+              height: "90%",
+            }}>
+            <Outlet />
+          </Content>
+        </Layout>
       </Layout>
-    </Layout>
+    </ConfigProvider>
   );
 };

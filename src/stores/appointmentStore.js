@@ -23,9 +23,7 @@ export const useAppointmentStore = create((set) => ({
   fetchDepartments: async () => {
     set({ loading: true, error: null });
     try {
-      const { data } = await api.get(
-        `${APPOINTMENT_URL}${APPOINTMENT_ENDPOINT.DEPARTMENTS}`
-      );
+      const { data } = await api.get("psychologists/departments");
       set({
         departments: data,
         loading: false,

@@ -7,13 +7,13 @@ const initialState = {
   error: null,
 };
 
-const PSYCHOLOGIST_URL = "/psychologists/";
+const PSYCHOLOGIST_URL = "/psychologists";
 
 const PSYCHOLOGIST_PATH = {
-  GET_LEAVE_REQUEST: (psychId) => `${psychId}/leave-requests`,
-  POST_LEAVE_REQUEST: (psychId) => `${psychId}/leave-requests`,
+  GET_LEAVE_REQUEST: (psychId) => `/${psychId}/leave-requests`,
+  POST_LEAVE_REQUEST: (psychId) => `/${psychId}/leave-requests`,
   CANCEL_LEAVE_REQUEST: (psychId, leaveRequestId) =>
-    `${psychId}/leave-requests/${leaveRequestId}/cancel`,
+    `/${psychId}/leave-requests/${leaveRequestId}/cancel`,
 };
 
 export const usePsychologistStore = create((set) => ({
