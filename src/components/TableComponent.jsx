@@ -10,6 +10,8 @@ const TableComponent = ({
   loading = false,
   pagination = true,
   showExpandColumn = false,
+  rowSelectionType = "checkbox",
+  showSelection = true,
   onSelectRowKey = (selectedRowKeys, selectedRows) => {
     console.log(
       `selectedRowKeys: ${selectedRowKeys}`,
@@ -33,7 +35,14 @@ const TableComponent = ({
         bordered={bordered}
         size={size}
         loading={loading}
-        rowSelection={{ type: "checkbox", ...rowSelection }}
+        rowSelection={
+          showSelection
+            ? {
+                type: rowSelectionType,
+                ...rowSelection,
+              }
+            : undefined
+        }
         rowKey={(record) => record.userId}
         pagination={
           pagination && {
@@ -57,6 +66,8 @@ TableComponent.propTypes = {
   loading: PropTypes.bool,
   pagination: PropTypes.bool,
   showExpandColumn: PropTypes.bool,
+  rowSelectionType: PropTypes.oneOf(["checkbox", "radio"]),
+  showSelection: PropTypes.bool,
   onSelectRowKey: PropTypes.func,
   getCheckboxProps: PropTypes.func,
   expandedRowRender: PropTypes.func,

@@ -1,5 +1,5 @@
 // DateTimeSelector.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   ConfigProvider,
@@ -50,18 +50,15 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
       ...prev,
       timeSlotId: null,
     }));
+    fetchSlots(formatAppointmentDate(dayjs()));
   }, [selectedPsychologist]);
 
-  useEffect(() => {
-    const fetchSlots = async () => {
+  const fetchSlots = useCallback(
+    async (dateStr) => {
       if (!selectedPsychologist) {
         setAvailableSlots([]);
         return;
       }
-
-      const dateStr = selectedDate
-        ? formatAppointmentDate(selectedDate)
-        : formatAppointmentDate(otherDate);
 
       setIsLoading(true);
       try {
@@ -70,7 +67,7 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
           dateStr
         );
 
-        if (timeSlots.length) {
+        if (timeSlots?.length) {
           setAvailableSlots(
             timeSlots.map((slot) => ({
               id: slot.timeSlotId,
@@ -95,12 +92,11 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
       } finally {
         setIsLoading(false);
       }
-    };
+    },
+    [selectedPsychologist, selectedDate, otherDate]
+  );
 
-    fetchSlots();
-  }, [selectedDate, otherDate, selectedPsychologist]);
-
-  const handleDateSelection = (date, cardType = "RegularDate") => {
+  const handleDateSelection = async (date, cardType = "RegularDate") => {
     if (!selectedPsychologist) return;
 
     setMessage(null);
@@ -112,18 +108,18 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
       setIsOpen(false);
     } else {
       setIsOtherDate(true);
-      setIsOpen(false);
+      setIsOpen(true);
       setSelectedDate(null);
     }
 
     setLastSelectedCard(cardType);
+
+    await fetchSlots(formatAppointmentDate(date));
   };
 
   const onChange = (value) => {
-    if (!value.isBefore(dayjs())) {
-      setOtherDate(value);
-      handleDateSelection(value, "OtherDate");
-    }
+    setOtherDate(value);
+    handleDateSelection(value, "OtherDate");
   };
 
   const headerRender = ({ value, onChange }) => {
@@ -199,10 +195,10 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
               <div className="w-[300px]">
                 <CustomCalendar
                   fullscreen={false}
-                  onChange={onChange}
+                  onSelect={onChange}
                   headerRender={headerRender}
                   disabledDate={(current) => {
-                    return current.isBefore(dayjs());
+                    return current.isBefore(dayjs().subtract(1, "day"));
                   }}
                 />
               </div>
@@ -210,13 +206,13 @@ const DateTimeSelector = ({ selectedPsychologist = null, ...props }) => {
             <Card
               key="other"
               className={`
-                min-w-14 cursor-pointer border-none transition-all
+                min-w-14 border-none transition-all
                 ${
-                  isOtherDate
-                    ? selectedPsychologist
-                      ? "bg-[#5C8C6B]"
-                      : "bg-gray-400"
-                    : "bg-gray-100 hover:bg-gray-200"
+                  !selectedPsychologist
+                    ? "bg-gray-100 cursor-not-allowed"
+                    : isOtherDate
+                    ? "bg-[#5C8C6B]"
+                    : "bg-gray-100 hover:bg-gray-200 cursor-pointer"
                 }
               `}
               onClick={() => {
