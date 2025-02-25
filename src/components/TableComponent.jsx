@@ -21,6 +21,7 @@ const TableComponent = ({
   },
   getCheckboxProps = () => {},
   expandedRowRender = () => {},
+  rowKey = "userId",
 }) => {
   const rowSelection = {
     onChange: onSelectRowKey,
@@ -43,7 +44,7 @@ const TableComponent = ({
               }
             : undefined
         }
-        rowKey={(record) => record.userId}
+        rowKey={rowKey}
         pagination={
           pagination && {
             position: ["bottomCenter"],
@@ -71,6 +72,7 @@ TableComponent.propTypes = {
   onSelectRowKey: PropTypes.func,
   getCheckboxProps: PropTypes.func,
   expandedRowRender: PropTypes.func,
+  rowKey: PropTypes.string,
 };
 
 export default TableComponent;

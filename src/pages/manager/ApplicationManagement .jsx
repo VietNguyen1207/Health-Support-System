@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import TableComponent from "../../components/TableComponent";
-import { Button, Flex, message, Popconfirm } from "antd";
+import { Button, Flex, message, Popconfirm, Typography, Space } from "antd";
 import TagComponent from "../../components/TagComponent";
 import { transformString } from "../../utils/Helper";
 import dayjs from "dayjs";
 import { useManagerStore } from "../../stores/managerStore";
+import { ReloadOutlined } from "@ant-design/icons";
 
 function ApplicationManagement() {
   const { fetchLeaveRequests, updateLeaveRequest, loading } = useManagerStore();
@@ -13,7 +14,11 @@ function ApplicationManagement() {
   const fetchData = async () => {
     try {
       const data = await fetchLeaveRequests();
-      setData(data);
+      const formattedData = data.map((item) => ({
+        ...item,
+        duration: dayjs(item.endDate).diff(dayjs(item.startDate), "days") + 1,
+      }));
+      setData(formattedData);
     } catch (error) {
       console.error("Error fetching leave requests:", error);
     }
@@ -36,10 +41,32 @@ function ApplicationManagement() {
       dataIndex: "requestId",
     },
     {
+      title: "Psychologist Name",
+      dataIndex: "psychologistName",
+      sorter: (a, b) => a.psychologistName.localeCompare(b.psychologistName),
+      filterSearch: true,
+      onFilter: (value, record) =>
+        record.psychologistName.toLowerCase().includes(value.toLowerCase()),
+      filters: data
+        .map((item) => item.psychologistName)
+        .filter((value, index, self) => self.indexOf(value) === index)
+        .map((name) => ({ text: name, value: name })),
+    },
+    {
       title: "Start Date",
       dataIndex: "startDate",
       render: (text) => new Date(text).toLocaleDateString(),
       sorter: (a, b) => new Date(a.startDate) - new Date(b.startDate),
+      filterSearch: true,
+      onFilter: (value, record) => {
+        const recordDate = new Date(record.startDate).toLocaleDateString();
+        return recordDate.toLowerCase().includes(value.toLowerCase());
+      },
+      filters: data
+        .map((item) => new Date(item.startDate).toLocaleDateString())
+        .filter((value, index, self) => self.indexOf(value) === index)
+        .map((date) => ({ text: date, value: date })),
+      width: "10%",
     },
     {
       title: "End Date",
@@ -47,9 +74,14 @@ function ApplicationManagement() {
       render: (text) => new Date(text).toLocaleDateString(),
     },
     {
+      title: "Duration",
+      dataIndex: "duration",
+      render: (text) => `${text} days`,
+    },
+    {
       title: "Reason",
       dataIndex: "reason",
-      width: "30%",
+      width: "25%",
     },
     {
       title: "Created At",
@@ -70,7 +102,13 @@ function ApplicationManagement() {
                 ? "orange"
                 : transformedValue === "Approved"
                 ? "green"
-                : "red"
+                : transformedValue === "Cancelled"
+                ? "red"
+                : transformedValue === "Expired"
+                ? "gray"
+                : transformedValue === "Rejected"
+                ? "volcano"
+                : "default"
             }
             tag={value}
           />
@@ -88,6 +126,14 @@ function ApplicationManagement() {
         {
           text: "Cancelled",
           value: "CANCELLED",
+        },
+        {
+          text: "Expired",
+          value: "EXPIRED",
+        },
+        {
+          text: "Rejected",
+          value: "REJECTED",
         },
       ],
       onFilter: (value, record) => record.status.includes(value),
@@ -135,7 +181,20 @@ function ApplicationManagement() {
   }, []);
 
   return (
-    <div className="">
+    <div className="p-6">
+      <Flex justify="space-between" align="center" className="mb-6">
+        <Typography.Title level={2} style={{ margin: 0 }}>
+          Application Management
+        </Typography.Title>
+        <Space>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={fetchData}
+            loading={loading}>
+            Refresh
+          </Button>
+        </Space>
+      </Flex>
       <TableComponent
         title="Applications"
         columns={columns}
@@ -145,6 +204,7 @@ function ApplicationManagement() {
         showSelection={false}
         setData={setData}
         size="middle"
+        rowKey="requestId"
       />
     </div>
   );
