@@ -302,9 +302,14 @@ ProgramDetailContent.propTypes = {
 };
 
 const AppointmentDetailContent = ({ appointment }) => {
-  const { checkInAppointment, appointmentStatus, clearAppointmentStatus } =
-    useAppointmentStore();
+  const {
+    checkInAppointment,
+    checkOutAppointment,
+    appointmentStatus,
+    clearAppointmentStatus,
+  } = useAppointmentStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [notes, setNotes] = useState("");
 
   // Handle check-in
   const handleCheckIn = async () => {
@@ -320,10 +325,17 @@ const AppointmentDetailContent = ({ appointment }) => {
   };
 
   // Handle check-out
-  const handleCheckOut = () => {
-    message.success("Appointment completed successfully!");
-    clearAppointmentStatus(); // Clear the status when checking out
-    // TODO: Implement API call to update appointment status to "Completed"
+  const handleCheckOut = async () => {
+    try {
+      setIsLoading(true);
+      await checkOutAppointment(appointment.appointmentID, notes);
+      message.success("Appointment completed successfully!");
+      clearAppointmentStatus();
+    } catch (error) {
+      message.error("Failed to check out appointment");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Clean up on unmount
@@ -414,6 +426,7 @@ const AppointmentDetailContent = ({ appointment }) => {
               className="bg-primary-green hover:bg-primary-green/90"
               icon={<CheckOutlined />}
               onClick={handleCheckOut}
+              loading={isLoading}
             >
               Complete & Check-out
             </Button>
@@ -541,12 +554,9 @@ const AppointmentDetailContent = ({ appointment }) => {
               placeholder="Enter session notes here..."
               rows={4}
               className="w-full"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
             />
-            <div className="flex justify-end">
-              <Button type="primary" className="bg-primary-green">
-                Save Notes
-              </Button>
-            </div>
           </div>
         </Card>
       )}

@@ -144,6 +144,28 @@ export const useAppointmentStore = create((set) => ({
     }
   },
 
-  // Add this to clear status when modal closes
+  checkOutAppointment: async (appointmentId, notes = "") => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.post(
+        `/appointments/${appointmentId}/check-out`,
+        {
+          psychologistNotes: notes,
+        }
+      );
+      set({
+        loading: false,
+        appointmentStatus: data.status,
+      });
+      return data;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to check-out appointment";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
+  // Clear status when modal closes
   clearAppointmentStatus: () => set({ appointmentStatus: null }),
 }));
