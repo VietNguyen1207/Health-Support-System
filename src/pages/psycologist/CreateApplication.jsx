@@ -9,6 +9,7 @@ import {
   message,
   Typography,
   Popconfirm,
+  Space,
 } from "antd";
 import { CalendarOutlined, FileTextOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -50,7 +51,7 @@ function CreateApplication({ isModalOpen, setIsModalOpen, user, fetchData }) {
       const [start, end] = dates;
       const diffDays = end.diff(start, "day");
       if (diffDays > 2) {
-        message.warning("You can only select up to 3 days");
+        // message.warning("You can only select up to 3 days");
         form.setFieldValue("dateRange", [start, start.add(2, "day")]);
       }
     }
@@ -90,7 +91,50 @@ function CreateApplication({ isModalOpen, setIsModalOpen, user, fetchData }) {
                 required: true,
                 message: "Please select your leave dates",
               },
-            ]}>
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  const [start, end] = value;
+                  const diffDays = end.diff(start, "day");
+                  if (diffDays > 2) {
+                    return Promise.reject(
+                      "Leave duration cannot exceed 3 days"
+                    );
+                  }
+                  return Promise.resolve();
+                },
+              },
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  const [start] = value;
+                  const today = dayjs();
+                  const daysUntilStart = start.diff(today, "day");
+                  if (daysUntilStart < 2) {
+                    return Promise.reject(
+                      "Leave request must be submitted at least 2 days in advance"
+                    );
+                  }
+                  return Promise.resolve();
+                },
+              },
+            ]}
+            extra={
+              <Space direction="vertical" className="mt-1">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                  <Typography.Text type="secondary">
+                    Maximum leave duration is 3 days
+                  </Typography.Text>
+                </div>
+                <div className="flex items-center gap-2 text-gray-500">
+                  <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                  <Typography.Text type="secondary">
+                    Leave request must be submitted at least 2 days in advance
+                  </Typography.Text>
+                </div>
+              </Space>
+            }>
             <RangePicker
               className="w-full"
               disabledDate={disabledDate}

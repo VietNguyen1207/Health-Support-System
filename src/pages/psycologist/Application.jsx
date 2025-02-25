@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { usePsychologistStore } from "../../stores/psychologistStore";
 import TableComponent from "../../components/TableComponent";
 import CreateApplication from "./CreateApplication";
-import { Button, message, Popconfirm, Typography } from "antd";
+import { Button, message, Popconfirm, Typography, Space } from "antd";
 import { useAuthStore } from "../../stores/authStore";
 import TagComponent from "../../components/TagComponent";
 import { transformString } from "../../utils/Helper";
 import dayjs from "dayjs";
+import { ReloadOutlined } from "@ant-design/icons";
 
 function Application() {
   const { fetchLeaveRequests, cancelLeaveRequest, loading } =
@@ -68,6 +69,7 @@ function Application() {
       dataIndex: "status",
       render: (value) => {
         const transformedValue = transformString(value);
+
         return (
           <TagComponent
             color={
@@ -75,7 +77,13 @@ function Application() {
                 ? "orange"
                 : transformedValue === "Approved"
                 ? "green"
-                : "red"
+                : transformedValue === "Cancelled"
+                ? "volcano"
+                : transformedValue === "Expired"
+                ? "gray"
+                : transformedValue === "Rejected"
+                ? "red"
+                : "default"
             }
             tag={value}
           />
@@ -93,6 +101,14 @@ function Application() {
         {
           text: "Cancelled",
           value: "CANCELLED",
+        },
+        {
+          text: "Expired",
+          value: "EXPIRED",
+        },
+        {
+          text: "Rejected",
+          value: "REJECTED",
         },
       ],
       onFilter: (value, record) => record.status.includes(value),
@@ -128,9 +144,17 @@ function Application() {
       <div className="max-w-7xl mx-auto mt-32 space-y-4 px-5 md:px-10">
         <div className="flex justify-between items-center">
           <Typography.Title level={2}>Application Management</Typography.Title>
-          <Button type="primary" onClick={() => setIsModalOpen(true)}>
-            Create Application
-          </Button>
+          <Space>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={fetchData}
+              loading={loading}>
+              Refresh
+            </Button>
+            <Button type="primary" onClick={() => setIsModalOpen(true)}>
+              Create Application
+            </Button>
+          </Space>
         </div>
         <CreateApplication
           isModalOpen={isModalOpen}
