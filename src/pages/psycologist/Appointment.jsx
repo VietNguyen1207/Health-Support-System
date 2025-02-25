@@ -28,20 +28,19 @@ export default function Appointment() {
       return []; // Return an empty array if appointments is not an array
     }
 
-    const uniqueAppointments = [];
-    const seenStartTimes = new Set();
+    // Sort appointments by start time and status
+    return appointments.sort((a, b) => {
+      // Compare start times first
+      const timeComparison = a.startTime.localeCompare(b.startTime);
+      if (timeComparison !== 0) return timeComparison;
 
-    appointments.forEach((appt) => {
-      if (!seenStartTimes.has(appt.startTime)) {
-        seenStartTimes.add(appt.startTime);
-        uniqueAppointments.push(appt);
-      }
+      // If start times are equal, prioritize SCHEDULED over COMPLETED
+      if (a.status === "SCHEDULED" && b.status === "COMPLETED") return -1;
+      if (a.status === "COMPLETED" && b.status === "SCHEDULED") return 1;
+
+      // If both status are the same, sort by appointmentID for consistency
+      return a.appointmentID.localeCompare(b.appointmentID);
     });
-
-    // Sort unique appointments by start time
-    return uniqueAppointments.sort(
-      (a, b) => new Date(a.startTime) - new Date(b.startTime)
-    );
   };
 
   useEffect(() => {
