@@ -204,6 +204,7 @@ function ApplicationManagement() {
         showSelection={false}
         setData={setData}
         size="middle"
+        rowKey="requestId"
       />
     </div>
   );
