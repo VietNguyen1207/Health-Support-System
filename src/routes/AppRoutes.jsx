@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import { ManagerLayout } from "../layouts/ManagerLayout";
 import { StandardLayout } from "../layouts/StandardLayout";
 import { PrivateRoute } from "../components/PrivateRoute";
@@ -18,7 +19,7 @@ import AddProgram from "../pages/psycologist/AddProgram";
 import CreateTest from "../pages/psycologist/CreateTest";
 import StudentProfile from "../pages/student/StudentProfile";
 import { Outlet } from "react-router-dom";
-import Appointment from "../pages/psycologist/Appointment";
+// import Appointment from "../pages/psycologist/Appointment";
 import ChildrenRecord from "../pages/parent/ChildrenRecord";
 import AppointmentRecord from "../pages/student/AppointmentRecord";
 import TestRecord from "../pages/student/TestRecord";
@@ -31,6 +32,9 @@ import Blog from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetail";
 import Application from "../pages/psycologist/Application";
 import ApplicationManagement from "../pages/manager/ApplicationManagement ";
+import NotificationDetail from "../pages/NotificationDetail";
+
+const Appointment = lazy(() => import("../pages/psycologist/Appointment"));
 
 export const routes = [
   {
@@ -77,7 +81,6 @@ export const routes = [
           { path: "student-profile", element: <StudentProfile /> },
           { path: "test-question", element: <TestQuestion /> },
           { path: "book-appointment", element: <Booking /> },
-          { path: "appointment-record", element: <AppointmentRecord /> },
           { path: "test-record", element: <TestRecord /> },
           { path: "test-results", element: <TestResult /> },
           { path: "program", element: <Program /> },
@@ -107,6 +110,8 @@ export const routes = [
         children: [
           { path: "test", element: <Test /> },
           { path: "calendar", element: <Appointment /> },
+          { path: "appointment-record", element: <AppointmentRecord /> },
+          { path: "notifications/:id", element: <NotificationDetail /> },
         ],
       },
       {
@@ -137,6 +142,10 @@ export const routes = [
       { path: "surveys", element: <SurveyManagement /> },
       { path: "applications", element: <ApplicationManagement /> },
     ],
+  },
+  {
+    path: "/notifications",
+    element: <NotificationDetail />,
   },
   {
     path: "*",

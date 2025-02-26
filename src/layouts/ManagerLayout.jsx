@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, ConfigProvider, Dropdown, Layout, Menu, theme } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -9,6 +9,7 @@ import {
   PoweroffOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../stores/authStore";
+import { useNotificationStore } from "../stores/notificationStore";
 
 const { Header, Sider, Content } = Layout;
 
@@ -21,6 +22,28 @@ export const ManagerLayout = () => {
   const {
     token: { borderRadiusLG },
   } = theme.useToken();
+  const startPolling = useNotificationStore((state) => state.startPolling);
+  const stopPolling = useNotificationStore((state) => state.stopPolling);
+  const { getNotifications } = useNotificationStore();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (user?.userId) await getNotifications(user?.userId);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (user?.userId) {
+      console.log("Starting polling...");
+      startPolling(user.userId);
+
+      return () => {
+        console.log("Cleanup: stopping polling...");
+        stopPolling();
+      };
+    }
+  }, [user?.userId]);
 
   const menuItems = [
     {

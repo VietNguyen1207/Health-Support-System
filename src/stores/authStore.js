@@ -9,6 +9,7 @@ const initialState = {
   user: null,
   token: null,
   isAuthenticated: false,
+  loading: false,
 };
 
 const AUTH_URL = "/auth/";
@@ -53,6 +54,7 @@ export const useAuthStore = create(
 
       // Action login
       login: async (credentials) => {
+        set({ loading: true });
         try {
           const { data } = await api.post(
             AUTH_URL + AUTH_ENDPOINT.LOGIN,
@@ -97,6 +99,8 @@ export const useAuthStore = create(
             throw new Error(error.response?.data?.message || "Login failed");
           }
           throw error;
+        } finally {
+          set({ loading: false });
         }
       },
 

@@ -87,7 +87,7 @@ export const dropdownMenu = [
     label: "Appointment Record",
     key: "/appointment-record",
     icon: <HistoryOutlined />,
-    roles: ["psychologist"],
+    roles: ["psychologist", "student"],
   },
   {
     label: "Children Record",

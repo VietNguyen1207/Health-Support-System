@@ -28,47 +28,48 @@ export default function Appointment() {
       return []; // Return an empty array if appointments is not an array
     }
 
+    //Filter appointment have status Scheduled
+    const filteredAppointment = appointments.filter(
+      (appt) => appt.status === "SCHEDULED" || appt.status === "IN_PROGRESS"
+    );
+
     // Sort appointments by start time and status
-    return appointments.sort((a, b) => {
+    return filteredAppointment.sort((a, b) => {
       // Compare start times first
       const timeComparison = a.startTime.localeCompare(b.startTime);
       if (timeComparison !== 0) return timeComparison;
-
-      // If start times are equal, prioritize SCHEDULED over COMPLETED
-      if (a.status === "SCHEDULED" && b.status === "COMPLETED") return -1;
-      if (a.status === "COMPLETED" && b.status === "SCHEDULED") return 1;
 
       // If both status are the same, sort by appointmentID for consistency
       return a.appointmentID.localeCompare(b.appointmentID);
     });
   };
 
+  const fetchData = async () => {
+    try {
+      const data = await getEvents(user.userId);
+      const eventList = data.event || {}; // Ensure eventList is an object
+      // console.log(eventList);
+
+      // Sort and filter unique appointments by start time
+      const sortedAppointments = Object.keys(eventList).reduce((acc, key) => {
+        const event = eventList[key];
+        acc[key] = {
+          ...event,
+          appointment: sortAppointmentsByTime(event.appointment || []), // Ensure appointment is an array
+        };
+        return acc;
+      }, {});
+
+      setEvents(sortedAppointments); // Update events with sorted appointments
+    } catch (error) {
+      console.log("Failed to fetch events: ", error);
+      message.error("Failed to fetch events");
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getEvents(user.userId);
-        const eventList = data.event || {}; // Ensure eventList is an object
-        // console.log(eventList);
-
-        // Sort and filter unique appointments by start time
-        const sortedAppointments = Object.keys(eventList).reduce((acc, key) => {
-          const event = eventList[key];
-          acc[key] = {
-            ...event,
-            appointment: sortAppointmentsByTime(event.appointment || []), // Ensure appointment is an array
-          };
-          return acc;
-        }, {});
-
-        setEvents(sortedAppointments); // Update events with sorted appointments
-      } catch (error) {
-        console.log("Failed to fetch events: ", error);
-        message.error("Failed to fetch events");
-      }
-    };
-
     fetchData();
-  }, [user.userId]); // Added user.userId as a dependency
+  }, []); // Added user.userId as a dependency
 
   const content = (
     <>
@@ -292,9 +293,11 @@ export default function Appointment() {
       </div>
 
       <DetailCalendar
+        user={user}
         events={selectedDateDetails}
         visible={isModalVisible}
         onClose={handleModalClose}
+        fetchData={fetchData}
       />
     </div>
   );

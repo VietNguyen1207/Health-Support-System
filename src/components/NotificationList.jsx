@@ -1,10 +1,12 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { useNotificationStore } from "../stores/notificationStore";
-import { useUserStore } from "../stores/userStore";
-import { BellOutlined, CheckOutlined } from "@ant-design/icons";
+import { BellOutlined, CheckOutlined, ReloadOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Empty, Skeleton } from "antd";
+import { Empty, Skeleton, Button, Tooltip } from "antd";
+import { useAuthStore } from "../stores/authStore";
+import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
 dayjs.extend(relativeTime);
 
@@ -23,34 +25,52 @@ const NotificationSkeleton = () => (
   </div>
 );
 
-const NotificationList = () => {
+const NotificationList = ({ onClose }) => {
+  const [activeFilter, setActiveFilter] = useState("all");
   const {
     notifications,
     loading,
     error,
     getNotifications,
+    getUnreadNotifications,
     markNotificationAsRead,
   } = useNotificationStore();
-  const { user } = useUserStore();
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
 
-  const fetchData = async () => {
+  const fetchData = async (unreadOnly = false) => {
     try {
-      await getNotifications(user.userId);
+      setActiveFilter(unreadOnly ? "unread" : "all");
+      if (unreadOnly) {
+        await getUnreadNotifications(user?.userId);
+      } else {
+        await getNotifications(user?.userId);
+      }
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markNotificationAsRead(user.userId);
-    } catch (error) {
-      console.error("Error marking all notifications as read:", error);
+  const handleNotificationClick = async (notification) => {
+    if (!notification.isRead) {
+      try {
+        await markNotificationAsRead(notification.id);
+        fetchData();
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
+        return;
+      }
     }
+
+    // // Extract type and typeId for navigation
+    // const type = notification.type?.toLowerCase();
+    // const typeId = notification.idtype || "";
+
+    // Close notification panel
+    onClose();
+
+    // Navigate to notification detail page with query params
+    navigate(`/notifications/${notification.id}`);
   };
 
   return (
@@ -61,17 +81,37 @@ const NotificationList = () => {
           <BellOutlined className="text-blue-600" />
           Notifications
         </h1>
-        <div className="text-xs text-gray-500 hover:text-blue-600 cursor-pointer">
-          Mark all as read
+        <div className="flex gap-2 items-center">
+          <Tooltip title="Refresh">
+            <Button
+              type="text"
+              icon={<ReloadOutlined spin={loading} />}
+              onClick={fetchData}
+              loading={loading}
+              size="small"
+            />
+          </Tooltip>
         </div>
       </div>
 
       {/* Filters */}
       <div className="px-3 py-2 flex gap-2 border-b">
-        <button className="px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 font-medium text-xs hover:bg-blue-100 transition-colors">
+        <button
+          className={`px-3 py-1.5 rounded-full font-medium text-xs transition-colors ${
+            activeFilter === "all"
+              ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
+          onClick={() => fetchData(false)}>
           All
         </button>
-        <button className="px-3 py-1.5 rounded-full text-gray-600 font-medium text-xs hover:bg-gray-100 transition-colors">
+        <button
+          className={`px-3 py-1.5 rounded-full font-medium text-xs transition-colors ${
+            activeFilter === "unread"
+              ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
+          onClick={() => fetchData(true)}>
           Unread
         </button>
       </div>
@@ -85,13 +125,21 @@ const NotificationList = () => {
             <NotificationSkeleton />
             <NotificationSkeleton />
           </>
+        ) : error ? (
+          <div className="py-8 text-center">
+            <p className="text-red-500 mb-2">Error loading notifications</p>
+            <Button type="primary" onClick={fetchData} size="small">
+              Try again
+            </Button>
+          </div>
         ) : notifications?.length > 0 ? (
           notifications.map((notification) => (
             <div
               key={notification.id}
               className={`p-3 border-b hover:bg-gray-50 cursor-pointer transition-colors ${
                 !notification.isRead ? "bg-blue-50" : ""
-              }`}>
+              }`}
+              onClick={() => handleNotificationClick(notification)}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -123,6 +171,10 @@ const NotificationList = () => {
       </div>
     </div>
   );
+};
+
+NotificationList.propTypes = {
+  onClose: PropTypes.func.isRequired,
 };
 
 export default NotificationList;
