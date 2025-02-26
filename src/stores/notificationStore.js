@@ -24,9 +24,10 @@ export const useNotificationStore = create((set, get) => ({
     set({ loading: true });
     try {
       const { data } = await api.get(NOTIFICATION_URL(userId));
-      set({ notifications: data });
+      set({ notifications: Array.isArray(data) ? data : [] });
     } catch (error) {
       console.error("Error fetching notifications:", error);
+      set({ notifications: [] });
     } finally {
       set({ loading: false });
     }
