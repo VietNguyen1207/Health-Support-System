@@ -71,11 +71,6 @@ const Program = () => {
     setTimeout(clearSelectedProgram, 300);
   }, [clearSelectedProgram]);
 
-  // Handle join program
-  const handleJoinProgram = useCallback((programId) => {
-    message.info("Join program functionality will be implemented soon!");
-  }, []);
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -237,7 +232,6 @@ const Program = () => {
         onClose={handleModalClose}
         program={selectedProgram}
         loading={loadingDetails}
-        onJoinProgram={handleJoinProgram}
       />
     </div>
   );

@@ -123,6 +123,21 @@ export const useUserStore = create((set, get) => ({
     }
   },
 
+  // Get user detail with appointments
+  getUserWithAppointments: async (userId) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.get(USER_URL + userId);
+      set({ user: data, loading: false });
+      return data;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch user detail";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
   // Reset store to initial state
   reset: () => {
     set(initialState);
