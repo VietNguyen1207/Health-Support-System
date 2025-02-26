@@ -158,7 +158,8 @@ export default function UserManagement() {
             <Button
               type="link"
               icon={<EyeOutlined />}
-              onClick={() => handleViewDetail(record)}>
+              onClick={() => handleViewDetail(record)}
+            >
               View
             </Button>
           </Space>
@@ -307,7 +308,7 @@ export default function UserManagement() {
 
   const handleUpdateSubmit = async () => {
     try {
-      // Implement your update logic here
+      // Implement update logic here
       message.success("User updated successfully");
       setIsEditMode(false);
       setIsModalVisible(false);
@@ -339,12 +340,14 @@ export default function UserManagement() {
             gender: selectedUser.gender,
             grade: selectedUser.grade,
             className: selectedUser.className,
-          }}>
+          }}
+        >
           <Card>
             <Form.Item
               name="fullName"
               label="Full Name"
-              rules={[{ required: true, message: "Please input full name!" }]}>
+              rules={[{ required: true, message: "Please input full name!" }]}
+            >
               <Input style={{ borderColor: "#d9d9d9", borderRadius: "8px" }} />
             </Form.Item>
             <Form.Item
@@ -353,19 +356,22 @@ export default function UserManagement() {
               rules={[
                 { required: true, message: "Please input email!" },
                 { type: "email", message: "Please enter a valid email!" },
-              ]}>
+              ]}
+            >
               <Input style={{ borderColor: "#d9d9d9", borderRadius: "8px" }} />
             </Form.Item>
             <Form.Item
               name="phone"
               label="Phone"
-              rules={[{ required: true, message: "Please input phone!" }]}>
+              rules={[{ required: true, message: "Please input phone!" }]}
+            >
               <Input style={{ borderColor: "#d9d9d9", borderRadius: "8px" }} />
             </Form.Item>
             <Form.Item
               name="gender"
               label="Gender"
-              rules={[{ required: true, message: "Please select gender!" }]}>
+              rules={[{ required: true, message: "Please select gender!" }]}
+            >
               <Select>
                 <Select.Option value="Male">Male</Select.Option>
                 <Select.Option value="Female">Female</Select.Option>
@@ -378,7 +384,8 @@ export default function UserManagement() {
                   name="grade"
                   label="Grade"
                   style={{ width: "50%" }}
-                  rules={[{ required: true, message: "Please input grade!" }]}>
+                  rules={[{ required: true, message: "Please input grade!" }]}
+                >
                   <InputNumber
                     min={1}
                     max={12}
@@ -389,7 +396,8 @@ export default function UserManagement() {
                   name="className"
                   label="Class"
                   style={{ width: "50%" }}
-                  rules={[{ required: true, message: "Please input class!" }]}>
+                  rules={[{ required: true, message: "Please input class!" }]}
+                >
                   <Input
                     style={{
                       height: "32px",
@@ -408,7 +416,8 @@ export default function UserManagement() {
                   label="Specialization"
                   rules={[
                     { required: true, message: "Please input specialization!" },
-                  ]}>
+                  ]}
+                >
                   <Input
                     style={{ borderColor: "#d9d9d9", borderRadius: "8px" }}
                   />
@@ -421,7 +430,8 @@ export default function UserManagement() {
                       required: true,
                       message: "Please input years of experience!",
                     },
-                  ]}>
+                  ]}
+                >
                   <InputNumber min={0} />
                 </Form.Item>
               </>
@@ -446,7 +456,8 @@ export default function UserManagement() {
               description="Are you sure you want to cancel? All changes will be lost."
               onConfirm={() => setIsEditMode(false)}
               okText="Yes"
-              cancelText="No">
+              cancelText="No"
+            >
               <Button>Cancel</Button>
             </Popconfirm>
             <Button type="primary" htmlType="submit">
@@ -567,7 +578,8 @@ export default function UserManagement() {
                         <Card
                           key={child.userId}
                           size="small"
-                          style={{ marginBottom: 8 }}>
+                          style={{ marginBottom: 8 }}
+                        >
                           <Flex justify="space-between">
                             <Flex vertical gap={4}>
                               <span style={{ fontWeight: "bold" }}>
@@ -613,7 +625,8 @@ export default function UserManagement() {
             onConfirm={handleDelete}
             okText="Yes"
             cancelText="No"
-            okButtonProps={{ danger: true }}>
+            okButtonProps={{ danger: true }}
+          >
             <Button danger icon={<DeleteOutlined />}>
               Delete
             </Button>
@@ -657,7 +670,8 @@ export default function UserManagement() {
           setIsEditMode(false);
         }}
         footer={null}
-        width={800}>
+        width={800}
+      >
         {renderUserDetails()}
       </Modal>
     </Flex>
