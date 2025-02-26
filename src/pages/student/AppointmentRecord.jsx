@@ -312,12 +312,19 @@ export default function AppointmentRecord() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
-        <Title level={2} className="text-primary-green">
-          Appointment Records
-        </Title>
-        <Text type="secondary">
-          View your past appointment history and details
-        </Text>
+        <div className="flex items-start">
+          <div className="bg-primary-green/10 p-2 rounded-lg mr-3">
+            <HistoryOutlined className="text-xl text-primary-green" />
+          </div>
+          <div>
+            <Title level={2} className="text-gray-800 m-0 font-bold">
+              Appointment Records
+            </Title>
+            <Text className="text-gray-500 text-base">
+              View your completed and cancelled appointments history
+            </Text>
+          </div>
+        </div>
       </div>
 
       {loading ? (
