@@ -1,36 +1,20 @@
 import "../style/Login.css";
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
-import { message } from "antd";
+import { Button, Form, Input, Checkbox, message } from "antd";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
 const Login = () => {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
-  const [formData, setFormData] = useState({
-    loginIdentifier: "",
-    password: "",
-    remember: false,
-  });
+  const { login, loading } = useAuthStore();
+  const [form] = Form.useForm();
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (values) => {
     try {
-      // Gọi action login từ store
-      await login(formData);
-      // Chuyển hướng sau khi đăng nhập thành công
+      await login(values);
       navigate("/");
     } catch (error) {
       console.log(error);
-
       message.error("Login failed");
     }
   };
@@ -40,55 +24,53 @@ const Login = () => {
       <div className="login-box">
         <h2 className="login-title">Sign In</h2>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="email">
-              Email
-            </label>
-            <input
-              type="text"
-              id="email"
-              name="loginIdentifier"
-              className="form-input"
+        <Form
+          form={form}
+          onFinish={handleSubmit}
+          initialValues={{ remember: false }}
+          layout="vertical"
+          className="login-form">
+          <Form.Item
+            label="Email"
+            name="loginIdentifier"
+            rules={[{ required: true, message: "Please input your email!" }]}>
+            <Input
+              size="large"
               placeholder="Enter your Email"
-              value={formData.loginIdentifier}
-              onChange={handleChange}
-              required
+              prefix={<UserOutlined className="text-gray-400" />}
+              className="login-input"
             />
-          </div>
+          </Form.Item>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="password">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              className="form-input"
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[
+              { required: true, message: "Please input your password!" },
+            ]}>
+            <Input.Password
+              size="large"
               placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              required
+              prefix={<LockOutlined className="text-gray-400" />}
+              className="login-input"
             />
-          </div>
+          </Form.Item>
 
-          <div className="remember-me">
-            <input
-              type="checkbox"
-              id="remember"
-              name="remember"
-              checked={formData.remember}
-              onChange={handleChange}
-            />
+          <Form.Item name="remember" valuePropName="checked">
+            <Checkbox className="remember-checkbox">Remember me</Checkbox>
+          </Form.Item>
 
-            <label htmlFor="rememberMe">Remember me</label>
-          </div>
-
-          <button type="submit" className="login-button">
-            Sign In
-          </button>
-        </form>
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              size="large"
+              className="login-button">
+              Sign In
+            </Button>
+          </Form.Item>
+        </Form>
 
         <div className="forgot-password">
           <Link to="/forgot-password">Forgot Password?</Link>

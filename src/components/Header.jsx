@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { Dropdown, Menu, ConfigProvider, Button } from "antd";
@@ -10,12 +10,35 @@ import {
   filterMenuItemsByRole,
 } from "../utils/Helper";
 import NotificationBell from "./NotificationBell";
+import { useNotificationStore } from "../stores/notificationStore";
 
 const Header = () => {
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
+  const startPolling = useNotificationStore((state) => state.startPolling);
+  const stopPolling = useNotificationStore((state) => state.stopPolling);
+  const { getNotifications } = useNotificationStore();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (user?.userId) await getNotifications(user?.userId);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (user?.userId) {
+      console.log("Starting polling...");
+      startPolling(user.userId);
+
+      return () => {
+        console.log("Cleanup: stopping polling...");
+        stopPolling();
+      };
+    }
+  }, [user?.userId]);
 
   const handleLogout = async () => {
     await logout();

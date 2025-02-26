@@ -1,4 +1,15 @@
-import { Button, Modal, Space, Tabs, Tag, Typography, Card, Input } from "antd";
+import {
+  Button,
+  Modal,
+  Space,
+  Tabs,
+  Tag,
+  Typography,
+  Card,
+  Input,
+  Popconfirm,
+  Progress,
+} from "antd";
 import PropTypes from "prop-types";
 import { useAppointmentStore } from "../stores/appointmentStore";
 import { useProgramStore } from "../stores/programStore";
@@ -11,22 +22,14 @@ import {
   TeamOutlined,
   UserOutlined,
   CheckOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Legend,
-} from "recharts";
 import { message } from "antd";
 
 const { Text } = Typography;
 
-function DetailCalendar({ events, visible, onClose }) {
+function DetailCalendar({ user, events, visible, onClose, fetchData }) {
   const { GetDetails } = useAppointmentStore();
   const { fetchProgramDetails } = useProgramStore();
 
@@ -54,58 +57,64 @@ function DetailCalendar({ events, visible, onClose }) {
     }
   };
 
+  const fetchFormattedItem = async () => {
+    try {
+      setIsLoading(true);
+      const appointments = events?.appointment || [];
+      const programs = events?.program || [];
+
+      const formatAppt = await Promise.all(
+        appointments.map(async (appt) => {
+          const data = await formattedAppointment(appt.appointmentID);
+          if (data)
+            return {
+              key: data.appointmentID,
+              label: `${appt.startTime} - ${
+                appt?.psychologistName || appt?.studentName
+              }`,
+              icon: <UserOutlined />,
+              children: (
+                <AppointmentDetailContent
+                  appointment={data}
+                  key={appt.appointmentID}
+                  user={user}
+                  fetchData={() => {
+                    fetchData();
+                    onClose();
+                  }}
+                />
+              ),
+            };
+        })
+      );
+
+      const formatProgram = await Promise.all(
+        programs.map(async (program) => {
+          const data = await formattedProgram(program.programID);
+          if (data)
+            return {
+              key: data.programID,
+              label: `${program.title} - ${program.type}`,
+              icon: <CarryOutOutlined />,
+              children: (
+                <ProgramDetailContent
+                  program={data}
+                  key={program.programID}
+                  user={user}
+                />
+              ),
+            };
+        })
+      );
+      setIsLoading(false);
+      setFormattedItem([...formatAppt, ...formatProgram]);
+    } catch (error) {
+      console.log("Failed to fetch data: ", error);
+      // message.error("Failed to fetch data");
+    }
+  };
+
   useEffect(() => {
-    const fetchFormattedItem = async () => {
-      try {
-        setIsLoading(true);
-        const appointments = events?.appointment || [];
-        const programs = events?.program || [];
-
-        const formatAppt = await Promise.all(
-          appointments.map(async (appt) => {
-            const data = await formattedAppointment(appt.appointmentID);
-            if (data)
-              return {
-                key: data.appointmentID,
-                label: `${appt.startTime} - ${
-                  appt?.psychologistName || appt?.studentName
-                }`,
-                icon: <UserOutlined />,
-                children: (
-                  <AppointmentDetailContent
-                    appointment={data}
-                    key={appt.appointmentID}
-                  />
-                ),
-              };
-          })
-        );
-
-        const formatProgram = await Promise.all(
-          programs.map(async (program) => {
-            const data = await formattedProgram(program.programID);
-            if (data)
-              return {
-                key: data.programID,
-                label: `${program.title} - ${program.type}`,
-                icon: <CarryOutOutlined />,
-                children: (
-                  <ProgramDetailContent
-                    program={data}
-                    key={program.programID}
-                  />
-                ),
-              };
-          })
-        );
-        setIsLoading(false);
-        setFormattedItem([...formatAppt, ...formatProgram]);
-      } catch (error) {
-        console.log("Failed to fetch data: ", error);
-        // message.error("Failed to fetch data");
-      }
-    };
-
     fetchFormattedItem();
   }, [events]);
 
@@ -121,8 +130,7 @@ function DetailCalendar({ events, visible, onClose }) {
           maxHeight: "78vh",
           padding: "5px 50px",
         },
-      }}
-    >
+      }}>
       {isLoading ? (
         <LoadingSkeleton />
       ) : formattedItem.length ? (
@@ -144,6 +152,7 @@ function DetailCalendar({ events, visible, onClose }) {
 
 // Add prop types validation
 DetailCalendar.propTypes = {
+  user: PropTypes.object.isRequired,
   events: PropTypes.shape({
     appointment: PropTypes.arrayOf(
       PropTypes.shape({
@@ -171,9 +180,12 @@ DetailCalendar.propTypes = {
   }),
   visible: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  fetchData: PropTypes.func.isRequired,
 };
 
-const ProgramDetailContent = ({ program }) => {
+const ProgramDetailContent = ({ program, user }) => {
+  console.log(user);
+
   return (
     <div className="space-y-4 w-full overflow-auto h-full">
       {/* Program Header */}
@@ -225,8 +237,7 @@ const ProgramDetailContent = ({ program }) => {
           </div>
           <Tag
             color={program.type === "Online" ? "blue" : "green"}
-            className="mt-1"
-          >
+            className="mt-1">
             {program.type}
           </Tag>
         </div>
@@ -257,8 +268,7 @@ const ProgramDetailContent = ({ program }) => {
               href={program.meetingLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-0 h-auto text-primary-green hover:text-primary-green/80"
-            >
+              className="p-0 h-auto text-primary-green hover:text-primary-green/80">
               Join Meeting
             </Button>
           </div>
@@ -272,8 +282,7 @@ const ProgramDetailContent = ({ program }) => {
             {program.tags.map((tag) => (
               <Tag
                 key={tag}
-                className="bg-gray-50 border border-gray-200 text-sm"
-              >
+                className="bg-gray-50 border border-gray-200 text-sm">
                 {tag}
               </Tag>
             ))}
@@ -285,6 +294,7 @@ const ProgramDetailContent = ({ program }) => {
 };
 
 ProgramDetailContent.propTypes = {
+  user: PropTypes.object.isRequired,
   program: PropTypes.shape({
     programID: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
@@ -301,12 +311,13 @@ ProgramDetailContent.propTypes = {
   }).isRequired,
 };
 
-const AppointmentDetailContent = ({ appointment }) => {
+const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
   const {
     checkInAppointment,
     checkOutAppointment,
     appointmentStatus,
     clearAppointmentStatus,
+    cancelAppointment,
   } = useAppointmentStore();
   const [isLoading, setIsLoading] = useState(false);
   const [notes, setNotes] = useState("");
@@ -319,6 +330,7 @@ const AppointmentDetailContent = ({ appointment }) => {
       message.success("Student checked in successfully!");
     } catch (error) {
       message.error("Failed to check in student");
+      console.log("Failed to check in student:", error);
     } finally {
       setIsLoading(false);
     }
@@ -330,9 +342,25 @@ const AppointmentDetailContent = ({ appointment }) => {
       setIsLoading(true);
       await checkOutAppointment(appointment.appointmentID, notes);
       message.success("Appointment completed successfully!");
+      fetchData();
       clearAppointmentStatus();
     } catch (error) {
       message.error("Failed to check out appointment");
+      console.log("Failed to check out student:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    setIsLoading(true);
+    try {
+      await cancelAppointment(appointment.appointmentID, user.userId);
+      message.success("Appointment completed successfully!");
+      fetchData();
+    } catch (error) {
+      // message.error("Failed to cancel appointment");
+      console.log("Failed to cancel appointment:", error);
     } finally {
       setIsLoading(false);
     }
@@ -349,37 +377,29 @@ const AppointmentDetailContent = ({ appointment }) => {
   const isInProgress =
     appointmentStatus === "IN_PROGRESS" || appointment.status === "IN_PROGRESS";
 
-  const calculatePercentage = (score) => score * 10;
-
-  const getScoreColor = (score) => {
-    if (score <= 25) return "#4CAF50"; // Xanh lá - Mức độ nhẹ
-    if (score <= 50) return "#FFC107"; // Vàng - Mức độ trung bình
-    return "#F44336"; // Đỏ - Mức độ nặng
-  };
-
-  const data = [
+  const calculatePercentage = (score) => (score / 10) * 100;
+  const scores = [
     {
-      name: "Depression Score",
-      score: calculatePercentage(appointment.studentResponse.depressionScore),
-      fill: getScoreColor(
-        calculatePercentage(appointment.studentResponse.depressionScore)
-      ),
+      title: "Anxiety Level",
+      score: appointment.studentResponse.depressionScore,
     },
     {
-      name: "Anxiety Score",
-      score: calculatePercentage(appointment.studentResponse.anxietyScore),
-      fill: getScoreColor(
-        calculatePercentage(appointment.studentResponse.anxietyScore)
-      ),
+      title: "Stress Level",
+      score: appointment.studentResponse.stressScore,
     },
     {
-      name: "Stress Score",
-      score: calculatePercentage(appointment.studentResponse.stressScore),
-      fill: getScoreColor(
-        calculatePercentage(appointment.studentResponse.stressScore)
-      ),
+      title: "Anxiety Level",
+      score: appointment.studentResponse.anxietyScore,
     },
   ];
+
+  const getScoreColor = (score) => {
+    console.log(score);
+
+    if (score <= 3) return "#4a7c59";
+    if (score <= 6) return "#fbbf24";
+    return "#ef4444";
+  };
 
   return (
     <div className="space-y-4 max-h-[69vh] overflow-auto pr-5">
@@ -396,8 +416,7 @@ const AppointmentDetailContent = ({ appointment }) => {
                   : appointment.status === "COMPLETED"
                   ? "success"
                   : "default"
-              }
-            >
+              }>
               {isInProgress
                 ? "In Progress"
                 : appointment.status === "COMPLETED"
@@ -407,139 +426,154 @@ const AppointmentDetailContent = ({ appointment }) => {
           </div>
         </div>
 
-        <div className="flex gap-3">
-          {!isInProgress && appointment.status !== "COMPLETED" && (
-            <Button
-              type="primary"
-              className="bg-blue-500 hover:bg-blue-600"
-              icon={<UserOutlined />}
-              onClick={handleCheckIn}
-              loading={isLoading}
-            >
-              Check-in Student
-            </Button>
-          )}
+        {user.role === "psychologist" ? (
+          <div className="flex gap-3">
+            {!isInProgress && appointment.status !== "COMPLETED" && (
+              <Button
+                type="primary"
+                icon={<UserOutlined />}
+                onClick={handleCheckIn}
+                loading={isLoading}>
+                Check-in Student
+              </Button>
+            )}
 
-          {isInProgress && (
-            <Button
-              type="primary"
-              className="bg-primary-green hover:bg-primary-green/90"
-              icon={<CheckOutlined />}
-              onClick={handleCheckOut}
-              loading={isLoading}
-            >
-              Complete & Check-out
-            </Button>
-          )}
-        </div>
+            {isInProgress && (
+              <Button
+                type="primary"
+                icon={<CheckOutlined />}
+                onClick={handleCheckOut}
+                loading={isLoading}>
+                Complete & Check-out
+              </Button>
+            )}
+          </div>
+        ) : (
+          user.role === "student" &&
+          !isInProgress && (
+            <>
+              <Popconfirm
+                title="Cancel Appointment"
+                description="Are you sure you want to cancel appointment?"
+                onConfirm={handleCancel}
+                okText="Yes"
+                cancelText="No">
+                <Button danger loading={isLoading}>
+                  Cancel
+                </Button>
+              </Popconfirm>
+            </>
+          )
+        )}
       </div>
 
       {/* Psychologist and Student Information Cards */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card
-          title={
-            <div className="flex items-center gap-2">
-              <UserOutlined className="text-primary-green text-lg" />
-              <span className="font-semibold">Psychologist Information</span>
-            </div>
-          }
-          className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
-        >
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
-              <div className="w-28 text-gray-500">Name</div>
-              <div className="font-medium">
-                {appointment.psychologistResponse.info.fullName}
+      <div className="grid grid-flow-col gap-4">
+        {user.role !== "psychologist" && (
+          <Card
+            title={
+              <div className="flex items-center gap-2">
+                <UserOutlined className="text-primary-green text-lg" />
+                <span className="font-semibold">Psychologist Information</span>
               </div>
-            </div>
+            }
+            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+                <div className="w-28 text-gray-500">Name</div>
+                <div className="font-medium">
+                  {appointment.psychologistResponse.info.fullName}
+                </div>
+              </div>
 
-            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
-              <div className="w-28 text-gray-500">Department</div>
-              <div className="font-medium">
-                {appointment.psychologistResponse.departmentName}
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+                <div className="w-28 text-gray-500">Department</div>
+                <div className="font-medium">
+                  {appointment.psychologistResponse.departmentName}
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
-              <div className="w-28 text-gray-500">Experience</div>
-              <div className="font-medium">
-                {appointment.psychologistResponse.yearsOfExperience} years
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+                <div className="w-28 text-gray-500">Experience</div>
+                <div className="font-medium">
+                  {appointment.psychologistResponse.yearsOfExperience} years
+                </div>
               </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
-        <Card
-          title={
-            <div className="flex items-center gap-2">
-              <TeamOutlined className="text-primary-green text-lg" />
-              <span className="font-semibold">Student Information</span>
-            </div>
-          }
-          className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
-        >
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
-              <div className="w-28 text-gray-500">Name</div>
-              <div className="font-medium">
-                {appointment.studentResponse.info.fullName}
+        {user.role !== "student" && (
+          <Card
+            title={
+              <div className="flex items-center gap-2">
+                <TeamOutlined className="text-primary-green text-lg" />
+                <span className="font-semibold">Student Information</span>
               </div>
-            </div>
+            }
+            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+                <div className="w-28 text-gray-500">Name</div>
+                <div className="font-medium">
+                  {appointment.studentResponse.info.fullName}
+                </div>
+              </div>
 
-            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
-              <div className="w-28 text-gray-500">Grade</div>
-              <div className="font-medium">
-                {appointment.studentResponse.grade}
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+                <div className="w-28 text-gray-500">Grade</div>
+                <div className="font-medium">
+                  {appointment.studentResponse.grade}
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
-              <div className="w-28 text-gray-500">School</div>
-              <div className="font-medium">
-                {appointment.studentResponse.schoolName}
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
+                <div className="w-28 text-gray-500">School</div>
+                <div className="font-medium">
+                  {appointment.studentResponse.schoolName}
+                </div>
               </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        )}
       </div>
 
       {/* Scores Card */}
       <Card
         title={
           <div className="flex items-center justify-between">
-            <span>Assessment Scores</span>
-            {isInProgress && (
-              <Tag color="processing" className="ml-2">
-                Session in Progress
-              </Tag>
-            )}
+            <div className="flex items-center gap-2">
+              <BarChartOutlined className="text-primary-green text-lg" />
+              <span>Assessment Scores</span>
+            </div>
           </div>
         }
-        className="bg-gray-50"
-        styles={{
-          title: {
-            textAlign: "start",
-            flex: 1,
-          },
-          body: {
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          },
-        }}
-      >
-        <BarChart width={700} height={300} data={data}>
-          <XAxis dataKey="name" />
-          <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} />
-          <Tooltip />
-          <CartesianGrid strokeDasharray="3 3" />
-          <Legend />
-          <Bar dataKey="score" name="Score (%)" fill={(entry) => entry.fill} />
-        </BarChart>
+        className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
+        <div className="grid grid-cols-3 gap-4">
+          {scores.map((score, index) => (
+            <div key={index} className="flex flex-col items-center gap-2">
+              <h3 className="text-base font-medium text-gray-700">
+                {score.title}
+              </h3>
+              <Progress
+                type="circle"
+                percent={calculatePercentage(score.score)}
+                strokeColor={getScoreColor(score.score)}
+                strokeWidth={10}
+                width={120}
+                format={(percent) => (
+                  <span className="text-lg font-medium">
+                    {Math.round(percent)}%
+                  </span>
+                )}
+              />
+            </div>
+          ))}
+        </div>
       </Card>
 
       {/* Session Notes - Only visible when checked in */}
-      {isInProgress && (
+      {user.role === "psychologist" && isInProgress && (
         <Card
           title="Session Notes"
           className="bg-white"
@@ -547,8 +581,7 @@ const AppointmentDetailContent = ({ appointment }) => {
             <Tag color="processing" className="mr-0">
               Current Session
             </Tag>
-          }
-        >
+          }>
           <div className="space-y-4">
             <Input.TextArea
               placeholder="Enter session notes here..."
@@ -566,6 +599,7 @@ const AppointmentDetailContent = ({ appointment }) => {
 
 // Update PropTypes
 AppointmentDetailContent.propTypes = {
+  user: PropTypes.object.isRequired,
   appointment: PropTypes.shape({
     appointmentID: PropTypes.string.isRequired,
     timeSlotID: PropTypes.string.isRequired,
@@ -602,11 +636,12 @@ AppointmentDetailContent.propTypes = {
         role: PropTypes.string.isRequired,
       }).isRequired,
     }).isRequired,
-    status: PropTypes.oneOf(["Scheduled", "In Progress", "Completed"])
+    status: PropTypes.oneOf(["SCHEDULED", "IN_PROGRESS", "COMPLETED"])
       .isRequired,
     createdAt: PropTypes.string.isRequired,
     updatedAt: PropTypes.string.isRequired,
   }).isRequired,
+  fetchData: PropTypes.func.isRequired,
 };
 
 export default DetailCalendar;
