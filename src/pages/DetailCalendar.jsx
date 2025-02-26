@@ -293,24 +293,6 @@ const ProgramDetailContent = ({ program, user }) => {
   );
 };
 
-ProgramDetailContent.propTypes = {
-  user: PropTypes.object.isRequired,
-  program: PropTypes.shape({
-    programID: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    startDate: PropTypes.string.isRequired,
-    duration: PropTypes.number.isRequired,
-    status: PropTypes.string.isRequired,
-    facilitatorName: PropTypes.string.isRequired,
-    departmentName: PropTypes.string.isRequired,
-    numberParticipants: PropTypes.string,
-    tags: PropTypes.arrayOf(PropTypes.string).isRequired,
-    type: PropTypes.string.isRequired,
-    meetingLink: PropTypes.string.isRequired,
-  }).isRequired,
-};
-
 const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
   const {
     checkInAppointment,
@@ -595,6 +577,24 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
       )}
     </div>
   );
+};
+
+ProgramDetailContent.propTypes = {
+  user: PropTypes.object.isRequired,
+  program: PropTypes.shape({
+    programID: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    startDate: PropTypes.string.isRequired,
+    duration: PropTypes.number.isRequired,
+    status: PropTypes.string.isRequired,
+    facilitatorName: PropTypes.string.isRequired,
+    departmentName: PropTypes.string.isRequired,
+    numberParticipants: PropTypes.string,
+    tags: PropTypes.arrayOf(PropTypes.string).isRequired,
+    type: PropTypes.string.isRequired,
+    meetingLink: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 // Update PropTypes
