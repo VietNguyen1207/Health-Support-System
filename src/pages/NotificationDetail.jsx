@@ -125,6 +125,8 @@ const NotificationDetail = () => {
 
   useEffect(() => {
     fetchNotifications();
+
+    renderDetailContent();
   }, [activeTabKey]);
 
   useEffect(() => {

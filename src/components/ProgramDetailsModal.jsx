@@ -1,11 +1,13 @@
-import React from "react";
-import { Modal, Button, Tag, Space, Skeleton } from "antd";
+import React, { useState } from "react";
+import { Modal, Button, Tag, Space, Skeleton, message } from "antd";
 import {
   CalendarOutlined,
   TeamOutlined,
   FieldTimeOutlined,
   LinkOutlined,
 } from "@ant-design/icons";
+import { useProgramStore } from "../stores/programStore";
+import { useAuthStore } from "../stores/authStore";
 
 const ProgramDetailsModal = ({
   isOpen,
@@ -14,6 +16,32 @@ const ProgramDetailsModal = ({
   loading,
   onJoinProgram,
 }) => {
+  const { registerProgram } = useProgramStore();
+  const { user } = useAuthStore();
+  const [registering, setRegistering] = useState(false);
+
+  const handleJoinProgram = async () => {
+    if (!program || !user) return;
+
+    // Get studentID from user object
+    const studentId = user.studentId || user.studentInfo?.studentId;
+
+    try {
+      setRegistering(true);
+      await registerProgram(program.programID, studentId);
+      message.success("Successfully registered for the program!");
+      if (onJoinProgram) onJoinProgram();
+      onClose();
+    } catch (error) {
+      console.error("Registration error in component:", error);
+      message.error(
+        `Failed to register: ${error.message || "Please try again"}`
+      );
+    } finally {
+      setRegistering(false);
+    }
+  };
+
   return (
     <Modal
       title={
@@ -43,12 +71,15 @@ const ProgramDetailsModal = ({
           <Button
             type="primary"
             className="bg-primary-green hover:bg-primary-green/90"
-            onClick={() => program && onJoinProgram(program.programID)}
-            disabled={loading}>
+            onClick={handleJoinProgram}
+            loading={registering || loading}
+            disabled={!user || !(user.studentId || user.studentInfo?.studentId)}
+          >
             Join Program
           </Button>
         </div>
-      }>
+      }
+    >
       <ModalContent program={program} loading={loading} />
     </Modal>
   );
@@ -112,7 +143,8 @@ const ModalContent = React.memo(({ program, loading }) => {
           </div>
           <Tag
             color={program.type === "Online" ? "blue" : "green"}
-            className="mt-1">
+            className="mt-1"
+          >
             {program.type}
           </Tag>
         </div>
@@ -132,7 +164,7 @@ const ModalContent = React.memo(({ program, loading }) => {
         </div>
       </div>
 
-      {/* Online Meeting Link - Fixed to prevent nested anchors */}
+      {/* Online Meeting Link */}
       {program.type === "Online" && program.meetingLink && (
         <div className="bg-blue-50 p-3 rounded-lg">
           <p className="text-gray-500 text-sm mb-1">Meeting Link</p>
@@ -143,7 +175,8 @@ const ModalContent = React.memo(({ program, loading }) => {
               href={program.meetingLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-0 h-auto text-primary-green hover:text-primary-green/80">
+              className="p-0 h-auto text-primary-green hover:text-primary-green/80"
+            >
               Join Meeting
             </Button>
           </div>
@@ -157,7 +190,8 @@ const ModalContent = React.memo(({ program, loading }) => {
             {program.tags.map((tag) => (
               <Tag
                 key={tag}
-                className="bg-gray-50 border border-gray-200 text-sm">
+                className="bg-gray-50 border border-gray-200 text-sm"
+              >
                 {tag}
               </Tag>
             ))}

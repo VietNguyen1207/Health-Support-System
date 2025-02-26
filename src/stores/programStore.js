@@ -103,4 +103,52 @@ export const useProgramStore = create((set) => ({
   },
 
   clearSelectedProgram: () => set({ selectedProgram: null }),
+
+  // Register for a program
+  registerProgram: async (programId, studentId) => {
+    set({ loading: true, error: null });
+    try {
+      console.log("Registering for program:", { programId, studentId });
+      const { data } = await api.post(`/programs/${programId}/register`, {
+        studentID: studentId,
+        programID: programId,
+      });
+
+      set({ loading: false });
+      return data;
+    } catch (error) {
+      console.error("Registration error details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        fullError: error,
+      });
+
+      const errorMessage =
+        error.response?.data?.message || "Failed to register for program";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
+  // Fetch enrolled programs for student
+  fetchEnrolledPrograms: async (studentId) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.get(`/programs/enrolled/${studentId}`);
+      set({ loading: false });
+      return data;
+    } catch (error) {
+      console.error("Error fetching enrolled programs:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch enrolled programs";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
 }));
