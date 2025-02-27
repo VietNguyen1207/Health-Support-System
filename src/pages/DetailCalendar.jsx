@@ -638,7 +638,7 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
           }
         >
           <div className="space-y-4">
-            <Input.TextArea
+            <Input.TextArean
               placeholder="Enter session notes here..."
               rows={4}
               className="w-full"
