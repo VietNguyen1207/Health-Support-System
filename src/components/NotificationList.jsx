@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNotificationStore } from "../stores/notificationStore";
 import { BellOutlined, CheckOutlined, ReloadOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -32,24 +32,31 @@ const NotificationList = ({ onClose }) => {
     loading,
     error,
     getNotifications,
-    getUnreadNotifications,
     markNotificationAsRead,
   } = useNotificationStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const [notificationList, setNotificationList] = useState(
+    notifications.slice(0, 4)
+  );
 
-  const fetchData = async (unreadOnly = false) => {
+  const fetchData = async () => {
     try {
-      setActiveFilter(unreadOnly ? "unread" : "all");
-      if (unreadOnly) {
-        await getUnreadNotifications(user?.userId);
-      } else {
-        await getNotifications(user?.userId);
-      }
+      await getNotifications(user?.userId);
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
   };
+
+  const handleFilter = useCallback((unreadOnly = false) => {
+    setActiveFilter(unreadOnly ? "unread" : "all");
+    if (unreadOnly) {
+      const unread = notifications.filter((noti) => !noti.isRead).slice(0, 4);
+      setNotificationList(unread);
+    } else {
+      setNotificationList(notifications.slice(0, 4));
+    }
+  }, []);
 
   const handleNotificationClick = async (notification) => {
     if (!notification.isRead) {
@@ -61,12 +68,6 @@ const NotificationList = ({ onClose }) => {
         return;
       }
     }
-
-    // // Extract type and typeId for navigation
-    // const type = notification.type?.toLowerCase();
-    // const typeId = notification.idtype || "";
-
-    // Close notification panel
     onClose();
 
     // Navigate to notification detail page with query params
@@ -102,7 +103,7 @@ const NotificationList = ({ onClose }) => {
               ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
               : "text-gray-600 hover:bg-gray-100"
           }`}
-          onClick={() => fetchData(false)}>
+          onClick={() => handleFilter(false)}>
           All
         </button>
         <button
@@ -111,7 +112,7 @@ const NotificationList = ({ onClose }) => {
               ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
               : "text-gray-600 hover:bg-gray-100"
           }`}
-          onClick={() => fetchData(true)}>
+          onClick={() => handleFilter(true)}>
           Unread
         </button>
       </div>
@@ -132,8 +133,8 @@ const NotificationList = ({ onClose }) => {
               Try again
             </Button>
           </div>
-        ) : notifications?.length > 0 ? (
-          notifications.map((notification) => (
+        ) : notificationList?.length > 0 ? (
+          notificationList.map((notification) => (
             <div
               key={notification.id}
               className={`p-3 border-b hover:bg-gray-50 cursor-pointer transition-colors ${

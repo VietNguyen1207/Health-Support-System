@@ -38,7 +38,7 @@ const Header = () => {
         stopPolling();
       };
     }
-  }, [user?.userId]);
+  }, [user]);
 
   const handleLogout = async () => {
     await logout();
@@ -90,7 +90,7 @@ const Header = () => {
       <Dropdown.Button
         menu={menuProps}
         align="end"
-        buttonsRender={([leftButton, rightButton]) => [
+        buttonsRender={([, rightButton]) => [
           <Button
             key={user?.role}
             icon={<UserOutlined />}

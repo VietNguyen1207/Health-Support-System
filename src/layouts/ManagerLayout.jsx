@@ -43,7 +43,7 @@ export const ManagerLayout = () => {
         stopPolling();
       };
     }
-  }, [user?.userId]);
+  }, [user]);
 
   const menuItems = [
     {
@@ -139,7 +139,7 @@ export const ManagerLayout = () => {
           <Dropdown.Button
             menu={menuProps}
             align="end"
-            buttonsRender={([leftButton, rightButton]) => [
+            buttonsRender={([, rightButton]) => [
               <Button
                 key={user?.role}
                 icon={<UserOutlined />}
