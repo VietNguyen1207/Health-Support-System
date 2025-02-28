@@ -408,7 +408,7 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
     return "#ef4444";
   };
 
-  // Check if appointment date is valid for actions
+  // Check if appointment date is valid for checking-in student
   const canPerformActions = isAppointmentDateValid();
 
   return (
