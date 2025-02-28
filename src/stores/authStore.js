@@ -10,6 +10,7 @@ const initialState = {
   token: null,
   isAuthenticated: false,
   loading: false,
+  error: null,
 };
 
 const AUTH_URL = "/auth/";
@@ -37,7 +38,7 @@ const isTokenExpired = (token) => {
 
 export const useAuthStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialState,
 
       checkAuthStatus: () => {
@@ -52,73 +53,75 @@ export const useAuthStore = create(
         return true;
       },
 
-      // Action login
+      // Login user
       login: async (credentials) => {
-        set({ loading: true });
+        set({ loading: true, error: null });
         try {
-          const { data } = await api.post(
-            AUTH_URL + AUTH_ENDPOINT.LOGIN,
-            credentials
-          );
+          const { data } = await api.post("/auth/login", credentials);
 
-          const {
-            userId,
-            studentId, // Basic ID from login
-            fullName,
-            accessToken,
-            refreshToken,
-            role,
-          } = data;
+          // Store tokens
+          localStorage.setItem("token", data.accessToken);
+          localStorage.setItem("refreshToken", data.refreshToken);
 
-          // Set authorization header for subsequent requests
-          api.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${accessToken}`;
+          // Set user data directly from login response
+          const userData = {
+            userId: data.userId,
+            studentId: data.studentId,
+            fullName: data.fullName,
+            role: data.role.toLowerCase().replace("role_", ""),
+            // Add any other fields you need from the response
+          };
 
-          // Get user details to fetch role-specific IDs
-          const userStore = useUserStore.getState();
-          const userDetails = await userStore.getDetail(userId);
-
-          // Set user state with role-specific IDs
           set({
-            user: {
-              userId,
-              studentId,
-              fullName,
-              role: String(role).toLowerCase(),
-              psychologistId: userDetails?.psychologistInfo?.psychologistId,
-              parentId: userDetails?.parentInfo?.parentId,
-            },
-            token: { accessToken, refreshToken },
+            user: userData,
             isAuthenticated: true,
+            loading: false,
           });
 
-          return true;
+          return userData;
         } catch (error) {
-          if (axios.isAxiosError(error)) {
-            throw new Error(error.response?.data?.message || "Login failed");
-          }
-          throw error;
-        } finally {
-          set({ loading: false });
+          console.error("Login error details:", {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message,
+          });
+
+          const errorMessage =
+            error.response?.data?.message || "Failed to login";
+          set({ error: errorMessage, loading: false });
+          throw new Error(errorMessage);
         }
       },
 
-      // Action logout
-      logout: async () => {
-        try {
-          delete api.defaults.headers.common["Authorization"];
-          await api.post(AUTH_URL + AUTH_ENDPOINT.LOGOUT);
+      // Logout user
+      logout: () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        set(initialState);
+      },
 
-          // delete api.defaults.headers.common["Authentication"];
-          // Reset state
+      // Check if user is authenticated
+      checkAuth: async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
           set(initialState);
-        } catch (error) {
-          if (axios.isAxiosError(error)) {
-            throw new Error(error.response?.data?.message || "Logout failed");
-          }
-          throw error;
+          return false;
         }
+
+        try {
+          // You can add a token validation endpoint call here if needed
+          return get().isAuthenticated;
+        } catch (error) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("refreshToken");
+          set(initialState);
+          return false;
+        }
+      },
+
+      // Update user
+      updateUser: (userData) => {
+        set({ user: { ...get().user, ...userData } });
       },
 
       // Action refresh token

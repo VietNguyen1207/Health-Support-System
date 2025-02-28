@@ -9,15 +9,27 @@ import {
   ClockCircleOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { Input, Select, Pagination, Dropdown, Button } from "antd";
+import {
+  Input,
+  Select,
+  Pagination,
+  Dropdown,
+  Button,
+  Spin,
+  Empty,
+  notification,
+} from "antd";
 import { useNavigate } from "react-router-dom";
+import { useSurveyStore } from "../stores/surveyStore";
+import { useAuthStore } from "../stores/authStore";
 
 const { Option } = Select;
 
 const Test = () => {
   const navigate = useNavigate();
-  const [tests, setTests] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user, logout } = useAuthStore();
+  const { surveys, loading, fetchSurveys, getStudentSurveyStatus } =
+    useSurveyStore();
   const [selectedTest, setSelectedTest] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,34 +38,68 @@ const Test = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
 
-  // Fetch tests data
+  // Fetch surveys data
   useEffect(() => {
-    const fetchTests = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/src/data/tests.json");
-        const data = await response.json();
-        setTests(data.tests);
+        await fetchSurveys();
       } catch (error) {
-        console.error("Error fetching tests:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error fetching surveys:", error);
+
+        // Handle 403 Forbidden error
+        if (
+          error.message.includes("permission") ||
+          error.message.includes("403") ||
+          error.response?.status === 403
+        ) {
+          notification.error({
+            message: "Authentication Error",
+            description: "Your session may have expired. Please log in again.",
+            duration: 5,
+          });
+
+          // Optional: Redirect to login page
+          // logout();
+          // navigate("/login");
+        } else {
+          notification.error({
+            message: "Error Loading Tests",
+            description:
+              "Failed to load available tests. Please try again later.",
+            duration: 5,
+          });
+        }
       }
     };
 
-    fetchTests();
-  }, []);
+    fetchData();
+  }, [fetchSurveys]);
+
+  // Get student-specific survey data
+  const studentSurveys = useMemo(() => {
+    if (user?.studentId) {
+      return getStudentSurveyStatus(surveys, user.studentId);
+    }
+    return surveys;
+  }, [surveys, user, getStudentSurveyStatus]);
 
   // Get unique statuses and categories for filters
   const statuses = useMemo(
-    () => [...new Set(tests.map((test) => test.status))],
-    [tests]
+    () => [
+      ...new Set(
+        studentSurveys.map((survey) => survey.studentStatus || "Not Started")
+      ),
+    ],
+    [studentSurveys]
   );
 
   const categories = useMemo(() => {
-    return [...new Set(tests.map((test) => test.category))].filter(Boolean);
-  }, [tests]);
+    return [
+      ...new Set(studentSurveys.map((survey) => survey.categoryName)),
+    ].filter(Boolean);
+  }, [studentSurveys]);
 
-  // Move the items array inside the component but outside any render logic
+  // Menu items for dropdown
   const menuItems = {
     items: [
       {
@@ -85,20 +131,21 @@ const Test = () => {
     ],
   };
 
-  // Filter tests based on search and filters
+  // Filter surveys based on search and filters
   const filteredTests = useMemo(() => {
-    return tests.filter((test) => {
+    return studentSurveys.filter((survey) => {
       const matchesSearch =
-        test.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        test.description.toLowerCase().includes(searchQuery.toLowerCase());
+        survey.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        survey.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesStatus = !selectedStatus || test.status === selectedStatus;
+      const matchesStatus =
+        !selectedStatus || survey.studentStatus === selectedStatus;
       const matchesCategory =
-        !selectedCategory || test.category === selectedCategory;
+        !selectedCategory || survey.categoryName === selectedCategory;
 
       return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [tests, searchQuery, selectedStatus, selectedCategory]);
+  }, [studentSurveys, searchQuery, selectedStatus, selectedCategory]);
 
   // Calculate pagination
   const totalTests = filteredTests.length;
@@ -113,24 +160,17 @@ const Test = () => {
 
   const handleStartTest = async (test) => {
     try {
-      const response = await fetch("/src/data/test-questions.json");
-      const data = await response.json();
-
-      // Get questions for this specific test using test.id
-      const testQuestions = data.questions[test.id];
-
-      if (testQuestions) {
-        navigate("/test-question", {
-          state: {
-            test: {
-              ...test,
-              questions: testQuestions.questions,
-            },
+      // Navigate to the test with the survey data
+      navigate("/test-question", {
+        state: {
+          test: {
+            ...test,
+            id: test.id,
           },
-        });
-      }
+        },
+      });
     } catch (error) {
-      console.error("Error fetching test questions:", error);
+      console.error("Error starting test:", error);
     }
   };
 
@@ -143,7 +183,7 @@ const Test = () => {
       <div className="max-w-5xl mx-auto px-4">
         {loading ? (
           <div className="flex justify-center items-center min-h-[400px]">
-            <div className="text-gray-500">Loading tests...</div>
+            <Spin size="large" />
           </div>
         ) : (
           <div className="test-content max-w-5xl mx-auto px-4">
@@ -165,8 +205,6 @@ const Test = () => {
                   <SearchOutlined className="text-gray-400 text-lg mr-3" />
                   <Input
                     placeholder="Search tests..."
-                    // `bordered` is deprecated. Please use `variant` instead
-                    // bordered={false}
                     variant="borderless"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -223,10 +261,12 @@ const Test = () => {
                             {test.title}
                           </h3>
                           <div className="flex items-center">
-                            {test.status === "finished" ? (
+                            {test.studentStatus === "Finished" ? (
                               <span className="flex items-center text-green-500 bg-green-50 rounded-xl p-2">
                                 <CheckCircleOutlined className="mr-1.5" />
-                                <span className="text-sm">Completed</span>
+                                <span className="text-sm">
+                                  Completed ({test.studentScore})
+                                </span>
                               </span>
                             ) : (
                               <span className="flex items-center text-blue-500 bg-blue-50 rounded-xl p-2">
@@ -256,7 +296,7 @@ const Test = () => {
                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                               />
                             </svg>
-                            {test.duration}
+                            {test.numberOfQuestions * 3} mins
                           </span>
                           <span className="flex items-center bg-gray-50 px-3 py-1.5 rounded-lg">
                             <svg
@@ -272,7 +312,7 @@ const Test = () => {
                                 d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                               />
                             </svg>
-                            {test.questions} Questions
+                            {test.numberOfQuestions} Questions
                           </span>
                           <span className="flex items-center bg-custom-green/10 text-custom-green px-3 py-1.5 rounded-lg">
                             <svg
@@ -288,7 +328,7 @@ const Test = () => {
                                 d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
                               />
                             </svg>
-                            {test.category}
+                            {test.categoryName}
                           </span>
                         </div>
                       </div>
@@ -303,9 +343,10 @@ const Test = () => {
                 ))
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">
-                    No tests found matching your criteria.
-                  </p>
+                  <Empty
+                    description="No tests found matching your criteria."
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  />
                 </div>
               )}
             </div>
@@ -334,86 +375,88 @@ const Test = () => {
                 onClick={() => setIsModalOpen(false)}
               >
                 <div
-                  className="bg-white rounded-xl max-w-2xl w-full shadow-2xl transform transition-all relative"
+                  className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-auto"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {/* Modal Header */}
-                  <div className="p-6 border-b">
-                    <div className="flex justify-between items-start">
-                      <h2 className="text-xl font-semibold text-gray-900">
-                        {selectedTest.title}
-                      </h2>
-                      <Dropdown
-                        menu={menuItems}
-                        trigger={["click"]}
-                        placement="bottomRight"
-                      >
-                        <button
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-gray-400 hover:text-gray-500"
-                        >
-                          <MenuOutlined style={{ fontSize: "24px" }} />
-                        </button>
-                      </Dropdown>
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                      {selectedTest.title}
+                    </h2>
+                    <div className="flex items-center space-x-2 mb-4">
+                      <span className="bg-custom-green/10 text-custom-green px-3 py-1 rounded-full text-sm">
+                        {selectedTest.categoryName}
+                      </span>
+                      {selectedTest.studentStatus === "Finished" ? (
+                        <span className="bg-green-50 text-green-600 px-3 py-1 rounded-full text-sm flex items-center">
+                          <CheckCircleOutlined className="mr-1" />
+                          Completed ({selectedTest.studentScore})
+                        </span>
+                      ) : (
+                        <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm flex items-center">
+                          <ClockCircleOutlined className="mr-1" />
+                          Not Started
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-gray-600">{selectedTest.description}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="font-medium text-gray-800 mb-2">
+                        Details
+                      </h3>
+                      <ul className="space-y-2">
+                        <li className="flex justify-between">
+                          <span className="text-gray-500">Questions:</span>
+                          <span className="font-medium">
+                            {selectedTest.numberOfQuestions}
+                          </span>
+                        </li>
+                        <li className="flex justify-between">
+                          <span className="text-gray-500">Estimated Time:</span>
+                          <span className="font-medium">
+                            {selectedTest.numberOfQuestions * 3} minutes
+                          </span>
+                        </li>
+                        <li className="flex justify-between">
+                          <span className="text-gray-500">Category:</span>
+                          <span className="font-medium">
+                            {selectedTest.categoryName}
+                          </span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="font-medium text-gray-800 mb-2">
+                        Instructions
+                      </h3>
+                      <ul className="space-y-1 text-gray-600 text-sm">
+                        <li>• Answer all questions honestly</li>
+                        <li>• There are no right or wrong answers</li>
+                        <li>• Take your time to consider each question</li>
+                        <li>
+                          • Your responses will help us provide better support
+                        </li>
+                      </ul>
                     </div>
                   </div>
 
-                  {/* Modal Body */}
-                  <div className="p-6">
-                    <div className="space-y-4">
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-900">
-                          Description
-                        </h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                          {selectedTest.detailedDescription}
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <h3 className="text-sm font-medium text-gray-900">
-                            Duration
-                          </h3>
-                          <p className="mt-1 text-sm text-gray-500">
-                            {selectedTest.duration}
-                          </p>
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-medium text-gray-900">
-                            Number of Questions
-                          </h3>
-                          <p className="mt-1 text-sm text-gray-500">
-                            {selectedTest.questions}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-900">
-                          Category
-                        </h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                          {selectedTest.category}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Modal Footer */}
-                  <div className="p-6 border-t bg-gray-50 flex justify-end space-x-3 rounded-b-lg">
-                    <button
-                      onClick={() => setIsModalOpen(false)}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                    >
+                  <div className="flex justify-end space-x-3">
+                    <Button onClick={() => setIsModalOpen(false)}>
                       Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      type="primary"
+                      className="bg-custom-green hover:bg-custom-green/90"
                       onClick={() => handleStartTest(selectedTest)}
-                      className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary -green hover:bg-custom-green/90"
+                      disabled={selectedTest.status === "INACTIVE"}
                     >
-                      Start Test
-                    </button>
+                      {selectedTest.studentStatus === "Finished"
+                        ? "Retake Test"
+                        : "Start Test"}
+                    </Button>
                   </div>
                 </div>
               </div>

@@ -29,20 +29,34 @@ const Booking = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchData = async () => {
+      if (users && users.length > 0) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
+        setIsLoading(true);
         await getAllUsers();
       } catch (error) {
         console.error("Error fetching users:", error);
         notification.error({
           message: "Failed to load user data",
+          description: "Please try refreshing the page",
         });
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
+
     fetchData();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [getAllUsers, users]);
 
   // Get list of specializations
   const specializations = useMemo(() => {
@@ -104,7 +118,8 @@ const Booking = () => {
           onClick={() => {
             notification.destroy();
             navigate("/calendar");
-          }}>
+          }}
+        >
           View Calendar
         </Button>
       ),
@@ -139,7 +154,7 @@ const Booking = () => {
 
   useEffect(() => {
     setIsFormValid(validateFormData());
-  }, [formData]); // Revalidate when formData changes
+  }, [formData]);
 
   const disabledButton = useMemo(() => !isFormValid, [isFormValid]);
 
@@ -171,7 +186,8 @@ const Booking = () => {
         <div
           className={`max-w-7xl min-w-6xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8 ${
             isLoading ? "pointer-events-none" : ""
-          }`}>
+          }`}
+        >
           <h2 className="text-2xl font-bold text-custom-green mb-8 pb-2 border-b">
             Book an Appointment
           </h2>
@@ -186,7 +202,8 @@ const Booking = () => {
                 <div>
                   <label
                     htmlFor="specialization"
-                    className="block text-base font-medium text-gray-700 mb-4">
+                    className="block text-base font-medium text-gray-700 mb-4"
+                  >
                     Select Specialization<span className="text-red-500">*</span>
                   </label>
                   <select
@@ -195,7 +212,8 @@ const Booking = () => {
                     required
                     value={selectedSpecialization}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-green focus:ring-custom-green">
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-green focus:ring-custom-green"
+                  >
                     <option value="" className="text-gray-400">
                       --- Select a Specialization ---
                     </option>
@@ -211,7 +229,8 @@ const Booking = () => {
                 <div>
                   <label
                     htmlFor="psychologist"
-                    className="block text-base font-medium text-gray-700 mb-4">
+                    className="block text-base font-medium text-gray-700 mb-4"
+                  >
                     Select Psychologist<span className="text-red-500">*</span>
                   </label>
                   <select
@@ -220,7 +239,8 @@ const Booking = () => {
                     required
                     value={formData.psychologist}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-green focus:ring-custom-green">
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-custom-green focus:ring-custom-green"
+                  >
                     <option value="" className="text-gray-400">
                       --- Select a psychologist ---
                     </option>
@@ -235,7 +255,8 @@ const Booking = () => {
                 <div>
                   <label
                     htmlFor="reason"
-                    className="block text-base font-medium text-gray-700 mb-4">
+                    className="block text-base font-medium text-gray-700 mb-4"
+                  >
                     Reason for Appointment (Optional)
                   </label>
                   <textarea
@@ -284,14 +305,16 @@ const Booking = () => {
                 onClick={() => {
                   resetFormData();
                   navigate(-1);
-                }}>
+                }}
+              >
                 Cancel
               </Button>
               <Button
                 type="primary"
                 disabled={disabledButton}
                 loading={loading}
-                onClick={handleSubmit}>
+                onClick={handleSubmit}
+              >
                 Book Appointment
               </Button>
             </div>

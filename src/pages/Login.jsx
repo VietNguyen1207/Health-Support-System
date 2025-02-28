@@ -1,7 +1,7 @@
 import "../style/Login.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
-import { Button, Form, Input, Checkbox, message } from "antd";
+import { Button, Form, Input, Checkbox, message, notification } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
 const Login = () => {
@@ -12,6 +12,7 @@ const Login = () => {
   const handleSubmit = async (values) => {
     try {
       await login(values);
+      message.success("Login successful!");
       navigate("/");
     } catch (error) {
       console.log(error);
@@ -29,11 +30,13 @@ const Login = () => {
           onFinish={handleSubmit}
           initialValues={{ remember: false }}
           layout="vertical"
-          className="login-form">
+          className="login-form"
+        >
           <Form.Item
             label="Email"
             name="loginIdentifier"
-            rules={[{ required: true, message: "Please input your email!" }]}>
+            rules={[{ required: true, message: "Please input your email!" }]}
+          >
             <Input
               size="large"
               placeholder="Enter your Email"
@@ -45,9 +48,8 @@ const Login = () => {
           <Form.Item
             label="Password"
             name="password"
-            rules={[
-              { required: true, message: "Please input your password!" },
-            ]}>
+            rules={[{ required: true, message: "Please input your password!" }]}
+          >
             <Input.Password
               size="large"
               placeholder="Enter your password"
@@ -66,7 +68,8 @@ const Login = () => {
               htmlType="submit"
               loading={loading}
               size="large"
-              className="login-button">
+              className="login-button"
+            >
               Sign In
             </Button>
           </Form.Item>

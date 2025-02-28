@@ -130,7 +130,8 @@ function DetailCalendar({ user, events, visible, onClose, fetchData }) {
           maxHeight: "78vh",
           padding: "5px 50px",
         },
-      }}>
+      }}
+    >
       {isLoading ? (
         <LoadingSkeleton />
       ) : formattedItem.length ? (
@@ -237,7 +238,8 @@ const ProgramDetailContent = ({ program, user }) => {
           </div>
           <Tag
             color={program.type === "Online" ? "blue" : "green"}
-            className="mt-1">
+            className="mt-1"
+          >
             {program.type}
           </Tag>
         </div>
@@ -268,7 +270,8 @@ const ProgramDetailContent = ({ program, user }) => {
               href={program.meetingLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-0 h-auto text-primary-green hover:text-primary-green/80">
+              className="p-0 h-auto text-primary-green hover:text-primary-green/80"
+            >
               Join Meeting
             </Button>
           </div>
@@ -282,7 +285,8 @@ const ProgramDetailContent = ({ program, user }) => {
             {program.tags.map((tag) => (
               <Tag
                 key={tag}
-                className="bg-gray-50 border border-gray-200 text-sm">
+                className="bg-gray-50 border border-gray-200 text-sm"
+              >
                 {tag}
               </Tag>
             ))}
@@ -304,8 +308,31 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [notes, setNotes] = useState("");
 
+  // Determine if appointment is in progress
+  const isInProgress =
+    appointmentStatus === "IN_PROGRESS" || appointment.status === "IN_PROGRESS";
+
+  // Check if the appointment date has arrived
+  const isAppointmentDateValid = () => {
+    // Get the appointment date from the timeSlot
+    const appointmentDate = new Date(appointment.appointmentDate);
+    appointmentDate.setHours(0, 0, 0, 0); // Set to beginning of day
+
+    // Get today's date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to beginning of day
+
+    // Return true if today is the same day or after the appointment date
+    return today >= appointmentDate;
+  };
+
   // Handle check-in
   const handleCheckIn = async () => {
+    // Validate appointment date
+    if (!isAppointmentDateValid()) {
+      return message.error("Cannot check in before the appointment date");
+    }
+
     try {
       setIsLoading(true);
       await checkInAppointment(appointment.appointmentID);
@@ -320,6 +347,11 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
 
   // Handle check-out
   const handleCheckOut = async () => {
+    // Validate appointment date
+    if (!isAppointmentDateValid()) {
+      return message.error("Cannot check out before the appointment date");
+    }
+
     try {
       setIsLoading(true);
       await checkOutAppointment(appointment.appointmentID, notes);
@@ -338,10 +370,9 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
     setIsLoading(true);
     try {
       await cancelAppointment(appointment.appointmentID, user.userId);
-      message.success("Appointment completed successfully!");
+      message.success("Appointment cancelled successfully!");
       fetchData();
     } catch (error) {
-      // message.error("Failed to cancel appointment");
       console.log("Failed to cancel appointment:", error);
     } finally {
       setIsLoading(false);
@@ -355,14 +386,10 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
     };
   }, [clearAppointmentStatus]);
 
-  // Determine if appointment is in progress
-  const isInProgress =
-    appointmentStatus === "IN_PROGRESS" || appointment.status === "IN_PROGRESS";
-
   const calculatePercentage = (score) => (score / 10) * 100;
   const scores = [
     {
-      title: "Anxiety Level",
+      title: "Depression Level",
       score: appointment.studentResponse.depressionScore,
     },
     {
@@ -376,12 +403,13 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
   ];
 
   const getScoreColor = (score) => {
-    console.log(score);
-
     if (score <= 3) return "#4a7c59";
     if (score <= 6) return "#fbbf24";
     return "#ef4444";
   };
+
+  // Check if appointment date is valid for checking-in student
+  const canPerformActions = isAppointmentDateValid();
 
   return (
     <div className="space-y-4 max-h-[69vh] overflow-auto pr-5">
@@ -398,13 +426,21 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
                   : appointment.status === "COMPLETED"
                   ? "success"
                   : "default"
-              }>
+              }
+            >
               {isInProgress
                 ? "In Progress"
                 : appointment.status === "COMPLETED"
                 ? "Completed"
                 : "Scheduled"}
             </Tag>
+
+            {!canPerformActions && appointment.status !== "COMPLETED" && (
+              <Tag color="warning">
+                Available on{" "}
+                {new Date(appointment.appointmentDate).toLocaleDateString()}
+              </Tag>
+            )}
           </div>
         </div>
 
@@ -415,7 +451,14 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
                 type="primary"
                 icon={<UserOutlined />}
                 onClick={handleCheckIn}
-                loading={isLoading}>
+                loading={isLoading}
+                disabled={!canPerformActions}
+                title={
+                  !canPerformActions
+                    ? "Cannot check in before appointment date"
+                    : ""
+                }
+              >
                 Check-in Student
               </Button>
             )}
@@ -425,7 +468,14 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
                 type="primary"
                 icon={<CheckOutlined />}
                 onClick={handleCheckOut}
-                loading={isLoading}>
+                loading={isLoading}
+                disabled={!canPerformActions}
+                title={
+                  !canPerformActions
+                    ? "Cannot check out before appointment date"
+                    : ""
+                }
+              >
                 Complete & Check-out
               </Button>
             )}
@@ -439,7 +489,8 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
                 description="Are you sure you want to cancel appointment?"
                 onConfirm={handleCancel}
                 okText="Yes"
-                cancelText="No">
+                cancelText="No"
+              >
                 <Button danger loading={isLoading}>
                   Cancel
                 </Button>
@@ -459,7 +510,8 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
                 <span className="font-semibold">Psychologist Information</span>
               </div>
             }
-            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
+            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full"
+          >
             <div className="space-y-3">
               <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
                 <div className="w-28 text-gray-500">Name</div>
@@ -493,7 +545,8 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
                 <span className="font-semibold">Student Information</span>
               </div>
             }
-            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
+            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full"
+          >
             <div className="space-y-3">
               <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
                 <div className="w-28 text-gray-500">Name</div>
@@ -530,7 +583,8 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
             </div>
           </div>
         }
-        className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
+        className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full"
+      >
         <div className="grid grid-cols-3 gap-4">
           {scores.map((score, index) => (
             <div key={index} className="flex flex-col items-center gap-2">
@@ -563,9 +617,10 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
             <Tag color="processing" className="mr-0">
               Current Session
             </Tag>
-          }>
+          }
+        >
           <div className="space-y-4">
-            <Input.TextArea
+            <Input.TextArean
               placeholder="Enter session notes here..."
               rows={4}
               className="w-full"
