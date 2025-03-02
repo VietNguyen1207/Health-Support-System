@@ -215,7 +215,7 @@ export const useUserStore = create((set, get) => {
       }
     },
 
-    // Deactivate user account (only for Manager role)
+    // Deactivate user account
     deactivateUser: async (userId, deactivateData) => {
       set({ loading: true, error: null });
       try {

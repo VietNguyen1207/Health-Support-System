@@ -33,6 +33,7 @@ import BlogDetail from "../pages/BlogDetail";
 import Application from "../pages/psycologist/Application";
 import ApplicationManagement from "../pages/manager/ApplicationManagement ";
 import NotificationDetail from "../pages/NotificationDetail";
+import PsychologistProfile from "../pages/psycologist/PsychologistProfile";
 
 const Appointment = lazy(() => import("../pages/psycologist/Appointment"));
 
@@ -94,6 +95,7 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [
+          { path: "psychologist-profile", element: <PsychologistProfile /> },
           { path: "application", element: <Application /> },
           { path: "add-program", element: <AddProgram /> },
           { path: "patient-record", element: <PatientRecord /> },

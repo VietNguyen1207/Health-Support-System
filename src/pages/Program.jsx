@@ -105,14 +105,15 @@ const Program = () => {
               <div className="relative p-6 pb-4">
                 <div className="absolute top-6 right-6">
                   <Tag
-                    color={program.type === "Online" ? "blue" : "green"}
+                    color={program.type === "ONLINE" ? "blue" : "green"}
                     className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      program.type === "Online"
+                      program.type === "ONLINE"
                         ? "bg-blue-50 text-blue-600 border-blue-100"
                         : "bg-green-50 text-green-600 border-green-100"
                     }`}
                   >
-                    {program.type}
+                    {program.type.charAt(0) +
+                      program.type.slice(1).toLowerCase()}
                   </Tag>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-3 pr-24">
@@ -169,27 +170,28 @@ const Program = () => {
                         Participants
                       </p>
                       <p className="flex justify-center text-sm text-gray-800 font-medium">
-                        {program.numberParticipants}
+                        {program.currentParticipants}/{program.maxParticipants}
                       </p>
                     </div>
                   </div>
                   <div className="h-10 w-px bg-gray-200"></div>
                   <div className="text-right min-w-[80px]">
-                    <p className="flex justify-center items-center  text-xs text-gray-500 font-medium mb-0.5">
+                    <p className="flex justify-center items-center text-xs text-gray-500 font-medium mb-0.5">
                       Status
                     </p>
                     <span
                       className={`flex justify-center items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        program.status === "Active"
+                        program.status === "ACTIVE"
                           ? "bg-green-50 text-green-700"
-                          : program.status === "Full"
+                          : program.status === "FULL"
                           ? "bg-orange-50 text-orange-700"
-                          : program.status === "Closed"
+                          : program.status === "CLOSED"
                           ? "bg-red-50 text-red-700"
                           : "bg-gray-50 text-gray-700"
                       }`}
                     >
-                      {program.status}
+                      {program.status.charAt(0) +
+                        program.status.slice(1).toLowerCase()}
                     </span>
                   </div>
                 </div>
