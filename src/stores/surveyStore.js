@@ -11,8 +11,10 @@ const initialState = {
 
 const SURVEY_URL = "/surveys";
 
-export const useSurveyStore = create((set) => ({
+export const useSurveyStore = create((set, get) => ({
   ...initialState,
+  questions: [],
+  loadingQuestions: false,
 
   // Fetch all surveys
   fetchSurveys: async () => {
@@ -74,4 +76,51 @@ export const useSurveyStore = create((set) => ({
 
   // Clear selected survey
   clearSelectedSurvey: () => set({ selectedSurvey: null }),
+
+  // Fetch survey questions
+  fetchSurveyQuestions: async (surveyId) => {
+    set({ loadingQuestions: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+
+      const { data } = await api.get(`/surveys/${surveyId}/questions`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      set({
+        questions: data.questionList,
+        selectedSurvey: {
+          ...get().selectedSurvey,
+          id: data.surveyId,
+          title: data.title,
+          questions: data.questionList,
+        },
+        loadingQuestions: false,
+      });
+
+      return data;
+    } catch (error) {
+      console.error("Survey questions fetch error details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      const errorMessage =
+        error.response?.status === 403
+          ? "You don't have permission to access this survey. Please log in again."
+          : error.response?.data?.message ||
+            error.message ||
+            "Failed to fetch survey questions";
+
+      set({
+        error: errorMessage,
+        loadingQuestions: false,
+      });
+      throw new Error(errorMessage);
+    }
+  },
+
+  // Clear questions
+  clearQuestions: () => set({ questions: [] }),
 }));
