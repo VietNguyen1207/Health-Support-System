@@ -69,7 +69,6 @@ export const useAuthStore = create(
             studentId: data.studentId,
             fullName: data.fullName,
             role: data.role.toLowerCase().replace("role_", ""),
-            // Add any other fields you need from the response
           };
 
           set({
