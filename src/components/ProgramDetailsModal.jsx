@@ -5,6 +5,7 @@ import {
   TeamOutlined,
   FieldTimeOutlined,
   LinkOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { useProgramStore } from "../stores/programStore";
 import { useAuthStore } from "../stores/authStore";
@@ -129,11 +130,21 @@ const ModalContent = React.memo(({ program, loading }) => {
         <div className="bg-gray-50 p-3 rounded-lg">
           <div className="flex items-center gap-2 mb-1">
             <TeamOutlined className="text-primary-green" />
-            <p className="text-gray-500 text-sm">Capacity</p>
+            <p className="text-gray-500 text-sm">Participants</p>
           </div>
           <p className="font-medium text-sm">
-            {program.numberParticipants} participants
+            {program.currentParticipants}/{program.maxParticipants} participants
           </p>
+          <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+            <div
+              className="bg-primary-green h-1.5 rounded-full"
+              style={{
+                width: `${
+                  (program.currentParticipants / program.maxParticipants) * 100
+                }%`,
+              }}
+            ></div>
+          </div>
         </div>
 
         <div className="bg-gray-50 p-3 rounded-lg">
@@ -142,10 +153,10 @@ const ModalContent = React.memo(({ program, loading }) => {
             <p className="text-gray-500 text-sm">Type</p>
           </div>
           <Tag
-            color={program.type === "Online" ? "blue" : "green"}
+            color={program.type === "ONLINE" ? "blue" : "green"}
             className="mt-1"
           >
-            {program.type}
+            {program.type.charAt(0) + program.type.slice(1).toLowerCase()}
           </Tag>
         </div>
       </div>
@@ -154,7 +165,7 @@ const ModalContent = React.memo(({ program, loading }) => {
       <div className="bg-gray-50 p-3 rounded-lg">
         <div className="flex items-center">
           <div className="bg-primary-green/10 p-2 rounded-full mr-3">
-            <TeamOutlined className="text-primary-green" />
+            <UserOutlined className="text-primary-green" />
           </div>
           <div>
             <p className="text-gray-500 text-sm mb-0">Facilitator</p>
@@ -165,7 +176,7 @@ const ModalContent = React.memo(({ program, loading }) => {
       </div>
 
       {/* Online Meeting Link */}
-      {program.type === "Online" && program.meetingLink && (
+      {program.type === "ONLINE" && program.meetingLink && (
         <div className="bg-blue-50 p-3 rounded-lg">
           <p className="text-gray-500 text-sm mb-1">Meeting Link</p>
           <div className="flex items-center gap-2">
@@ -183,9 +194,26 @@ const ModalContent = React.memo(({ program, loading }) => {
         </div>
       )}
 
+      {/* Status */}
+      <div className="bg-gray-50 p-3 rounded-lg">
+        <p className="text-gray-500 text-sm mb-1">Program Status</p>
+        <Tag
+          className={`mt-1 ${
+            program.status === "ACTIVE"
+              ? "bg-green-50 text-green-700 border-green-200"
+              : program.status === "FULL"
+              ? "bg-orange-50 text-orange-700 border-orange-200"
+              : "bg-red-50 text-red-700 border-red-200"
+          }`}
+        >
+          {program.status.charAt(0) + program.status.slice(1).toLowerCase()}
+        </Tag>
+      </div>
+
       {/* Tags */}
       {program.tags && program.tags.length > 0 && (
         <div className="pt-2">
+          <p className="text-gray-500 text-sm mb-2">Program Tags</p>
           <Space wrap size={[0, 8]}>
             {program.tags.map((tag) => (
               <Tag
