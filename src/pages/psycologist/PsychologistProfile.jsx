@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   Tag,
@@ -41,6 +42,7 @@ const PsychologistProfile = () => {
   const { getUserDetails, loading } = useUserStore();
   const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState("1");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPsychologistDetails = async () => {
@@ -56,6 +58,11 @@ const PsychologistProfile = () => {
 
     fetchPsychologistDetails();
   }, [getUserDetails]);
+
+  // Function to navigate to appointments page
+  const handleNavigateToAppointments = () => {
+    navigate("/calendar");
+  };
 
   if (loading) {
     return (
@@ -310,6 +317,7 @@ const PsychologistProfile = () => {
                   type="primary"
                   className="bg-custom-green hover:bg-custom-green/90"
                   icon={<CalendarOutlined />}
+                  onClick={handleNavigateToAppointments}
                 >
                   Manage Schedule
                 </Button>
