@@ -1,9 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 // import account from "../data/account.json";
-import axios from "axios";
 import { api } from "./apiConfig";
-import { useUserStore } from "./userStore";
 
 const initialState = {
   user: null,
@@ -65,9 +63,7 @@ export const useAuthStore = create(
 
           // Set user data directly from login response
           const userData = {
-            userId: data.userId,
-            studentId: data.studentId,
-            fullName: data.fullName,
+            ...data,
             role: data.role.toLowerCase().replace("role_", ""),
           };
 
@@ -77,7 +73,7 @@ export const useAuthStore = create(
             loading: false,
           });
 
-          return userData;
+          // return userData;
         } catch (error) {
           console.error("Login error details:", {
             status: error.response?.status,
@@ -111,6 +107,8 @@ export const useAuthStore = create(
           // You can add a token validation endpoint call here if needed
           return get().isAuthenticated;
         } catch (error) {
+          console.log(error);
+
           localStorage.removeItem("token");
           localStorage.removeItem("refreshToken");
           set(initialState);
@@ -205,10 +203,6 @@ if (token) {
   if (isTokenExpired(token)) {
     // If token is expired, reset the store to initial state
     useAuthStore.setState(initialState);
-    delete api.defaults.headers.common["Authorization"];
-  } else {
-    // Only set the Authorization header if token is valid
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   }
 }
 
