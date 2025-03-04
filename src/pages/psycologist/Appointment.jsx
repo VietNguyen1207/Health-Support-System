@@ -311,7 +311,7 @@ export default function Appointment() {
           <Spin size="large" />
         </div>
       )}
-      <div className="general-wrapper pt-16 px-20 min-w-fit">
+      <div className="general-wrapper pt-10 px-20 min-w-fit">
         <CustomCalendar
           mode="month"
           value={selectedDate}
