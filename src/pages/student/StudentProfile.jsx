@@ -1,53 +1,65 @@
 import React, { useState, useEffect } from "react";
-import { Card, Progress, Tag, Spin, Empty, Modal } from "antd";
+import {
+  Card,
+  Progress,
+  Tag,
+  Spin,
+  Empty,
+  Modal,
+  Tabs,
+  Button,
+  Tooltip,
+  Statistic,
+} from "antd";
 import {
   CalendarOutlined,
   TeamOutlined,
   FieldTimeOutlined,
   LinkOutlined,
+  UserOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  HomeOutlined,
+  BookOutlined,
+  HeartOutlined,
+  BarChartOutlined,
+  ClockCircleOutlined,
+  FileTextOutlined,
+  EditOutlined,
+  EnvironmentOutlined,
+  BulbOutlined,
 } from "@ant-design/icons";
-import studentData from "../../data/student-data.json";
-import { useProgramStore } from "../../stores/programStore";
+import { useUserStore } from "../../stores/userStore";
 import { useAuthStore } from "../../stores/authStore";
 
-const StudentProfile = () => {
-  // For demo, using first student - in real app, you'd use student ID from auth/route
-  const student = studentData.students[0];
+const { TabPane } = Tabs;
 
-  const { user } = useAuthStore();
-  const { fetchEnrolledPrograms, fetchProgramDetails, loading } =
-    useProgramStore();
-  const [enrolledPrograms, setEnrolledPrograms] = useState([]);
+const StudentProfile = () => {
+  const { user: authUser } = useAuthStore();
+  const { getUserDetails, loading } = useUserStore();
+  const [userData, setUserData] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [loadingProgram, setLoadingProgram] = useState(false);
+  const [activeTab, setActiveTab] = useState("1");
 
   useEffect(() => {
-    const getEnrolledPrograms = async () => {
-      if (user?.studentId) {
+    const fetchUserDetails = async () => {
+      if (authUser?.userId) {
         try {
-          const programs = await fetchEnrolledPrograms(user.studentId);
-          setEnrolledPrograms(programs);
+          const data = await getUserDetails(authUser.userId);
+          setUserData(data);
         } catch (error) {
-          console.error("Failed to fetch enrolled programs:", error);
+          console.error("Failed to fetch user details:", error);
         }
       }
     };
 
-    getEnrolledPrograms();
-  }, [fetchEnrolledPrograms, user]);
+    fetchUserDetails();
+  }, [getUserDetails, authUser]);
 
-  const handleProgramClick = async (programId) => {
-    try {
-      setLoadingProgram(true);
-      const programDetails = await fetchProgramDetails(programId);
-      setSelectedProgram(programDetails);
-      setIsModalVisible(true);
-    } catch (error) {
-      console.error("Failed to fetch program details:", error);
-    } finally {
-      setLoadingProgram(false);
-    }
+  const handleProgramClick = (program) => {
+    setSelectedProgram(program);
+    setIsModalVisible(true);
   };
 
   const getIndicatorColor = (score) => {
@@ -56,10 +68,23 @@ const StudentProfile = () => {
     return "#ef4444";
   };
 
-  const renderAssessmentCard = (title, score, maxScore = 10) => (
-    <Card className="assessment-card bg-white rounded-xl shadow-sm">
-      <div className="text-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
+  const getIndicatorText = (score) => {
+    if (score <= 3) return "Low";
+    if (score <= 6) return "Moderate";
+    return "High";
+  };
+
+  const renderAssessmentCard = (title, score, icon, maxScore = 10) => (
+    <Card
+      className="assessment-card bg-white rounded-xl shadow-sm hover:shadow-md transition-all"
+      bordered={false}
+    >
+      <div className="flex items-center mb-4">
+        <div className="bg-custom-green/10 p-2 rounded-full mr-3">{icon}</div>
+        <h3 className="text-lg font-semibold text-gray-900 m-0">{title}</h3>
+      </div>
+
+      <div className="flex items-center justify-between">
         <Progress
           type="circle"
           percent={(score / maxScore) * 100}
@@ -68,105 +93,439 @@ const StudentProfile = () => {
           width={80}
           format={() => <span className="text-lg">{score}</span>}
         />
+        <div className="text-right">
+          <span className="text-sm text-gray-500">Level</span>
+          <div
+            className={`mt-1 px-3 py-1 rounded-full text-sm font-medium inline-block
+              ${
+                score <= 3
+                  ? "bg-green-50 text-green-700"
+                  : score <= 6
+                  ? "bg-yellow-50 text-yellow-700"
+                  : "bg-red-50 text-red-700"
+              }`}
+          >
+            {getIndicatorText(score)}
+          </div>
+        </div>
       </div>
-      <p className="text-sm text-gray-500 text-center">
-        Last updated:{" "}
-        {new Date(
-          student.mental_health_data.last_assessment
-        ).toLocaleDateString()}
+
+      <p className="text-xs text-gray-500 mt-4 mb-0">
+        Last updated: {new Date().toLocaleDateString()}
       </p>
     </Card>
   );
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Empty description="No student data available" />
+      </div>
+    );
+  }
+
+  const { studentInfo, programsRecord } = userData;
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Student Basic Info Card */}
-        <Card className="shadow-lg rounded-2xl">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-16 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header with profile summary */}
+        <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            <div className="w-32 h-32 bg-custom-green/10 rounded-full flex items-center justify-center">
-              <span className="text-4xl text-custom-green font-semibold">
-                {student.name
+            <div className="w-32 h-32 bg-gradient-to-br from-custom-green/80 to-custom-green rounded-full flex items-center justify-center shadow-md">
+              <span
+                className="text-4xl text-custom-green font-bold tracking-wider"
+                style={{ textShadow: "0 1px 2px rgba(0,0,0,0.2)" }}
+              >
+                {userData.fullName
                   .split(" ")
-                  .map((n) => n[0])
+                  .map((name) => name[0])
                   .join("")}
               </span>
             </div>
+
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center md:text-left">
-                {student.name}
-              </h1>
-              <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="flex flex-col md:flex-row md:justify-between md:items-center">
                 <div>
-                  <p className="text-sm text-gray-500">Student ID</p>
-                  <p className="font-medium text-gray-900">{student.id}</p>
+                  <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center md:text-left">
+                    {userData.fullName}
+                  </h1>
+                  <div className="flex flex-wrap gap-2 mb-4 justify-center md:justify-start">
+                    <Tag color="blue">
+                      {userData.role.charAt(0) +
+                        userData.role.slice(1).toLowerCase()}
+                    </Tag>
+                    <Tag color="green">
+                      {userData.gender.charAt(0) +
+                        userData.gender.slice(1).toLowerCase()}
+                    </Tag>
+                    {userData.verified && <Tag color="cyan">Verified</Tag>}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Grade</p>
-                  <p className="font-medium text-gray-900">{student.grade}</p>
+
+                <Tooltip title="Edit Profile">
+                  <Button
+                    type="primary"
+                    shape="round"
+                    icon={<EditOutlined />}
+                    className="bg-custom-green hover:bg-custom-green/90"
+                  >
+                    Edit Profile
+                  </Button>
+                </Tooltip>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div className="flex items-center gap-2">
+                  <UserOutlined className="text-custom-green" />
+                  <div>
+                    <p className="text-sm text-gray-500 m-0">Student ID</p>
+                    <p className="font-medium text-gray-900 m-0">
+                      {studentInfo.studentId}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Age</p>
-                  <p className="font-medium text-gray-900">{student.age}</p>
+
+                <div className="flex items-center gap-2">
+                  <BookOutlined className="text-custom-green" />
+                  <div>
+                    <p className="text-sm text-gray-500 m-0">Grade</p>
+                    <p className="font-medium text-gray-900 m-0">
+                      {studentInfo.grade} - Class {studentInfo.className}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500">Attendance Rate</p>
-                  <p className="font-medium text-gray-900">
-                    {student.mental_health_data.attendance_rate}%
-                  </p>
+
+                <div className="flex items-center gap-2">
+                  <EnvironmentOutlined className="text-custom-green" />
+                  <div>
+                    <p className="text-sm text-gray-500 m-0">School</p>
+                    <p className="font-medium text-gray-900 m-0">
+                      {studentInfo.schoolName}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <MailOutlined className="text-custom-green" />
+                  <div>
+                    <p className="text-sm text-gray-500 m-0">Email</p>
+                    <p className="font-medium text-gray-900 m-0">
+                      {userData.email}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <PhoneOutlined className="text-custom-green" />
+                  <div>
+                    <p className="text-sm text-gray-500 m-0">Phone</p>
+                    <p className="font-medium text-gray-900 m-0">
+                      {userData.phoneNumber}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <HomeOutlined className="text-custom-green" />
+                  <div>
+                    <p className="text-sm text-gray-500 m-0">Address</p>
+                    <p className="font-medium text-gray-900 m-0 truncate max-w-[200px]">
+                      {userData.address}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </Card>
-
-        {/* Mental Health Assessments */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Mental Health Overview
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {renderAssessmentCard(
-              "Anxiety Level",
-              student.mental_health_data.anxiety_level
-            )}
-            {renderAssessmentCard(
-              "Stress Level",
-              student.mental_health_data.stress_level
-            )}
-            {renderAssessmentCard(
-              "Depression Score",
-              student.mental_health_data.depression_score
-            )}
-          </div>
         </div>
 
-        {/* Support Programs */}
-        <Card className="shadow-lg rounded-2xl">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Active Support Programs
-          </h2>
-          {loading ? (
-            <Spin />
-          ) : enrolledPrograms.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {enrolledPrograms.map((program) => (
-                <Tag
-                  key={program.programID}
-                  className="bg-custom-green/10 text-custom-green px-3 py-1 rounded-full text-sm cursor-pointer hover:bg-custom-green/20 transition-colors"
-                  onClick={() => handleProgramClick(program.programID)}
-                >
-                  {program.title}
-                </Tag>
-              ))}
+        {/* Main content with tabs */}
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          type="card"
+          className="bg-white rounded-2xl shadow-md p-6"
+        >
+          <TabPane
+            tab={
+              <span className="flex items-center gap-2">
+                <HeartOutlined />
+                <span>Mental Health</span>
+              </span>
+            }
+            key="1"
+          >
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Mental Health Overview
+                </h2>
+                <Button type="link" icon={<FileTextOutlined />}>
+                  View Full Report
+                </Button>
+              </div>
+
+              {/* Stats summary */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <Card bordered={false} className="bg-gray-50 rounded-xl">
+                  <Statistic
+                    title="Overall Well-being"
+                    value={
+                      Math.round(
+                        ((10 -
+                          studentInfo.anxietyScore +
+                          (10 - studentInfo.stressScore) +
+                          (10 - studentInfo.depressionScore)) /
+                          3) *
+                          10
+                      ) / 10
+                    }
+                    suffix="/ 10"
+                    precision={1}
+                    valueStyle={{ color: "#4a7c59" }}
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Based on assessment scores
+                  </p>
+                </Card>
+
+                <Card bordered={false} className="bg-gray-50 rounded-xl">
+                  <Statistic
+                    title="Last Assessment"
+                    value={new Date().toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                    valueStyle={{ fontSize: "16px" }}
+                  />
+                  <Button type="link" size="small" className="mt-2 p-0">
+                    Take New Assessment
+                  </Button>
+                </Card>
+
+                <Card bordered={false} className="bg-gray-50 rounded-xl">
+                  <Statistic
+                    title="Assessments Completed"
+                    value={studentInfo.surveyResults?.length || 0}
+                    suffix={
+                      studentInfo.surveyResults?.length === 1 ? "test" : "tests"
+                    }
+                  />
+                  <Button type="link" size="small" className="mt-2 p-0">
+                    View History
+                  </Button>
+                </Card>
+              </div>
+
+              {/* Assessment cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {renderAssessmentCard(
+                  "Anxiety Level",
+                  studentInfo.anxietyScore,
+                  <BarChartOutlined className="text-custom-green" />
+                )}
+                {renderAssessmentCard(
+                  "Stress Level",
+                  studentInfo.stressScore,
+                  <ClockCircleOutlined className="text-custom-green" />
+                )}
+                {renderAssessmentCard(
+                  "Depression Score",
+                  studentInfo.depressionScore,
+                  <HeartOutlined className="text-custom-green" />
+                )}
+              </div>
+
+              {/* Recommendations */}
+              <Card
+                title={
+                  <div className="flex items-center gap-2">
+                    <BulbOutlined className="text-custom-green" />
+                    <span>Recommendations</span>
+                  </div>
+                }
+                className="mt-8"
+                bordered={false}
+              >
+                <div className="space-y-4">
+                  <p className="text-gray-600">
+                    Based on your assessment results, here are some
+                    recommendations:
+                  </p>
+                  <ul className="list-disc pl-5 space-y-2 text-gray-600">
+                    <li>
+                      Consider joining the "Stress Management" program to learn
+                      coping strategies
+                    </li>
+                    <li>Schedule regular check-ins with your counselor</li>
+                    <li>Practice mindfulness exercises daily</li>
+                    <li>Maintain a regular sleep schedule</li>
+                  </ul>
+                </div>
+              </Card>
             </div>
-          ) : (
-            <Empty
-              description="No active support programs"
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-            />
-          )}
-        </Card>
+          </TabPane>
+
+          <TabPane
+            tab={
+              <span className="flex items-center gap-2">
+                <TeamOutlined />
+                <span>Support Programs</span>
+              </span>
+            }
+            key="2"
+          >
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Active Support Programs
+                </h2>
+                <Button
+                  type="primary"
+                  className="bg-custom-green hover:bg-custom-green/90"
+                  icon={<TeamOutlined />}
+                >
+                  Browse All Programs
+                </Button>
+              </div>
+
+              {programsRecord && programsRecord.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {programsRecord.map((program) => (
+                    <Card
+                      key={program.programID}
+                      className="hover:shadow-lg transition-all cursor-pointer border border-gray-100 rounded-xl overflow-hidden"
+                      bodyStyle={{ padding: 0 }}
+                      onClick={() => handleProgramClick(program)}
+                    >
+                      <div className="p-5">
+                        <div className="flex justify-between items-start mb-3">
+                          <h3 className="text-lg font-medium text-gray-800">
+                            {program.title}
+                          </h3>
+                          <Tag
+                            color={program.type === "ONLINE" ? "blue" : "green"}
+                            className="rounded-full"
+                          >
+                            {program.type.charAt(0) +
+                              program.type.slice(1).toLowerCase()}
+                          </Tag>
+                        </div>
+
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                          {program.description}
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                          <div className="flex items-center gap-2">
+                            <CalendarOutlined className="text-custom-green" />
+                            <span className="text-sm">
+                              {new Date(program.startDate).toLocaleDateString()}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <FieldTimeOutlined className="text-custom-green" />
+                            <span className="text-sm">
+                              {program.duration} weeks
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-sm text-gray-500">
+                              Participants
+                            </span>
+                            <span className="text-sm font-medium">
+                              {program.currentParticipants}/
+                              {program.maxParticipants}
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-1.5">
+                            <div
+                              className="bg-custom-green h-1.5 rounded-full"
+                              style={{
+                                width: `${
+                                  (program.currentParticipants /
+                                    program.maxParticipants) *
+                                  100
+                                }%`,
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-gray-100 p-3 bg-gray-50 flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <UserOutlined className="text-custom-green" />
+                          <span className="text-sm text-gray-600">
+                            {program.facilitatorName}
+                          </span>
+                        </div>
+                        <Button
+                          type="link"
+                          className="text-custom-green p-0 flex items-center"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(program.meetingLink, "_blank");
+                          }}
+                        >
+                          {program.type === "ONLINE" && (
+                            <LinkOutlined className="mr-1" />
+                          )}
+                          {program.type === "ONLINE"
+                            ? "Join Meeting"
+                            : "View Details"}
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Empty
+                  description="No active support programs"
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                />
+              )}
+            </div>
+          </TabPane>
+
+          <TabPane
+            tab={
+              <span className="flex items-center gap-2">
+                <CalendarOutlined />
+                <span>Appointments</span>
+              </span>
+            }
+            key="3"
+          >
+            <div className="min-h-[300px] flex items-center justify-center">
+              <Empty
+                description="No upcoming appointments"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              >
+                <Button
+                  type="primary"
+                  className="bg-custom-green hover:bg-custom-green/90 mt-4"
+                >
+                  Schedule Appointment
+                </Button>
+              </Empty>
+            </div>
+          </TabPane>
+        </Tabs>
 
         {/* Program Details Modal */}
         <Modal
@@ -187,15 +546,27 @@ const StudentProfile = () => {
           }
           open={isModalVisible}
           onCancel={() => setIsModalVisible(false)}
-          footer={null}
+          footer={
+            <div className="flex justify-end">
+              <Button onClick={() => setIsModalVisible(false)}>Close</Button>
+              {selectedProgram?.type === "ONLINE" &&
+                selectedProgram?.meetingLink && (
+                  <Button
+                    type="primary"
+                    className="bg-custom-green hover:bg-custom-green/90 ml-3"
+                    onClick={() =>
+                      window.open(selectedProgram.meetingLink, "_blank")
+                    }
+                  >
+                    Join Meeting
+                  </Button>
+                )}
+            </div>
+          }
           width={600}
           centered
         >
-          {loadingProgram ? (
-            <div className="py-10">
-              <Spin size="large" />
-            </div>
-          ) : selectedProgram ? (
+          {selectedProgram ? (
             <div className="space-y-4 py-2">
               <h2 className="text-xl font-semibold">{selectedProgram.title}</h2>
               <p className="text-gray-600">{selectedProgram.description}</p>
@@ -203,64 +574,82 @@ const StudentProfile = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Program Date */}
                 <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center">
-                    <CalendarOutlined className="text-custom-green mr-2" />
-                    <div>
-                      <p className="text-gray-500 text-sm mb-0">Start Date</p>
-                      <p className="font-medium">{selectedProgram.startDate}</p>
-                    </div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <CalendarOutlined className="text-custom-green" />
+                    <p className="text-gray-500 text-sm">Start Date</p>
                   </div>
+                  <p className="font-medium text-sm">
+                    {new Date(selectedProgram.startDate).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )}
+                  </p>
                 </div>
 
                 {/* Duration */}
                 <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center">
-                    <FieldTimeOutlined className="text-custom-green mr-2" />
-                    <div>
-                      <p className="text-gray-500 text-sm mb-0">Duration</p>
-                      <p className="font-medium">
-                        {selectedProgram.duration} weeks
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <FieldTimeOutlined className="text-custom-green" />
+                    <p className="text-gray-500 text-sm">Duration</p>
+                  </div>
+                  <p className="font-medium text-sm">
+                    {selectedProgram.duration} weeks
+                  </p>
+                </div>
+
+                {/* Participants */}
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 mb-1">
+                    <TeamOutlined className="text-custom-green" />
+                    <p className="text-gray-500 text-sm">Participants</p>
+                  </div>
+                  <p className="font-medium text-sm">
+                    {selectedProgram.currentParticipants}/
+                    {selectedProgram.maxParticipants} participants
+                  </p>
+                  <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                    <div
+                      className="bg-custom-green h-1.5 rounded-full"
+                      style={{
+                        width: `${
+                          (selectedProgram.currentParticipants /
+                            selectedProgram.maxParticipants) *
+                          100
+                        }%`,
+                      }}
+                    ></div>
                   </div>
                 </div>
 
                 {/* Type */}
                 <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center">
-                    <div>
-                      <p className="text-gray-500 text-sm mb-0">Type</p>
-                      <p className="font-medium">{selectedProgram.type}</p>
-                    </div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <i className="text-custom-green" />
+                    <p className="text-gray-500 text-sm">Type</p>
                   </div>
-                </div>
-
-                {/* Status */}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center">
-                    <div>
-                      <p className="text-gray-500 text-sm mb-0">Status</p>
-                      <Tag
-                        color={
-                          selectedProgram.status === "ACTIVE"
-                            ? "green"
-                            : "orange"
-                        }
-                      >
-                        {selectedProgram.status}
-                      </Tag>
-                    </div>
-                  </div>
+                  <Tag
+                    color={selectedProgram.type === "ONLINE" ? "blue" : "green"}
+                    className="mt-1"
+                  >
+                    {selectedProgram.type.charAt(0) +
+                      selectedProgram.type.slice(1).toLowerCase()}
+                  </Tag>
                 </div>
               </div>
 
               {/* Facilitator Info */}
               <div className="bg-gray-50 p-3 rounded-lg">
                 <div className="flex items-center">
-                  <TeamOutlined className="text-custom-green mr-2" />
+                  <div className="bg-custom-green/10 p-2 rounded-full mr-3">
+                    <UserOutlined className="text-custom-green" />
+                  </div>
                   <div>
                     <p className="text-gray-500 text-sm mb-0">Facilitator</p>
-                    <p className="font-medium">
+                    <p className="font-medium text-sm">
                       {selectedProgram.facilitatorName}
                     </p>
                     <p className="text-xs text-gray-500">
@@ -283,15 +672,33 @@ const StudentProfile = () => {
                         rel="noopener noreferrer"
                         className="text-custom-green hover:text-custom-green/80"
                       >
-                        Join Meeting
+                        {selectedProgram.meetingLink}
                       </a>
                     </div>
                   </div>
                 )}
 
+              {/* Status */}
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-gray-500 text-sm mb-1">Program Status</p>
+                <Tag
+                  className={`mt-1 ${
+                    selectedProgram.status === "ACTIVE"
+                      ? "bg-green-50 text-green-700 border-green-200"
+                      : selectedProgram.status === "FULL"
+                      ? "bg-orange-50 text-orange-700 border-orange-200"
+                      : "bg-red-50 text-red-700 border-red-200"
+                  }`}
+                >
+                  {selectedProgram.status.charAt(0) +
+                    selectedProgram.status.slice(1).toLowerCase()}
+                </Tag>
+              </div>
+
               {/* Tags */}
               {selectedProgram.tags && selectedProgram.tags.length > 0 && (
                 <div className="pt-2">
+                  <p className="text-gray-500 text-sm mb-2">Program Tags</p>
                   <div className="flex flex-wrap gap-2">
                     {selectedProgram.tags.map((tag) => (
                       <Tag

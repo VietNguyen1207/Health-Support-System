@@ -65,7 +65,6 @@ export const useAuthStore = create(
           const userData = {
             ...data,
             role: data.role.toLowerCase().replace("role_", ""),
-            // Add any other fields you need from the response
           };
 
           set({

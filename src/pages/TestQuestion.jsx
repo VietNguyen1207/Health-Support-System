@@ -1,16 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Radio, Button, Progress, Card } from "antd";
+import { Radio, Button, Progress, Card, Spin, message } from "antd";
+import { useSurveyStore } from "../stores/surveyStore";
 
 const TestQuestion = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const test = location.state?.test;
-  const questions = test?.questions || [];
+
+  const { questions, loadingQuestions, fetchSurveyQuestions, clearQuestions } =
+    useSurveyStore();
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
+
+  // Fetch questions when component mounts
+  useEffect(() => {
+    if (!test?.id) {
+      message.error("No test selected. Redirecting to tests page.");
+      navigate("/test");
+      return;
+    }
+
+    const loadQuestions = async () => {
+      try {
+        await fetchSurveyQuestions(test.id);
+      } catch (error) {
+        message.error("Failed to load questions. Please try again.");
+        navigate("/test");
+      }
+    };
+
+    loadQuestions();
+
+    // Clean up questions when component unmounts
+    return () => clearQuestions();
+  }, [test, fetchSurveyQuestions, clearQuestions, navigate]);
 
   const handleAnswer = (value) => {
     setSelectedOption(value);
@@ -18,12 +44,15 @@ const TestQuestion = () => {
       ...answers,
       [currentQuestion]: {
         questionId: questions[currentQuestion].id,
-        question: questions[currentQuestion].text,
+        question: questions[currentQuestion].questionText,
         selectedOption: value,
-        answer: questions[currentQuestion].options.find(
+        answer: questions[currentQuestion].questionOptions.find(
           (opt) => opt.value === value
         )?.label,
         score: value,
+        answerID: questions[currentQuestion].questionOptions.find(
+          (opt) => opt.value === value
+        )?.answerID,
       },
     });
   };
@@ -31,14 +60,14 @@ const TestQuestion = () => {
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
-      setSelectedOption(answers[currentQuestion + 1] || null);
+      setSelectedOption(answers[currentQuestion + 1]?.selectedOption || null);
     }
   };
 
   const handlePrevious = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
-      setSelectedOption(answers[currentQuestion - 1] || null);
+      setSelectedOption(answers[currentQuestion - 1]?.selectedOption || null);
     }
   };
 
@@ -47,11 +76,43 @@ const TestQuestion = () => {
     navigate("/test-results", {
       state: {
         answers: Object.values(answers),
-        test,
+        test: {
+          ...test,
+          title: test.title,
+          questions: questions,
+        },
         dateCompleted: new Date().toISOString(),
       },
     });
   };
+
+  if (loadingQuestions) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Spin size="large" />
+          <p className="mt-4 text-gray-600">Loading questions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!questions || questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-gray-800">No questions available.</p>
+          <Button
+            type="primary"
+            onClick={() => navigate("/test")}
+            className="mt-4 bg-custom-green hover:bg-custom-green/90"
+          >
+            Back to Tests
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
@@ -85,7 +146,7 @@ const TestQuestion = () => {
         {/* Question Card */}
         <Card className="shadow-md rounded-lg mb-8">
           <h2 className="text-lg font-medium text-gray-900 mb-6">
-            {questions[currentQuestion].text}
+            {questions[currentQuestion].questionText}
           </h2>
 
           <Radio.Group
@@ -93,9 +154,9 @@ const TestQuestion = () => {
             value={selectedOption}
             className="flex flex-col space-y-4"
           >
-            {questions[currentQuestion].options.map((option) => (
+            {questions[currentQuestion].questionOptions.map((option) => (
               <Radio
-                key={option.value}
+                key={option.answerID}
                 value={option.value}
                 className="text-gray-700 py-2"
               >

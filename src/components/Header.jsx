@@ -60,15 +60,15 @@ const Header = () => {
   };
 
   const handleDropdownButton = () => {
-    // if (user?.role === "student") {
-    //   navigate("/student-profile");
-    // } else if (user?.role === "psychologist") {
-    //   navigate("/psycologist-profile");
-    // } else if (user?.role === "parent") {
-    //   navigate("/parent-profile");
-    // }
+    if (user?.role === "student") {
+      navigate("/student-profile");
+    } else if (user?.role === "psychologist") {
+      navigate("/psychologist-profile");
+    } else if (user?.role === "parent") {
+      navigate("/parent-profile");
+    }
 
-    navigate("/student-profile");
+    // navigate("/student-profile");
   };
 
   const menuProps = {
@@ -97,7 +97,8 @@ const Header = () => {
             onClick={handleDropdownButton}
             className={`flex items-center gap-2 px-3 py-1 rounded-l-md border${
               user?.role === "manager" && `w-full pointer-events-none`
-            }`}>
+            }`}
+          >
             {user.fullName}
           </Button>,
           rightButton,
@@ -151,7 +152,8 @@ const Header = () => {
             subMenuTitleColor: "#4a7c59",
           },
         },
-      }}>
+      }}
+    >
       <header className="header">
         <div className="header-container">
           <div className="logo">
@@ -179,7 +181,8 @@ const Header = () => {
                 <Button
                   type="primary"
                   className="rounded-full"
-                  onClick={() => navigate(navItems.specialItem.key)}>
+                  onClick={() => navigate(navItems.specialItem.key)}
+                >
                   <p className="text-white w-full">
                     {navItems.specialItem.label}
                   </p>
@@ -195,7 +198,8 @@ const Header = () => {
                     transition-all duration-300`}
                     onClick={() => {
                       navigate("/calendar");
-                    }}>
+                    }}
+                  >
                     <CalendarFilled className="text-lg" />
                   </div>
                 </span>
