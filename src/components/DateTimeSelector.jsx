@@ -20,7 +20,6 @@ import {
   formatTimeDisplay,
   formatWeekDay,
 } from "../utils/Helper";
-import { usePsychologistStore } from "../stores/psychologistStore";
 const { Text, Title } = Typography;
 
 // Memoized component for time slot card with availability indicator
@@ -132,18 +131,30 @@ DateCard.propTypes = {
 
 DateCard.displayName = "DateCard";
 
-const DateTimeSelector = ({ selectedPsychologist = null, setFormData }) => {
+const DateTimeSelector = ({
+  timeSlots = [],
+  loading = false,
+  setFormData,
+  formData,
+}) => {
   // State management
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [message, setMessage] = useState(null);
   const [availableDates, setAvailableDates] = useState([]);
   const [activeTabKey, setActiveTabKey] = useState("thisWeek");
 
-  // Get API function from store
-  const { getTimeSlots } = usePsychologistStore();
+  // Update availableSlots when timeSlots prop changes
+  useEffect(() => {
+    if (timeSlots && timeSlots.length > 0) {
+      setAvailableSlots(timeSlots);
+      setMessage(null);
+    } else {
+      setAvailableSlots([]);
+      setMessage("No time slots found.");
+    }
+  }, [timeSlots]);
 
   // Group time slots by date and period
   const groupedTimeSlots = useMemo(() => {
@@ -208,79 +219,20 @@ const DateTimeSelector = ({ selectedPsychologist = null, setFormData }) => {
           setActiveTabKey("thisWeek");
         }
       }
+    } else {
+      setAvailableDates([]);
     }
   }, [availableSlots]);
 
-  // Reset state when psychologist changes
+  // Reset selected time slot when formData.psychologist changes
   useEffect(() => {
-    setSelectedDate(dayjs());
-    setSelectedTimeSlot(null);
-    setFormData((prev) => ({
-      ...prev,
-      timeSlotId: null,
-    }));
-
-    if (selectedPsychologist) {
-      fetchSlots();
-    } else {
+    if (formData && formData.psychologist === "") {
+      setSelectedTimeSlot(null);
       setAvailableSlots([]);
       setMessage(null);
       setAvailableDates([]);
     }
-  }, [selectedPsychologist]);
-
-  // Optimized fetch slots function
-  const fetchSlots = useCallback(async () => {
-    if (!selectedPsychologist) {
-      setAvailableSlots([]);
-      return;
-    }
-
-    setIsLoading(true);
-    setMessage(null);
-
-    try {
-      // Fetch all time slots for the psychologist
-      const data = await getTimeSlots(selectedPsychologist);
-
-      if (data?.length) {
-        setAvailableSlots(data);
-
-        // Find first available slot and set as selected date
-        const availableSlot = data.find((slot) => slot.status === "AVAILABLE");
-        if (availableSlot) {
-          const firstDate = dayjs(availableSlot.slotDate);
-          setSelectedDate(firstDate);
-        } else {
-          setSelectedDate(dayjs(data[0].slotDate));
-        }
-      } else {
-        setAvailableSlots([]);
-        setMessage(message || "No time slots found.");
-      }
-    } catch (error) {
-      console.error("Failed to fetch timeSlots:", error);
-      setAvailableSlots([]);
-      setMessage("Error loading time slots.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [selectedPsychologist, getTimeSlots]);
-
-  // Ensure fetchSlots is only called when selectedPsychologist changes and is not null
-  useEffect(() => {
-    if (selectedPsychologist) {
-      fetchSlots();
-    } else {
-      setAvailableSlots([]);
-      setMessage(null);
-      setSelectedTimeSlot(null);
-      setFormData((prev) => ({
-        ...prev,
-        timeSlotId: null,
-      }));
-    }
-  }, [selectedPsychologist, fetchSlots, setFormData]);
+  }, [formData]);
 
   // Handle date selection
   const handleDateSelection = useCallback(
@@ -399,19 +351,24 @@ const DateTimeSelector = ({ selectedPsychologist = null, setFormData }) => {
     return availableSlots.find((slot) => slot.timeSlotId === selectedTimeSlot);
   }, [selectedTimeSlot, availableSlots]);
 
+  // Check if psychologist is selected
+  const isPsychologistSelected = useMemo(() => {
+    return formData && formData.psychologist !== "";
+  }, [formData]);
+
   return (
     <div className="p-5">
       <Text strong className="block text-base mb-4">
         Appointment Time<span className="text-red-500">*</span>
       </Text>
 
-      {!selectedPsychologist ? (
+      {!isPsychologistSelected ? (
         <div className="bg-gray-50 p-6 rounded-lg text-center">
           <Text className="text-gray-500">
             Please select a psychologist first to view available time slots.
           </Text>
         </div>
-      ) : isLoading ? (
+      ) : loading ? (
         <div className="w-full flex flex-col justify-center items-center p-8">
           <Spin size="large" />
           <Text className="mt-3 text-gray-500">
@@ -559,8 +516,10 @@ const DateTimeSelector = ({ selectedPsychologist = null, setFormData }) => {
 };
 
 DateTimeSelector.propTypes = {
-  selectedPsychologist: PropTypes.string,
+  timeSlots: PropTypes.array.isRequired,
+  loading: PropTypes.bool.isRequired,
   setFormData: PropTypes.func.isRequired,
+  formData: PropTypes.object.isRequired,
 };
 
 export default DateTimeSelector;
