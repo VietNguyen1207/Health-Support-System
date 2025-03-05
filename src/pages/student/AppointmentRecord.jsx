@@ -6,13 +6,12 @@ import {
   Button,
   Spin,
   Empty,
-  DatePicker,
   Modal,
-  Tooltip,
   Card,
   Divider,
   Typography,
   notification,
+  Alert,
 } from "antd";
 import {
   CalendarOutlined,
@@ -21,82 +20,98 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   InfoCircleOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 import { useAuthStore } from "../../stores/authStore";
 import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
-const { RangePicker } = DatePicker;
+const { TabPane } = Tabs;
 
 export default function AppointmentRecord() {
   const { user } = useAuthStore();
-  const { fetchFilteredAppointments, loading, error, appointments } =
+  const { fetchAppointmentRecords, loading, error, appointments } =
     useAppointmentStore();
 
-  const [activeTab, setActiveTab] = useState("completed");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [dateRange, setDateRange] = useState(null);
+  const [activeTab, setActiveTab] = useState("all");
 
-  // Fetch appointments based on active tab
+  // Fetch appointments when component mounts
   useEffect(() => {
-    fetchAppointments();
-  }, [activeTab, dateRange]);
+    if (user) {
+      loadAppointments();
+    }
+  }, [user]);
 
-  const fetchAppointments = async () => {
-    if (!user?.id) return;
-
+  const loadAppointments = async () => {
     try {
-      // Determine which statuses to fetch based on active tab
-      const statuses =
-        activeTab === "completed" ? ["COMPLETED"] : ["CANCELLED"];
+      // Determine user role and ID
+      const userRole = user?.role?.toLowerCase() || "";
 
-      // Prepare filter object
-      const filters = {
-        studentId: user.id,
-        status: statuses,
-      };
+      if (userRole === "student") {
+        if (!user?.studentId) {
+          console.error("Missing student ID:", user);
+          notification.error({
+            message: "Missing Information",
+            description: "Student ID is missing. Please contact support.",
+          });
+          return;
+        }
 
-      // Add date range if selected
-      if (dateRange && dateRange[0] && dateRange[1]) {
-        filters.startDate = dateRange[0].format("YYYY-MM-DD");
-        filters.endDate = dateRange[1].format("YYYY-MM-DD");
+        console.log("Loading appointments for student:", user.studentId);
+        await fetchAppointmentRecords(user.studentId, "student");
+      } else if (userRole === "psychologist") {
+        if (!user?.psychologistId) {
+          console.error("Missing psychologist ID:", user);
+          notification.error({
+            message: "Missing Information",
+            description: "Psychologist ID is missing. Please contact support.",
+          });
+          return;
+        }
+
+        console.log(
+          "Loading appointments for psychologist:",
+          user.psychologistId
+        );
+        await fetchAppointmentRecords(user.psychologistId, "psychologist");
+      } else {
+        console.error("Unsupported user role:", userRole);
+        notification.error({
+          message: "Unsupported Role",
+          description:
+            "Your user role is not supported for appointment records.",
+        });
       }
-
-      await fetchFilteredAppointments(filters);
     } catch (error) {
+      console.error("Failed to load appointments:", error);
       notification.error({
         message: "Failed to load appointments",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
       });
     }
   };
+
+  // Filter appointments based on active tab
+  const filteredAppointments = appointments.filter((appointment) => {
+    if (activeTab === "all") return true;
+    return appointment.status === activeTab;
+  });
 
   const getStatusTag = (status) => {
     switch (status) {
       case "COMPLETED":
         return (
-          <Tag color="green" icon={<CheckCircleOutlined />}>
+          <Tag color="success" icon={<CheckCircleOutlined />}>
             Completed
           </Tag>
         );
       case "CANCELLED":
         return (
-          <Tag color="red" icon={<CloseCircleOutlined />}>
+          <Tag color="error" icon={<CloseCircleOutlined />}>
             Cancelled
-          </Tag>
-        );
-      case "SCHEDULED":
-        return (
-          <Tag color="blue" icon={<CalendarOutlined />}>
-            Scheduled
-          </Tag>
-        );
-      case "IN_PROGRESS":
-        return (
-          <Tag color="orange" icon={<ClockCircleOutlined />}>
-            In Progress
           </Tag>
         );
       default:
@@ -111,18 +126,18 @@ export default function AppointmentRecord() {
       key: "slotDate",
       render: (text) => (
         <div className="flex items-center">
-          <CalendarOutlined className="mr-2 text-custom-green" />
+          <CalendarOutlined className="mr-2 text-primary-green" />
           {dayjs(text).format("MMM DD, YYYY")}
         </div>
       ),
-      sorter: (a, b) => dayjs(a.slotDate).unix() - dayjs(b.slotDate).unix(),
+      sorter: (a, b) => new Date(a.slotDate) - new Date(b.slotDate),
     },
     {
       title: "Time",
       key: "time",
       render: (_, record) => (
         <div className="flex items-center">
-          <ClockCircleOutlined className="mr-2 text-custom-green" />
+          <ClockCircleOutlined className="mr-2 text-primary-green" />
           {record.startTime} - {record.endTime}
         </div>
       ),
@@ -133,7 +148,7 @@ export default function AppointmentRecord() {
       key: "psychologistID",
       render: (text) => (
         <div className="flex items-center">
-          <UserOutlined className="mr-2 text-custom-green" />
+          <UserOutlined className="mr-2 text-primary-green" />
           {text}
         </div>
       ),
@@ -154,7 +169,6 @@ export default function AppointmentRecord() {
             setSelectedAppointment(record);
             setIsModalVisible(true);
           }}
-          className="bg-custom-green hover:bg-custom-green/90"
         >
           View Details
         </Button>
@@ -167,35 +181,37 @@ export default function AppointmentRecord() {
 
     return (
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between">
-          <div className="mb-4 sm:mb-0">
-            <Text type="secondary">Appointment ID</Text>
-            <Title level={5} className="mt-1">
-              {selectedAppointment.appointmentID}
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <Title level={4} className="mb-1">
+              Appointment Record
             </Title>
+            <Text type="secondary">
+              {dayjs(selectedAppointment.slotDate).format("MMMM DD, YYYY")}
+            </Text>
           </div>
-          <div>{getStatusTag(selectedAppointment.status)}</div>
+          {getStatusTag(selectedAppointment.status)}
         </div>
 
         <Divider />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <Text type="secondary">Date</Text>
+            <Text type="secondary">Appointment ID</Text>
             <div className="flex items-center mt-1">
-              <CalendarOutlined className="mr-2 text-custom-green" />
-              <Text strong>
-                {dayjs(selectedAppointment.slotDate).format("MMMM DD, YYYY")}
+              <Text strong copyable>
+                {selectedAppointment.appointmentID}
               </Text>
             </div>
           </div>
 
           <div>
-            <Text type="secondary">Time</Text>
+            <Text type="secondary">Date & Time</Text>
             <div className="flex items-center mt-1">
-              <ClockCircleOutlined className="mr-2 text-custom-green" />
+              <CalendarOutlined className="mr-2 text-primary-green" />
               <Text strong>
-                {selectedAppointment.startTime} - {selectedAppointment.endTime}
+                {dayjs(selectedAppointment.slotDate).format("MMMM DD, YYYY")} (
+                {selectedAppointment.startTime} - {selectedAppointment.endTime})
               </Text>
             </div>
           </div>
@@ -203,7 +219,7 @@ export default function AppointmentRecord() {
           <div>
             <Text type="secondary">Psychologist ID</Text>
             <div className="flex items-center mt-1">
-              <UserOutlined className="mr-2 text-custom-green" />
+              <UserOutlined className="mr-2 text-primary-green" />
               <Text strong>{selectedAppointment.psychologistID}</Text>
             </div>
           </div>
@@ -211,7 +227,7 @@ export default function AppointmentRecord() {
           <div>
             <Text type="secondary">Student ID</Text>
             <div className="flex items-center mt-1">
-              <UserOutlined className="mr-2 text-custom-green" />
+              <UserOutlined className="mr-2 text-primary-green" />
               <Text strong>{selectedAppointment.studentID}</Text>
             </div>
           </div>
@@ -222,7 +238,7 @@ export default function AppointmentRecord() {
         <div>
           <Text type="secondary">Created At</Text>
           <div className="flex items-center mt-1">
-            <InfoCircleOutlined className="mr-2 text-custom-green" />
+            <InfoCircleOutlined className="mr-2 text-primary-green" />
             <Text>
               {dayjs(selectedAppointment.createdAt).format(
                 "MMMM DD, YYYY HH:mm"
@@ -232,10 +248,10 @@ export default function AppointmentRecord() {
         </div>
 
         {selectedAppointment.updatedAt && (
-          <div>
+          <div className="mt-4">
             <Text type="secondary">Last Updated</Text>
             <div className="flex items-center mt-1">
-              <InfoCircleOutlined className="mr-2 text-custom-green" />
+              <InfoCircleOutlined className="mr-2 text-primary-green" />
               <Text>
                 {dayjs(selectedAppointment.updatedAt).format(
                   "MMMM DD, YYYY HH:mm"
@@ -248,106 +264,70 @@ export default function AppointmentRecord() {
     );
   };
 
-  const handleTabChange = (key) => {
-    setActiveTab(key);
-  };
-
-  const handleDateRangeChange = (dates) => {
-    setDateRange(dates);
-  };
-
   return (
-    <div className="p-6">
-      <Card className="shadow-md rounded-xl">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
-          <Title level={3} className="mb-4 md:mb-0">
-            Appointment Records
-          </Title>
-
-          <RangePicker
-            onChange={handleDateRangeChange}
-            className="w-full md:w-auto"
-          />
+    <div className="p-6 max-w-7xl mx-auto">
+      <div className="mb-6">
+        <div className="flex items-start">
+          <div className="bg-primary-green/10 p-2 rounded-lg mr-3">
+            <HistoryOutlined className="text-xl text-primary-green" />
+          </div>
+          <div>
+            <Title level={2} className="text-gray-800 m-0 font-bold">
+              Appointment Records
+            </Title>
+            <Text className="text-gray-500 text-base">
+              View your completed and cancelled appointments history
+            </Text>
+          </div>
         </div>
+      </div>
 
+      {user?.role?.toLowerCase() === "student" && !user?.studentId && (
+        <Alert
+          message="Missing Student ID"
+          description="Your student ID is missing. Please update your profile or contact support."
+          type="warning"
+          showIcon
+          className="mb-6"
+        />
+      )}
+
+      {user?.role?.toLowerCase() === "psychologist" &&
+        !user?.psychologistId && (
+          <Alert
+            message="Missing Psychologist ID"
+            description="Your psychologist ID is missing. Please update your profile or contact support."
+            type="warning"
+            showIcon
+            className="mb-6"
+          />
+        )}
+
+      <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
         <Tabs
           activeKey={activeTab}
-          onChange={handleTabChange}
-          items={[
-            {
-              key: "completed",
-              label: (
-                <span className="flex items-center">
-                  <CheckCircleOutlined className="mr-2" />
-                  Completed
-                </span>
-              ),
-              children: (
-                <div>
-                  {loading ? (
-                    <div className="flex justify-center py-12">
-                      <Spin size="large" />
-                    </div>
-                  ) : error ? (
-                    <div className="text-center py-8">
-                      <Text type="danger">{error}</Text>
-                    </div>
-                  ) : appointments && appointments.length > 0 ? (
-                    <Table
-                      columns={columns}
-                      dataSource={appointments}
-                      rowKey="appointmentID"
-                      pagination={{ pageSize: 10 }}
-                    />
-                  ) : (
-                    <Empty
-                      description="No completed appointments found"
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    />
-                  )}
-                </div>
-              ),
-            },
-            {
-              key: "cancelled",
-              label: (
-                <span className="flex items-center">
-                  <CloseCircleOutlined className="mr-2" />
-                  Cancelled
-                </span>
-              ),
-              children: (
-                <div>
-                  {loading ? (
-                    <div className="flex justify-center py-12">
-                      <Spin size="large" />
-                    </div>
-                  ) : error ? (
-                    <div className="text-center py-8">
-                      <Text type="danger">{error}</Text>
-                    </div>
-                  ) : appointments && appointments.length > 0 ? (
-                    <Table
-                      columns={columns}
-                      dataSource={appointments}
-                      rowKey="appointmentID"
-                      pagination={{ pageSize: 10 }}
-                    />
-                  ) : (
-                    <Empty
-                      description="No cancelled appointments found"
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    />
-                  )}
-                </div>
-              ),
-            },
-          ]}
-        />
+          onChange={setActiveTab}
+          tabBarExtraContent={
+            <div className="flex items-center">
+              <HistoryOutlined className="mr-2" />
+              <Text type="secondary">{appointments.length} Records</Text>
+            </div>
+          }
+        >
+          <TabPane tab="All Records" key="all">
+            {renderAppointmentTable(filteredAppointments)}
+          </TabPane>
+          <TabPane tab="Completed" key="COMPLETED">
+            {renderAppointmentTable(filteredAppointments)}
+          </TabPane>
+          <TabPane tab="Cancelled" key="CANCELLED">
+            {renderAppointmentTable(filteredAppointments)}
+          </TabPane>
+        </Tabs>
       </Card>
 
       <Modal
-        title="Appointment Details"
+        title={null}
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={[
@@ -355,10 +335,55 @@ export default function AppointmentRecord() {
             Close
           </Button>,
         ]}
-        width={600}
+        width={800}
+        className="appointment-detail-modal"
       >
         {renderAppointmentDetails()}
       </Modal>
     </div>
   );
+
+  function renderAppointmentTable(appointments) {
+    if (loading) {
+      return (
+        <div className="py-10">
+          <div className="flex justify-center mb-6">
+            <Spin size="large" />
+          </div>
+          <div className="text-center">
+            <Text type="secondary">Loading your appointment records...</Text>
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="text-center py-8">
+          <Text type="danger">{error}</Text>
+        </div>
+      );
+    }
+
+    if (appointments.length === 0) {
+      return (
+        <Empty
+          description={`No ${
+            activeTab === "all" ? "" : activeTab.toLowerCase()
+          } appointment records found`}
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      );
+    }
+
+    return (
+      <Table
+        columns={columns}
+        dataSource={appointments}
+        rowKey="appointmentID"
+        pagination={{ pageSize: 10 }}
+        rowClassName="hover:bg-gray-50"
+      />
+    );
+  }
 }
