@@ -187,4 +187,58 @@ export const useAppointmentStore = create((set) => ({
       throw new Error(errorMessage);
     }
   },
+
+  // Fetch appointment records with correct ID fields
+  fetchAppointmentRecords: async (id, userType = "student") => {
+    set({ loading: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+
+      // Use the correct ID field based on user type
+      if (userType === "student") {
+        queryParams.append("studentId", id); // Use studentId instead of userId
+      } else if (userType === "psychologist") {
+        queryParams.append("psychologistId", id); // Use psychologistId instead of userId
+      }
+
+      // Add status parameters for completed and cancelled appointments
+      queryParams.append("status", "COMPLETED");
+      queryParams.append("status", "CANCELLED");
+
+      const url = `/appointments/filter?${queryParams.toString()}`;
+      console.log("Fetching appointment records from:", url);
+
+      const response = await api.get(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      set({ appointments: response.data || [], loading: false });
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching appointment records:", {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      let errorMessage = "Failed to fetch appointment records";
+
+      if (error.response?.status === 500) {
+        errorMessage =
+          "The server encountered an error. Please try again later or contact support.";
+      } else if (error.response?.status === 403) {
+        errorMessage =
+          "You don't have permission to access these appointments.";
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      set({ error: errorMessage, loading: false, appointments: [] });
+      return []; // Return empty array instead of throwing
+    }
+  },
 }));
