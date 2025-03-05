@@ -1,6 +1,6 @@
 import {
   FileDoneOutlined,
-  FileOutlined,
+  // FileOutlined,
   HistoryOutlined,
   PoweroffOutlined,
   // ProfileOutlined,
@@ -77,10 +77,16 @@ export const dropdownMenu = [
     icon: <FileDoneOutlined />,
     roles: ["student"],
   },
+  // {
+  //   label: "Application",
+  //   key: "/application",
+  //   icon: <FileOutlined />,
+  //   roles: ["psychologist"],
+  // },
   {
-    label: "Application",
-    key: "/application",
-    icon: <FileOutlined />,
+    label: "Work Schedule",
+    key: "/register-work-date",
+    icon: <HistoryOutlined />,
     roles: ["psychologist"],
   },
   {

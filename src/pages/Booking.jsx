@@ -142,8 +142,7 @@ const ConsentCheckbox = memo(({ checked, onChange, error }) => (
         }`}
       />
       <span className="ml-2 text-sm text-gray-600">
-        I consent to the processing of my personal information and agree to the
-        terms of service.
+        I agree to the terms of service.
       </span>
     </label>
     {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
@@ -452,6 +451,12 @@ const Booking = () => {
                   value={formData.reason}
                   onChange={handleChange}
                 />
+                {/* Consent Section */}
+                <ConsentCheckbox
+                  checked={formData.consent}
+                  onChange={handleChange}
+                  error={errors.consent}
+                />
               </div>
 
               <div className="w-3/5 flex-1">
@@ -467,13 +472,6 @@ const Booking = () => {
                 )}
               </div>
             </div>
-
-            {/* Consent Section */}
-            <ConsentCheckbox
-              checked={formData.consent}
-              onChange={handleChange}
-              error={errors.consent}
-            />
 
             {/* Submit Buttons */}
             <div className="flex justify-end space-x-6 pt-6">
