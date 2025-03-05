@@ -15,13 +15,13 @@ const initialState = {
 const PSYCHOLOGIST_URL = "/psychologists";
 
 const PSYCHOLOGIST_PATH = {
-  CREATE_TIME_SLOT: (psychId) =>
-    `${PSYCHOLOGIST_URL}/${psychId}/timeslots/batch`,
-  GET_LEAVE_REQUEST: (psychId) => `/${psychId}/leave-requests`,
-  POST_LEAVE_REQUEST: (psychId) => `/${psychId}/leave-requests`,
-  CANCEL_LEAVE_REQUEST: (psychId, leaveRequestId) =>
-    `/${psychId}/leave-requests/${leaveRequestId}/cancel`,
-  GET_TIME_SLOTS: (psychId) => `${PSYCHOLOGIST_URL}/${psychId}/timeslots`,
+  CREATE_TIME_SLOT: `${PSYCHOLOGIST_URL}/timeslots/batch`,
+  GET_TIME_SLOTS: (psychId, date) =>
+    `${PSYCHOLOGIST_URL}/timeslots?psychologistId=${psychId}&date=${date}`,
+  // GET_LEAVE_REQUEST: (psychId) => `/${psychId}/leave-requests`,
+  // POST_LEAVE_REQUEST: (psychId) => `/${psychId}/leave-requests`,
+  // CANCEL_LEAVE_REQUEST: (psychId, leaveRequestId) =>
+  // `/${psychId}/leave-requests/${leaveRequestId}/cancel`,
 };
 
 export const usePsychologistStore = create((set, get) => {
@@ -56,10 +56,10 @@ export const usePsychologistStore = create((set, get) => {
     getError: () => get().error,
 
     //Fetch Time Slots
-    getTimeSlots: async (psychId) => {
+    getTimeSlots: async (psychId, date = "") => {
       try {
         const endpoint = buildEndpoint(
-          PSYCHOLOGIST_PATH.GET_TIME_SLOTS(psychId)
+          PSYCHOLOGIST_PATH.GET_TIME_SLOTS(psychId, date)
         );
         const { data } = await api.get(endpoint);
         set({ timeSlots: data });
@@ -73,23 +73,41 @@ export const usePsychologistStore = create((set, get) => {
     },
 
     // Default Time Slots Management
-    // fetchDefaultTimeSlots: async () =>
-    //   handleError(async () => {
-    //     const endpoint = buildEndpoint(`${PSYCHOLOGIST_URL}default-time-slots`);
-    //     const { data } = await api.get(endpoint);
-    //     set({ defaultTimeSlots: data });
-    //     return data;
-    //   }, "Failed to fetch default time slots"),
+    fetchDefaultTimeSlots: async () => {
+      set({ loading: true, error: null });
+      try {
+        const endpoint = buildEndpoint(
+          `${PSYCHOLOGIST_URL}/default-time-slots`
+        );
+        const { data } = await api.get(endpoint);
+        set({ defaultTimeSlots: data, loading: false });
+        return data;
+      } catch (error) {
+        console.error("Default time slots fetch error:", error);
+        const errorMessage =
+          error.response?.data?.message || "Failed to fetch default time slots";
+        set({ error: errorMessage, loading: false });
+        throw new Error(errorMessage);
+      }
+    },
 
-    // createDefaultTimeSlot: async (psychId, timeSlotData) =>
-    //   handleError(async () => {
-    //     const endpoint = buildEndpoint(PSYCHOLOGIST_PATH.CREATE_TIME_SLOT(psychId));
-    //     const { data } = await api.post(endpoint, timeSlotData);
-    //     set((state) => ({
-    //       defaultTimeSlots: [...state.defaultTimeSlots, data],
-    //     }));
-    //     return data;
-    //   }, "Failed to create default time slot"),
+    createTimeSlot: async (psychId, { slotDate, defaultSlotIds }) => {
+      set({ loading: true, error: null });
+      try {
+        const endpoint = PSYCHOLOGIST_PATH.CREATE_TIME_SLOT;
+        await api.post(endpoint, {
+          slotDate,
+          defaultSlotIds,
+        });
+        set({ loading: false });
+      } catch (error) {
+        console.error("Create time slots error:", error);
+        const errorMessage =
+          error.response?.data?.message || "Failed to create time slots";
+        set({ error: errorMessage, loading: false });
+        throw new Error(errorMessage);
+      }
+    },
 
     // Fetch all psychologists
     fetchPsychologists: async () => {
@@ -112,62 +130,62 @@ export const usePsychologistStore = create((set, get) => {
     },
 
     // Fetch leave requests for a psychologist
-    fetchLeaveRequests: async (psychId, params = {}) => {
-      set({ loading: true, error: null });
-      try {
-        const endpoint = buildEndpoint(
-          `${PSYCHOLOGIST_URL}${PSYCHOLOGIST_PATH.GET_LEAVE_REQUEST(psychId)}`,
-          params
-        );
-        const { data } = await api.get(endpoint);
-        set({ loading: false });
-        return data;
-      } catch (error) {
-        console.error("Leave requests fetch error:", error);
-        const errorMessage =
-          error.response?.data?.message || "Failed to fetch leave requests";
-        set({ error: errorMessage, loading: false });
-        throw new Error(errorMessage);
-      }
-    },
+    // fetchLeaveRequests: async (psychId, params = {}) => {
+    //   set({ loading: true, error: null });
+    //   try {
+    //     const endpoint = buildEndpoint(
+    //       `${PSYCHOLOGIST_URL}${PSYCHOLOGIST_PATH.GET_LEAVE_REQUEST(psychId)}`,
+    //       params
+    //     );
+    //     const { data } = await api.get(endpoint);
+    //     set({ loading: false });
+    //     return data;
+    //   } catch (error) {
+    //     console.error("Leave requests fetch error:", error);
+    //     const errorMessage =
+    //       error.response?.data?.message || "Failed to fetch leave requests";
+    //     set({ error: errorMessage, loading: false });
+    //     throw new Error(errorMessage);
+    //   }
+    // },
 
-    // Post a leave request for a psychologist
-    postLeaveRequest: async (psychId, body) => {
-      set({ loading: true, error: null });
-      try {
-        const { data } = await api.post(
-          `${PSYCHOLOGIST_URL}${PSYCHOLOGIST_PATH.POST_LEAVE_REQUEST(psychId)}`,
-          body
-        );
-        set({ loading: false });
-        return data;
-      } catch (error) {
-        console.error("Leave request post error:", error);
-        const errorMessage =
-          error.response?.data?.message || "Failed to post leave request";
-        set({ error: errorMessage, loading: false });
-        throw new Error(errorMessage);
-      }
-    },
+    // // Post a leave request for a psychologist
+    // postLeaveRequest: async (psychId, body) => {
+    //   set({ loading: true, error: null });
+    //   try {
+    //     const { data } = await api.post(
+    //       `${PSYCHOLOGIST_URL}${PSYCHOLOGIST_PATH.POST_LEAVE_REQUEST(psychId)}`,
+    //       body
+    //     );
+    //     set({ loading: false });
+    //     return data;
+    //   } catch (error) {
+    //     console.error("Leave request post error:", error);
+    //     const errorMessage =
+    //       error.response?.data?.message || "Failed to post leave request";
+    //     set({ error: errorMessage, loading: false });
+    //     throw new Error(errorMessage);
+    //   }
+    // },
 
-    cancelLeaveRequest: async (psychId, leaveRequestId) => {
-      set({ loading: true, error: null });
-      try {
-        await api.put(
-          `${PSYCHOLOGIST_URL}${PSYCHOLOGIST_PATH.CANCEL_LEAVE_REQUEST(
-            psychId,
-            leaveRequestId
-          )}`
-        );
-        set({ loading: false });
-      } catch (error) {
-        console.error("Leave request cancel error:", error);
-        const errorMessage =
-          error.response?.data?.message || "Failed to cancel leave request";
-        set({ error: errorMessage, loading: false });
-        throw new Error(errorMessage);
-      }
-    },
+    // cancelLeaveRequest: async (psychId, leaveRequestId) => {
+    //   set({ loading: true, error: null });
+    //   try {
+    //     await api.put(
+    //       `${PSYCHOLOGIST_URL}${PSYCHOLOGIST_PATH.CANCEL_LEAVE_REQUEST(
+    //         psychId,
+    //         leaveRequestId
+    //       )}`
+    //     );
+    //     set({ loading: false });
+    //   } catch (error) {
+    //     console.error("Leave request cancel error:", error);
+    //     const errorMessage =
+    //       error.response?.data?.message || "Failed to cancel leave request";
+    //     set({ error: errorMessage, loading: false });
+    //     throw new Error(errorMessage);
+    //   }
+    // },
 
     // State management
     reset: () => set(initialState),

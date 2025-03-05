@@ -34,6 +34,7 @@ import Application from "../pages/psycologist/Application";
 import ApplicationManagement from "../pages/manager/ApplicationManagement ";
 import NotificationDetail from "../pages/NotificationDetail";
 import PsychologistProfile from "../pages/psycologist/PsychologistProfile";
+import WorkSchedule from "../pages/psycologist/WorkSchedule";
 
 const Appointment = lazy(() => import("../pages/psycologist/Appointment"));
 
@@ -114,6 +115,7 @@ export const routes = [
           { path: "calendar", element: <Appointment /> },
           { path: "appointment-record", element: <AppointmentRecord /> },
           { path: "notifications/:id", element: <NotificationDetail /> },
+          { path: "register-work-date", element: <WorkSchedule /> },
         ],
       },
       {

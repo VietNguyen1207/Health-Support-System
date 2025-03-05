@@ -206,29 +206,29 @@ if (token) {
   }
 }
 
-// Interceptor để handle refresh token
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+// // Interceptor để handle refresh token
+// api.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     const originalRequest = error.config;
 
-    // Check if the error is due to an expired token or 401 unauthorized
-    if (
-      (error.response?.status === 401 ||
-        isTokenExpired(useAuthStore.getState().token?.accessToken)) &&
-      !originalRequest._retry
-    ) {
-      originalRequest._retry = true;
+//     // Check if the error is due to an expired token or 401 unauthorized
+//     if (
+//       (error.response?.status === 401 ||
+//         isTokenExpired(useAuthStore.getState().token?.accessToken)) &&
+//       !originalRequest._retry
+//     ) {
+//       originalRequest._retry = true;
 
-      try {
-        await useAuthStore.getState().refreshToken();
-        return api(originalRequest);
-      } catch (refreshError) {
-        useAuthStore.getState().logout();
-        throw refreshError;
-      }
-    }
+//       try {
+//         await useAuthStore.getState().refreshToken();
+//         return api(originalRequest);
+//       } catch (refreshError) {
+//         useAuthStore.getState().logout();
+//         throw refreshError;
+//       }
+//     }
 
-    return Promise.reject(error);
-  }
-);
+//     return Promise.reject(error);
+//   }
+// );
