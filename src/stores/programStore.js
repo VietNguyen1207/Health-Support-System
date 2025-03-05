@@ -25,10 +25,19 @@ export const useProgramStore = create((set) => ({
   fetchProgramDetails: async (programId) => {
     set({ loadingDetails: true, error: null });
     try {
-      const { data } = await api.get(`/programs/${programId}/details`);
+      const { data } = await api.get(
+        `/programs/details?programId=${programId}`
+      );
       set({ selectedProgram: data, loadingDetails: false });
       return data;
     } catch (error) {
+      console.error("Error fetching program details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        fullError: error,
+      });
+
       const errorMessage =
         error.response?.data?.message || "Failed to fetch program details";
       set({ error: errorMessage, loadingDetails: false });
@@ -88,8 +97,6 @@ export const useProgramStore = create((set) => ({
 
       // Update programs list with new program
       set((state) => ({
-        // programs: [...state.programs, credentials],
-
         programs: [...state.programs, data],
         loading: false,
       }));
@@ -109,10 +116,15 @@ export const useProgramStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       console.log("Registering for program:", { programId, studentId });
-      const { data } = await api.post(`/programs/${programId}/register`, {
-        studentID: studentId,
-        programID: programId,
-      });
+
+      // Updated endpoint to use query parameter instead of path parameter
+      const { data } = await api.post(
+        `/programs/register?programId=${programId}`,
+        {
+          studentID: studentId,
+          programID: programId,
+        }
+      );
 
       set({ loading: false });
       return data;

@@ -1,77 +1,102 @@
-import React, { useEffect, useState } from "react";
-import { useUserStore } from "../../stores/userStore";
-import { useAuthStore } from "../../stores/authStore";
+import React, { useState, useEffect } from "react";
 import {
+  Tabs,
   Table,
   Tag,
-  Card,
-  Typography,
+  Button,
   Spin,
   Empty,
-  Tabs,
-  Button,
+  DatePicker,
   Modal,
-  Result,
-  Skeleton,
+  Tooltip,
+  Card,
+  Divider,
+  Typography,
+  notification,
 } from "antd";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
   UserOutlined,
-  FileTextOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  HistoryOutlined,
-  EnvironmentOutlined,
-  PhoneOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
+import { useAppointmentStore } from "../../stores/appointmentStore";
+import { useAuthStore } from "../../stores/authStore";
 import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
-const { TabPane } = Tabs;
+const { RangePicker } = DatePicker;
 
 export default function AppointmentRecord() {
-  const { getUserWithAppointments, loading } = useUserStore();
   const { user } = useAuthStore();
-  const [appointments, setAppointments] = useState([]);
-  const [filteredAppointments, setFilteredAppointments] = useState([]);
+  const { fetchFilteredAppointments, loading, error, appointments } =
+    useAppointmentStore();
+
+  const [activeTab, setActiveTab] = useState("completed");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [dateRange, setDateRange] = useState(null);
 
+  // Fetch appointments based on active tab
   useEffect(() => {
-    const fetchAppointments = async () => {
-      if (user?.userId) {
-        try {
-          const userData = await getUserWithAppointments(user.userId);
-          if (userData?.appointmentsRecord) {
-            // Filter only completed and cancelled appointments
-            const recordedAppointments = userData.appointmentsRecord.filter(
-              (app) => app.status === "COMPLETED" || app.status === "CANCELLED"
-            );
-            setAppointments(recordedAppointments);
-            setFilteredAppointments(recordedAppointments);
-          }
-        } catch (error) {
-          console.error("Failed to fetch appointments:", error);
-        }
-      }
-    };
-
     fetchAppointments();
-  }, [getUserWithAppointments, user]);
+  }, [activeTab, dateRange]);
+
+  const fetchAppointments = async () => {
+    if (!user?.id) return;
+
+    try {
+      // Determine which statuses to fetch based on active tab
+      const statuses =
+        activeTab === "completed" ? ["COMPLETED"] : ["CANCELLED"];
+
+      // Prepare filter object
+      const filters = {
+        studentId: user.id,
+        status: statuses,
+      };
+
+      // Add date range if selected
+      if (dateRange && dateRange[0] && dateRange[1]) {
+        filters.startDate = dateRange[0].format("YYYY-MM-DD");
+        filters.endDate = dateRange[1].format("YYYY-MM-DD");
+      }
+
+      await fetchFilteredAppointments(filters);
+    } catch (error) {
+      notification.error({
+        message: "Failed to load appointments",
+        description: error.message,
+      });
+    }
+  };
 
   const getStatusTag = (status) => {
     switch (status) {
       case "COMPLETED":
         return (
-          <Tag color="success" icon={<CheckCircleOutlined />}>
+          <Tag color="green" icon={<CheckCircleOutlined />}>
             Completed
           </Tag>
         );
       case "CANCELLED":
         return (
-          <Tag color="error" icon={<CloseCircleOutlined />}>
+          <Tag color="red" icon={<CloseCircleOutlined />}>
             Cancelled
+          </Tag>
+        );
+      case "SCHEDULED":
+        return (
+          <Tag color="blue" icon={<CalendarOutlined />}>
+            Scheduled
+          </Tag>
+        );
+      case "IN_PROGRESS":
+        return (
+          <Tag color="orange" icon={<ClockCircleOutlined />}>
+            In Progress
           </Tag>
         );
       default:
@@ -82,35 +107,34 @@ export default function AppointmentRecord() {
   const columns = [
     {
       title: "Date",
-      dataIndex: "createdAt",
-      key: "date",
-      render: (text) => dayjs(text).format("MMM DD, YYYY"),
-      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+      dataIndex: "slotDate",
+      key: "slotDate",
+      render: (text) => (
+        <div className="flex items-center">
+          <CalendarOutlined className="mr-2 text-custom-green" />
+          {dayjs(text).format("MMM DD, YYYY")}
+        </div>
+      ),
+      sorter: (a, b) => dayjs(a.slotDate).unix() - dayjs(b.slotDate).unix(),
     },
     {
       title: "Time",
       key: "time",
       render: (_, record) => (
-        <span>
-          {record.checkInTime
-            ? dayjs(record.checkInTime).format("hh:mm A")
-            : "N/A"}
-          {record.checkOutTime &&
-            ` - ${dayjs(record.checkOutTime).format("hh:mm A")}`}
-        </span>
+        <div className="flex items-center">
+          <ClockCircleOutlined className="mr-2 text-custom-green" />
+          {record.startTime} - {record.endTime}
+        </div>
       ),
     },
     {
       title: "Psychologist",
-      dataIndex: ["psychologistResponse", "name"],
-      key: "psychologist",
-      render: (text, record) => (
+      dataIndex: "psychologistID",
+      key: "psychologistID",
+      render: (text) => (
         <div className="flex items-center">
-          <UserOutlined className="mr-2" />
-          <span>{text}</span>
-          <Text type="secondary" className="ml-2">
-            ({record.psychologistResponse.departmentName})
-          </Text>
+          <UserOutlined className="mr-2 text-custom-green" />
+          {text}
         </div>
       ),
     },
@@ -119,11 +143,6 @@ export default function AppointmentRecord() {
       dataIndex: "status",
       key: "status",
       render: (status) => getStatusTag(status),
-      filters: [
-        { text: "Completed", value: "COMPLETED" },
-        { text: "Cancelled", value: "CANCELLED" },
-      ],
-      onFilter: (value, record) => record.status === value,
     },
     {
       title: "Actions",
@@ -135,6 +154,7 @@ export default function AppointmentRecord() {
             setSelectedAppointment(record);
             setIsModalVisible(true);
           }}
+          className="bg-custom-green hover:bg-custom-green/90"
         >
           View Details
         </Button>
@@ -143,265 +163,191 @@ export default function AppointmentRecord() {
   ];
 
   const renderAppointmentDetails = () => {
-    if (!selectedAppointment)
-      return <Skeleton active paragraph={{ rows: 6 }} />;
+    if (!selectedAppointment) return null;
 
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <Title level={4} className="mb-1">
-              Appointment Record
+        <div className="flex flex-col sm:flex-row sm:justify-between">
+          <div className="mb-4 sm:mb-0">
+            <Text type="secondary">Appointment ID</Text>
+            <Title level={5} className="mt-1">
+              {selectedAppointment.appointmentID}
             </Title>
-            <Text type="secondary">
-              {dayjs(selectedAppointment.createdAt).format("MMMM DD, YYYY")}
-            </Text>
           </div>
-          {getStatusTag(selectedAppointment.status)}
+          <div>{getStatusTag(selectedAppointment.status)}</div>
         </div>
+
+        <Divider />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Appointment Info */}
-          <Card
-            title={
-              <div className="flex items-center">
-                <CalendarOutlined className="mr-2 text-primary-green" />
-                <span>Appointment Details</span>
-              </div>
-            }
-            className="shadow-sm hover:shadow-md transition-shadow duration-300"
-          >
-            <div className="space-y-4">
-              <div className="flex justify-between">
-                <Text type="secondary">Appointment ID:</Text>
-                <Text copyable>{selectedAppointment.appointmentID}</Text>
-              </div>
-              <div className="flex justify-between">
-                <Text type="secondary">Date:</Text>
-                <Text>
-                  {dayjs(selectedAppointment.createdAt).format("MMMM DD, YYYY")}
-                </Text>
-              </div>
-              <div className="flex justify-between">
-                <Text type="secondary">Status:</Text>
-                {getStatusTag(selectedAppointment.status)}
-              </div>
-              {selectedAppointment.checkInTime && (
-                <div className="flex justify-between">
-                  <Text type="secondary">Check-in Time:</Text>
-                  <Text>
-                    {dayjs(selectedAppointment.checkInTime).format("hh:mm A")}
-                  </Text>
-                </div>
-              )}
-              {selectedAppointment.checkOutTime && (
-                <div className="flex justify-between">
-                  <Text type="secondary">Check-out Time:</Text>
-                  <Text>
-                    {dayjs(selectedAppointment.checkOutTime).format("hh:mm A")}
-                  </Text>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <Text type="secondary">Duration:</Text>
-                <Text>
-                  {selectedAppointment.checkInTime &&
-                  selectedAppointment.checkOutTime
-                    ? `${Math.round(
-                        (new Date(selectedAppointment.checkOutTime) -
-                          new Date(selectedAppointment.checkInTime)) /
-                          60000
-                      )} minutes`
-                    : "N/A"}
-                </Text>
-              </div>
-            </div>
-          </Card>
-
-          {/* Psychologist Info */}
-          <Card
-            title={
-              <div className="flex items-center">
-                <UserOutlined className="mr-2 text-primary-green" />
-                <span>Psychologist Information</span>
-              </div>
-            }
-            className="shadow-sm hover:shadow-md transition-shadow duration-300"
-          >
-            <div className="space-y-4">
-              <div className="flex justify-between">
-                <Text type="secondary">Name:</Text>
-                <Text>{selectedAppointment.psychologistResponse.name}</Text>
-              </div>
-              <div className="flex justify-between">
-                <Text type="secondary">Department:</Text>
-                <Text>
-                  {selectedAppointment.psychologistResponse.departmentName}
-                </Text>
-              </div>
-              <div className="flex justify-between">
-                <Text type="secondary">Experience:</Text>
-                <Text>
-                  {selectedAppointment.psychologistResponse.yearsOfExperience}{" "}
-                  years
-                </Text>
-              </div>
-              <div className="flex justify-between">
-                <Text type="secondary">Status:</Text>
-                <Tag
-                  color={
-                    selectedAppointment.psychologistResponse.status === "ACTIVE"
-                      ? "green"
-                      : "orange"
-                  }
-                >
-                  {selectedAppointment.psychologistResponse.status.replace(
-                    "_",
-                    " "
-                  )}
-                </Tag>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Notes Section (if available) */}
-        {selectedAppointment.psychologistNotes ? (
-          <Card
-            title={
-              <div className="flex items-center">
-                <FileTextOutlined className="mr-2 text-primary-green" />
-                <span>Session Notes</span>
-              </div>
-            }
-            className="shadow-sm hover:shadow-md transition-shadow duration-300"
-          >
-            <div className="p-4 bg-gray-50 rounded-md">
-              <Text>{selectedAppointment.psychologistNotes}</Text>
-            </div>
-          </Card>
-        ) : selectedAppointment.status === "COMPLETED" ? (
-          <Card
-            title={
-              <div className="flex items-center">
-                <FileTextOutlined className="mr-2 text-primary-green" />
-                <span>Session Notes</span>
-              </div>
-            }
-            className="shadow-sm hover:shadow-md transition-shadow duration-300"
-          >
-            <div className="p-4 bg-gray-50 rounded-md text-center">
-              <Text type="secondary">
-                No session notes were provided for this appointment.
+          <div>
+            <Text type="secondary">Date</Text>
+            <div className="flex items-center mt-1">
+              <CalendarOutlined className="mr-2 text-custom-green" />
+              <Text strong>
+                {dayjs(selectedAppointment.slotDate).format("MMMM DD, YYYY")}
               </Text>
             </div>
-          </Card>
-        ) : null}
+          </div>
+
+          <div>
+            <Text type="secondary">Time</Text>
+            <div className="flex items-center mt-1">
+              <ClockCircleOutlined className="mr-2 text-custom-green" />
+              <Text strong>
+                {selectedAppointment.startTime} - {selectedAppointment.endTime}
+              </Text>
+            </div>
+          </div>
+
+          <div>
+            <Text type="secondary">Psychologist ID</Text>
+            <div className="flex items-center mt-1">
+              <UserOutlined className="mr-2 text-custom-green" />
+              <Text strong>{selectedAppointment.psychologistID}</Text>
+            </div>
+          </div>
+
+          <div>
+            <Text type="secondary">Student ID</Text>
+            <div className="flex items-center mt-1">
+              <UserOutlined className="mr-2 text-custom-green" />
+              <Text strong>{selectedAppointment.studentID}</Text>
+            </div>
+          </div>
+        </div>
+
+        <Divider />
+
+        <div>
+          <Text type="secondary">Created At</Text>
+          <div className="flex items-center mt-1">
+            <InfoCircleOutlined className="mr-2 text-custom-green" />
+            <Text>
+              {dayjs(selectedAppointment.createdAt).format(
+                "MMMM DD, YYYY HH:mm"
+              )}
+            </Text>
+          </div>
+        </div>
+
+        {selectedAppointment.updatedAt && (
+          <div>
+            <Text type="secondary">Last Updated</Text>
+            <div className="flex items-center mt-1">
+              <InfoCircleOutlined className="mr-2 text-custom-green" />
+              <Text>
+                {dayjs(selectedAppointment.updatedAt).format(
+                  "MMMM DD, YYYY HH:mm"
+                )}
+              </Text>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
 
   const handleTabChange = (key) => {
-    if (key === "all") {
-      setFilteredAppointments(appointments);
-    } else {
-      setFilteredAppointments(appointments.filter((app) => app.status === key));
-    }
+    setActiveTab(key);
+  };
+
+  const handleDateRangeChange = (dates) => {
+    setDateRange(dates);
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <div className="flex items-start">
-          <div className="bg-primary-green/10 p-2 rounded-lg mr-3">
-            <HistoryOutlined className="text-xl text-primary-green" />
-          </div>
-          <div>
-            <Title level={2} className="text-gray-800 m-0 font-bold">
-              Appointment Records
-            </Title>
-            <Text className="text-gray-500 text-base">
-              View your completed and cancelled appointments history
-            </Text>
-          </div>
-        </div>
-      </div>
+    <div className="p-6">
+      <Card className="shadow-md rounded-xl">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+          <Title level={3} className="mb-4 md:mb-0">
+            Appointment Records
+          </Title>
 
-      {loading ? (
-        <Card className="shadow-sm">
-          <div className="py-10">
-            <div className="flex justify-center mb-6">
-              <Spin size="large" />
-            </div>
-            <div className="text-center">
-              <Text type="secondary">Loading your appointment records...</Text>
-            </div>
-            <div className="mt-8">
-              <Skeleton active paragraph={{ rows: 6 }} />
-            </div>
-          </div>
-        </Card>
-      ) : appointments.length > 0 ? (
-        <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
-          <Tabs
-            defaultActiveKey="all"
-            onChange={handleTabChange}
-            tabBarExtraContent={
-              <div className="flex items-center">
-                <HistoryOutlined className="mr-2" />
-                <Text type="secondary">{appointments.length} Records</Text>
-              </div>
-            }
-          >
-            <TabPane tab="All Records" key="all">
-              <Table
-                columns={columns}
-                dataSource={filteredAppointments}
-                rowKey="appointmentID"
-                pagination={{ pageSize: 10 }}
-                rowClassName="hover:bg-gray-50"
-                loading={loading}
-              />
-            </TabPane>
-            <TabPane tab="Completed" key="COMPLETED">
-              <Table
-                columns={columns}
-                dataSource={filteredAppointments}
-                rowKey="appointmentID"
-                pagination={{ pageSize: 10 }}
-                rowClassName="hover:bg-gray-50"
-                loading={loading}
-              />
-            </TabPane>
-            <TabPane tab="Cancelled" key="CANCELLED">
-              <Table
-                columns={columns}
-                dataSource={filteredAppointments}
-                rowKey="appointmentID"
-                pagination={{ pageSize: 10 }}
-                rowClassName="hover:bg-gray-50"
-                loading={loading}
-              />
-            </TabPane>
-          </Tabs>
-        </Card>
-      ) : (
-        <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
-          <Result
-            icon={<HistoryOutlined style={{ color: "#1890ff" }} />}
-            title="No Appointment Records"
-            subTitle="You don't have any completed or cancelled appointments yet."
-            extra={
-              <Button type="primary" href="/student/appointments">
-                Book an Appointment
-              </Button>
-            }
+          <RangePicker
+            onChange={handleDateRangeChange}
+            className="w-full md:w-auto"
           />
-        </Card>
-      )}
+        </div>
+
+        <Tabs
+          activeKey={activeTab}
+          onChange={handleTabChange}
+          items={[
+            {
+              key: "completed",
+              label: (
+                <span className="flex items-center">
+                  <CheckCircleOutlined className="mr-2" />
+                  Completed
+                </span>
+              ),
+              children: (
+                <div>
+                  {loading ? (
+                    <div className="flex justify-center py-12">
+                      <Spin size="large" />
+                    </div>
+                  ) : error ? (
+                    <div className="text-center py-8">
+                      <Text type="danger">{error}</Text>
+                    </div>
+                  ) : appointments && appointments.length > 0 ? (
+                    <Table
+                      columns={columns}
+                      dataSource={appointments}
+                      rowKey="appointmentID"
+                      pagination={{ pageSize: 10 }}
+                    />
+                  ) : (
+                    <Empty
+                      description="No completed appointments found"
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    />
+                  )}
+                </div>
+              ),
+            },
+            {
+              key: "cancelled",
+              label: (
+                <span className="flex items-center">
+                  <CloseCircleOutlined className="mr-2" />
+                  Cancelled
+                </span>
+              ),
+              children: (
+                <div>
+                  {loading ? (
+                    <div className="flex justify-center py-12">
+                      <Spin size="large" />
+                    </div>
+                  ) : error ? (
+                    <div className="text-center py-8">
+                      <Text type="danger">{error}</Text>
+                    </div>
+                  ) : appointments && appointments.length > 0 ? (
+                    <Table
+                      columns={columns}
+                      dataSource={appointments}
+                      rowKey="appointmentID"
+                      pagination={{ pageSize: 10 }}
+                    />
+                  ) : (
+                    <Empty
+                      description="No cancelled appointments found"
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    />
+                  )}
+                </div>
+              ),
+            },
+          ]}
+        />
+      </Card>
 
       <Modal
-        title={null}
+        title="Appointment Details"
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={[
@@ -409,8 +355,7 @@ export default function AppointmentRecord() {
             Close
           </Button>,
         ]}
-        width={800}
-        className="appointment-detail-modal"
+        width={600}
       >
         {renderAppointmentDetails()}
       </Modal>
