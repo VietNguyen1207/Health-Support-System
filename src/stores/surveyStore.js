@@ -83,9 +83,12 @@ export const useSurveyStore = create((set, get) => ({
     try {
       const token = localStorage.getItem("token");
 
-      const { data } = await api.get(`/surveys/${surveyId}/questions`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const { data } = await api.get(
+        `/surveys/questions?surveyId=${surveyId}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
 
       set({
         questions: data.questionList,
@@ -123,4 +126,91 @@ export const useSurveyStore = create((set, get) => ({
 
   // Clear questions
   clearQuestions: () => set({ questions: [] }),
+
+  // Fetch survey results for a specific student
+  fetchSurveyResults: async (surveyId, studentId) => {
+    set({ loading: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+
+      // Use the new endpoint structure with query parameters
+      const { data } = await api.get(
+        `/surveys/results?surveyId=${surveyId}&studentId=${studentId}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+
+      set({
+        selectedSurvey: data,
+        loading: false,
+      });
+
+      return data;
+    } catch (error) {
+      console.error("Survey results fetch error details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      const errorMessage =
+        error.response?.status === 403
+          ? "You don't have permission to access these results. Please log in again."
+          : error.response?.data?.message ||
+            error.message ||
+            "Failed to fetch survey results";
+
+      set({
+        error: errorMessage,
+        loading: false,
+      });
+      throw new Error(errorMessage);
+    }
+  },
+
+  // Submit survey answers
+  submitSurveyAnswers: async (surveyId, studentId, answers) => {
+    set({ loading: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+
+      // Extract just the answerIDs from the answers array
+      // The API expects an array of answer IDs like ["ANS003", "ANS005", etc.]
+      const answerIds = answers
+        .map((answer) => answer.answerId)
+        .filter(Boolean);
+
+      // Submit the answers to the API using the correct endpoint
+      const { data } = await api.post(
+        `/surveys/options/scoreResult?surveyId=${surveyId}&studentId=${studentId}`,
+        answerIds, // Send just the array of answer IDs
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+
+      set({ loading: false });
+      return data;
+    } catch (error) {
+      console.error("Survey submission error details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      const errorMessage =
+        error.response?.status === 403
+          ? "You don't have permission to submit this survey. Please log in again."
+          : error.response?.data?.message ||
+            error.message ||
+            "Failed to submit survey answers";
+
+      set({
+        error: errorMessage,
+        loading: false,
+      });
+      throw new Error(errorMessage);
+    }
+  },
 }));

@@ -8,12 +8,19 @@ const TestQuestion = () => {
   const navigate = useNavigate();
   const test = location.state?.test;
 
-  const { questions, loadingQuestions, fetchSurveyQuestions, clearQuestions } =
-    useSurveyStore();
+  const {
+    questions,
+    loadingQuestions,
+    fetchSurveyQuestions,
+    clearQuestions,
+    submitSurveyAnswers,
+  } = useSurveyStore();
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
+  const [user, setUser] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // Fetch questions when component mounts
   useEffect(() => {
@@ -71,19 +78,34 @@ const TestQuestion = () => {
     }
   };
 
-  const handleSubmit = () => {
-    // Navigate to results with answers and test data
-    navigate("/test-results", {
-      state: {
-        answers: Object.values(answers),
-        test: {
-          ...test,
-          title: test.title,
-          questions: questions,
+  const handleSubmit = async () => {
+    if (!user?.id || !test?.id) return;
+
+    // Check if all questions have been answered
+    const unansweredQuestions = answers.filter((answer) => !answer.answerId);
+    if (unansweredQuestions.length > 0) {
+      // Show a warning that not all questions are answered
+      // You could use Ant Design's message or notification component here
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Submit just the answer IDs
+      const result = await submitSurveyAnswers(test.id, user.id, answers);
+
+      // Navigate to results page with the score data
+      navigate(`/test-result/${test.id}`, {
+        state: {
+          score: result.score,
+          status: result.status,
         },
-        dateCompleted: new Date().toISOString(),
-      },
-    });
+      });
+    } catch (error) {
+      console.error("Failed to submit survey:", error);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loadingQuestions) {
