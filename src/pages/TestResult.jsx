@@ -38,7 +38,7 @@ const TestResult = () => {
   useEffect(() => {
     const loadResults = async () => {
       if (!surveyId || !user?.id) {
-        navigate("/tests");
+        navigate("/test");
         return;
       }
 
@@ -59,7 +59,7 @@ const TestResult = () => {
       let maxScore = 30; // Default max score
 
       if (scoreFromState) {
-        // Parse score in format "11/30"
+        // Parse score in format
         const scoreParts = scoreFromState.split("/");
         if (scoreParts.length === 2) {
           totalScore = parseInt(scoreParts[0], 10);
@@ -89,7 +89,7 @@ const TestResult = () => {
 
       setInterpretation(
         getInterpretation(
-          selectedSurvey.questionList[0].questionCategory,
+          selectedSurvey.questionList[0]?.questionCategory,
           totalScore
         )
       );
@@ -120,7 +120,6 @@ const TestResult = () => {
   };
 
   const getInterpretation = (category, score) => {
-    // Standardize category name
     const categoryName = category ? category.toUpperCase() : "ANXIETY";
 
     const interpretations = {
@@ -257,7 +256,7 @@ const TestResult = () => {
           type="error"
           showIcon
           action={
-            <Button onClick={() => navigate("/tests")} type="primary" danger>
+            <Button onClick={() => navigate("/test")} type="primary" danger>
               Back to Tests
             </Button>
           }
@@ -275,7 +274,7 @@ const TestResult = () => {
           type="warning"
           showIcon
           action={
-            <Button onClick={() => navigate("/tests")} type="primary">
+            <Button onClick={() => navigate("/test")} type="primary">
               Back to Tests
             </Button>
           }
@@ -294,7 +293,7 @@ const TestResult = () => {
               type="text"
               icon={<ArrowLeftOutlined />}
               className="text-white hover:text-white/80 mb-4"
-              onClick={() => navigate("/tests")}
+              onClick={() => navigate("/test")}
             >
               Back to Tests
             </Button>
@@ -364,37 +363,44 @@ const TestResult = () => {
 
           {/* Responses Section */}
           <div className="space-y-6 mt-6">
-            {selectedSurvey.questionList.map((question, index) => {
-              const selectedOption = question.questionOptions.find(
-                (opt) => opt.checked
-              );
+            {selectedSurvey?.questionList &&
+            selectedSurvey.questionList.length > 0 ? (
+              selectedSurvey.questionList.map((question, index) => {
+                const selectedOption = question.questionOptions.find(
+                  (opt) => opt.checked
+                );
 
-              return (
-                <div key={question.id} className="border-b pb-4">
-                  <div className="flex">
-                    <div className="bg-custom-green/10 text-custom-green font-bold rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">
-                      {parseInt(question.id) + 1}
-                    </div>
-                    <div>
-                      <Text strong className="text-gray-800">
-                        {question.questionText}
-                      </Text>
-                      <div className="mt-3 ml-2">
-                        <Text type="secondary">Your answer: </Text>
-                        <Tag color="blue" className="ml-2">
-                          {selectedOption?.label || "Not answered"}
-                        </Tag>
+                return (
+                  <div key={question.id} className="border-b pb-4">
+                    <div className="flex">
+                      <div className="bg-custom-green/10 text-custom-green font-bold rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">
+                        {parseInt(question.id) + 1}
+                      </div>
+                      <div>
+                        <Text strong className="text-gray-800">
+                          {question.questionText}
+                        </Text>
+                        <div className="mt-3 ml-2">
+                          <Text type="secondary">Your answer: </Text>
+                          <Tag color="blue" className="ml-2">
+                            {selectedOption?.label || "Not answered"}
+                          </Tag>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            ) : (
+              <div className="text-center py-6">
+                <Text type="secondary">No response data available</Text>
+              </div>
+            )}
           </div>
 
           {/* Actions */}
           <div className="flex justify-between mt-8">
-            <Button onClick={() => navigate("/tests")}>Back to Tests</Button>
+            <Button onClick={() => navigate("/test")}>Back to Tests</Button>
             <Button
               type="primary"
               className="bg-custom-green hover:bg-custom-green/90"

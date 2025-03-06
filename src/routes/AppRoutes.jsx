@@ -84,7 +84,7 @@ export const routes = [
           { path: "test-question", element: <TestQuestion /> },
           { path: "book-appointment", element: <Booking /> },
           { path: "test-record", element: <TestRecord /> },
-          { path: "test-results", element: <TestResult /> },
+          { path: "test-result/:surveyId", element: <TestResult /> },
           { path: "program", element: <Program /> },
         ],
       },
