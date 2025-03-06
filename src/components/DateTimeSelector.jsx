@@ -20,13 +20,12 @@ import {
   formatTimeDisplay,
   formatWeekDay,
 } from "../utils/Helper";
-import { usePsychologistStore } from "../stores/psychologistStore";
 const { Text, Title } = Typography;
 
 // Memoized component for time slot card with availability indicator
 const TimeSlotCard = memo(({ slot, isSelected, onSelect }) => {
   // Determine if slot is available
-  const isAvailable = slot.status === "AVAILABLE";
+  const isAvailable = slot.status === "AVAILABLE" && !slot.booked;
 
   // Calculate availability for visual indicator
   const availabilityText = `${slot.currentBookings}/${slot.maxCapacity}`;
@@ -67,7 +66,7 @@ const TimeSlotCard = memo(({ slot, isSelected, onSelect }) => {
           </div>
           {!isAvailable && (
             <Tag className="mt-1" color="default">
-              Unavailable
+              {slot.booked ? "Booked" : "Unavailable"}
             </Tag>
           )}
         </div>
@@ -85,6 +84,7 @@ TimeSlotCard.propTypes = {
     status: PropTypes.string.isRequired,
     maxCapacity: PropTypes.number.isRequired,
     currentBookings: PropTypes.number.isRequired,
+    booked: PropTypes.bool.isRequired,
   }).isRequired,
   isSelected: PropTypes.bool.isRequired,
   onSelect: PropTypes.func.isRequired,
@@ -132,18 +132,55 @@ DateCard.propTypes = {
 
 DateCard.displayName = "DateCard";
 
-const DateTimeSelector = ({ selectedPsychologist = null, setFormData }) => {
+const DateTimeSelector = ({
+  timeSlots = [],
+  loading = false,
+  setFormData,
+  formData,
+}) => {
   // State management
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [message, setMessage] = useState(null);
   const [availableDates, setAvailableDates] = useState([]);
   const [activeTabKey, setActiveTabKey] = useState("thisWeek");
 
-  // Get API function from store
-  const { getTimeSlots } = usePsychologistStore();
+  // Update availableSlots when timeSlots prop changes
+  useEffect(() => {
+    if (timeSlots && timeSlots.length > 0) {
+      // Filter out slots with dates before today
+      const today = dayjs().startOf("day");
+      const futureSlots = timeSlots.filter((slot) => {
+        const slotDate = dayjs(slot.slotDate);
+
+        // If it's today, also check if the slot time is in the future
+        if (slotDate.isSame(today, "day")) {
+          const slotHour = parseInt(slot.startTime.split(":")[0], 10);
+          const slotMinute = parseInt(slot.startTime.split(":")[1], 10);
+          const currentHour = dayjs().hour();
+          const currentMinute = dayjs().minute();
+
+          // Compare hours and minutes to determine if the slot is in the future
+          return (
+            slotHour > currentHour ||
+            (slotHour === currentHour && slotMinute > currentMinute)
+          );
+        }
+
+        // For future dates, include all slots
+        return slotDate.isAfter(today);
+      });
+
+      setAvailableSlots(futureSlots);
+      setMessage(
+        futureSlots.length > 0 ? null : "No future time slots available."
+      );
+    } else {
+      setAvailableSlots([]);
+      setMessage("No time slots found.");
+    }
+  }, [timeSlots]);
 
   // Group time slots by date and period
   const groupedTimeSlots = useMemo(() => {
@@ -194,11 +231,16 @@ const DateTimeSelector = ({ selectedPsychologist = null, setFormData }) => {
       const uniqueDates = [
         ...new Set(availableSlots.map((slot) => slot.slotDate)),
       ];
-      setAvailableDates(uniqueDates.map((date) => dayjs(date)));
+
+      // Sort dates chronologically
+      uniqueDates.sort((a, b) => dayjs(a).diff(dayjs(b)));
+
+      const dayJsDates = uniqueDates.map((date) => dayjs(date));
+      setAvailableDates(dayJsDates);
 
       // Set active tab based on available dates
-      if (uniqueDates.length > 0) {
-        const firstDate = dayjs(uniqueDates[0]);
+      if (dayJsDates.length > 0) {
+        const firstDate = dayJsDates[0];
         const today = dayjs();
         const endOfThisWeek = today.endOf("week");
 
@@ -207,80 +249,27 @@ const DateTimeSelector = ({ selectedPsychologist = null, setFormData }) => {
         } else {
           setActiveTabKey("thisWeek");
         }
+
+        // Set selected date to the first available date
+        setSelectedDate(firstDate);
       }
+    } else {
+      setAvailableDates([]);
     }
   }, [availableSlots]);
 
-  // Reset state when psychologist changes
+  // Reset component when formData is reset
   useEffect(() => {
-    setSelectedDate(dayjs());
-    setSelectedTimeSlot(null);
-    setFormData((prev) => ({
-      ...prev,
-      timeSlotId: null,
-    }));
-
-    if (selectedPsychologist) {
-      fetchSlots();
-    } else {
+    if (!formData.psychologist && !formData.timeSlotId) {
+      // Reset all internal state
+      setSelectedDate(dayjs());
+      setSelectedTimeSlot(null);
       setAvailableSlots([]);
       setMessage(null);
       setAvailableDates([]);
+      setActiveTabKey("thisWeek");
     }
-  }, [selectedPsychologist]);
-
-  // Optimized fetch slots function
-  const fetchSlots = useCallback(async () => {
-    if (!selectedPsychologist) {
-      setAvailableSlots([]);
-      return;
-    }
-
-    setIsLoading(true);
-    setMessage(null);
-
-    try {
-      // Fetch all time slots for the psychologist
-      const data = await getTimeSlots(selectedPsychologist);
-
-      if (data?.length) {
-        setAvailableSlots(data);
-
-        // Find first available slot and set as selected date
-        const availableSlot = data.find((slot) => slot.status === "AVAILABLE");
-        if (availableSlot) {
-          const firstDate = dayjs(availableSlot.slotDate);
-          setSelectedDate(firstDate);
-        } else {
-          setSelectedDate(dayjs(data[0].slotDate));
-        }
-      } else {
-        setAvailableSlots([]);
-        setMessage(message || "No time slots found.");
-      }
-    } catch (error) {
-      console.error("Failed to fetch timeSlots:", error);
-      setAvailableSlots([]);
-      setMessage("Error loading time slots.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [selectedPsychologist, getTimeSlots]);
-
-  // Ensure fetchSlots is only called when selectedPsychologist changes and is not null
-  useEffect(() => {
-    if (selectedPsychologist) {
-      fetchSlots();
-    } else {
-      setAvailableSlots([]);
-      setMessage(null);
-      setSelectedTimeSlot(null);
-      setFormData((prev) => ({
-        ...prev,
-        timeSlotId: null,
-      }));
-    }
-  }, [selectedPsychologist, fetchSlots, setFormData]);
+  }, [formData]);
 
   // Handle date selection
   const handleDateSelection = useCallback(
@@ -399,19 +388,24 @@ const DateTimeSelector = ({ selectedPsychologist = null, setFormData }) => {
     return availableSlots.find((slot) => slot.timeSlotId === selectedTimeSlot);
   }, [selectedTimeSlot, availableSlots]);
 
+  // Check if psychologist is selected
+  const isPsychologistSelected = useMemo(() => {
+    return formData && formData.psychologist !== "";
+  }, [formData]);
+
   return (
     <div className="p-5">
       <Text strong className="block text-base mb-4">
         Appointment Time<span className="text-red-500">*</span>
       </Text>
 
-      {!selectedPsychologist ? (
+      {!isPsychologistSelected ? (
         <div className="bg-gray-50 p-6 rounded-lg text-center">
           <Text className="text-gray-500">
             Please select a psychologist first to view available time slots.
           </Text>
         </div>
-      ) : isLoading ? (
+      ) : loading ? (
         <div className="w-full flex flex-col justify-center items-center p-8">
           <Spin size="large" />
           <Text className="mt-3 text-gray-500">
@@ -559,8 +553,10 @@ const DateTimeSelector = ({ selectedPsychologist = null, setFormData }) => {
 };
 
 DateTimeSelector.propTypes = {
-  selectedPsychologist: PropTypes.string,
+  timeSlots: PropTypes.array.isRequired,
+  loading: PropTypes.bool.isRequired,
   setFormData: PropTypes.func.isRequired,
+  formData: PropTypes.object.isRequired,
 };
 
 export default DateTimeSelector;

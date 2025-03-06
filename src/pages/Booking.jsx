@@ -52,10 +52,8 @@ SpecializationSelect.displayName = "SpecializationSelect";
 
 const PsychologistSelect = memo(
   ({ psychologists, selectedPsychologist, onChange, error, disabled }) => (
-    <div>
-      <label
-        htmlFor="psychologist"
-        className="block text-base font-medium text-gray-700 mb-4">
+    <div className="flex gap-3 items-center justify-between">
+      <label htmlFor="psychologist" className="text-sm">
         Select Psychologist<span className="text-red-500">*</span>
       </label>
       <select
@@ -65,7 +63,7 @@ const PsychologistSelect = memo(
         value={selectedPsychologist}
         onChange={onChange}
         disabled={disabled}
-        className={`mt-1 block w-full rounded-md shadow-sm focus:border-custom-green focus:ring-custom-green ${
+        className={`h-10 flex-1 rounded-md shadow-sm focus:border-custom-green focus:ring-custom-green ${
           error ? "border-red-500" : "border-gray-300"
         } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}>
         <option value="" className="text-gray-400">
@@ -163,10 +161,13 @@ const Booking = () => {
   const { user } = useAuthStore();
   const { loading: bookingLoading, CreateBooking } = useAppointmentStore();
   const {
+    timeSlots,
+    getTimeSlots,
     psychologists,
-    loading: psychologistsLoading,
     fetchPsychologists,
+    loading: psychologistsLoading,
   } = usePsychologistStore();
+  const [timeSlotsLoading, setTimeSlotsLoading] = useState(false);
 
   // Use refs to track mounted state
   const isMountedRef = useRef(true);
@@ -298,47 +299,35 @@ const Booking = () => {
   }, [navigate]);
 
   // Handle form submission - optimized with error handling
-  const handleSubmit = useCallback(
-    async (e) => {
-      if (e) e.preventDefault();
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
 
-      if (!validateFormData()) {
-        return;
+    if (!validateFormData()) {
+      return;
+    }
+
+    try {
+      const bookingData = {
+        userId: user?.userId,
+        timeSlotId: formData.timeSlotId,
+        note: formData.reason || "No notes provided",
+      };
+
+      await CreateBooking(bookingData);
+
+      showSuccessNotification();
+      resetFormData();
+    } catch (error) {
+      if (isMountedRef.current) {
+        notification.error({
+          message: "Booking Failed",
+          description:
+            error.message || "Failed to create booking. Please try again.",
+        });
+        console.error("Booking error:", error);
       }
-
-      try {
-        const bookingData = {
-          userId: user?.userId,
-          timeSlotId: formData.timeSlotId,
-          note: formData.reason || "No notes provided",
-        };
-
-        await CreateBooking(bookingData);
-
-        if (isMountedRef.current) {
-          showSuccessNotification();
-          resetFormData();
-        }
-      } catch (error) {
-        if (isMountedRef.current) {
-          notification.error({
-            message: "Booking Failed",
-            description:
-              error.message || "Failed to create booking. Please try again.",
-          });
-          console.error("Booking error:", error);
-        }
-      }
-    },
-    [
-      formData,
-      user,
-      CreateBooking,
-      validateFormData,
-      showSuccessNotification,
-      resetFormData,
-    ]
-  );
+    }
+  };
 
   // Optimized way to check form validity
   useEffect(() => {
@@ -357,7 +346,7 @@ const Booking = () => {
 
   // Handle form field changes with optimized batch updates
   const handleChange = useCallback(
-    (e) => {
+    async (e) => {
       const { name, value, type, checked } = e.target;
 
       if (name === "specialization") {
@@ -366,6 +355,7 @@ const Booking = () => {
           ...prev,
           [name]: value,
           psychologist: "", // Reset psychologist when specialization changes
+          timeSlotId: null, // Reset timeSlotId when specialization changes
         }));
 
         // Clear related errors
@@ -373,7 +363,33 @@ const Booking = () => {
           ...prev,
           specialization: undefined,
           psychologist: undefined,
+          timeSlotId: undefined,
         }));
+      } else if (name === "psychologist") {
+        // Update form data with selected psychologist
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          timeSlotId: null, // Reset timeSlotId when psychologist changes
+        }));
+
+        setTimeSlotsLoading(true);
+
+        // Clear related error
+        if (errors[name]) {
+          setErrors((prev) => ({
+            ...prev,
+            [name]: undefined,
+            timeSlotId: undefined,
+          }));
+        }
+
+        // Fetch time slots for the selected psychologist
+        if (value) {
+          await getTimeSlots(value); // Call API to get time slots by psychologistId
+        }
+
+        setTimeSlotsLoading(false);
       } else {
         setFormData((prev) => ({
           ...prev,
@@ -389,14 +405,14 @@ const Booking = () => {
         }
       }
     },
-    [errors]
+    [errors, getTimeSlots] // Add getTimeSlots to dependencies
   );
 
   // Handle cancel button
-  const handleCancel = useCallback(() => {
+  const handleCancel = () => {
     resetFormData();
     navigate(-1);
-  }, [resetFormData, navigate]);
+  };
 
   // Combined loading state
   const isLoading = psychologistsLoading;
@@ -461,7 +477,8 @@ const Booking = () => {
 
               <div className="w-3/5 flex-1">
                 <DateTimeSelector
-                  selectedPsychologist={formData.psychologist}
+                  timeSlots={timeSlots}
+                  loading={timeSlotsLoading}
                   setFormData={setFormData}
                   formData={formData}
                 />
