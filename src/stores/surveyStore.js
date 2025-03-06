@@ -132,40 +132,34 @@ export const useSurveyStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication required");
+      }
 
-      // Use the new endpoint structure with query parameters
-      const { data } = await api.get(
-        `/surveys/results?surveyId=${surveyId}&studentId=${studentId}`,
+      const response = await fetch(
+        `https://api.cybriadev.com/api/surveys/results/student?surveyId=${surveyId}&studentId=${studentId}`,
         {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
-      set({
-        selectedSurvey: data,
-        loading: false,
-      });
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          throw new Error("You don't have permission to view these results");
+        }
+        throw new Error(`Error: ${response.status}`);
+      }
 
+      const data = await response.json();
+      console.log("Survey results data:", data);
+      set({ selectedSurvey: data, loading: false });
       return data;
     } catch (error) {
-      console.error("Survey results fetch error details:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
-
-      const errorMessage =
-        error.response?.status === 403
-          ? "You don't have permission to access these results. Please log in again."
-          : error.response?.data?.message ||
-            error.message ||
-            "Failed to fetch survey results";
-
-      set({
-        error: errorMessage,
-        loading: false,
-      });
-      throw new Error(errorMessage);
+      console.error("Error fetching survey results:", error);
+      set({ error: error.message, loading: false });
+      throw error;
     }
   },
 

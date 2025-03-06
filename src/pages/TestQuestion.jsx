@@ -129,13 +129,8 @@ const TestQuestion = () => {
 
       console.log("Survey submission result:", result);
 
-      // Navigate to results page with the score data
-      navigate(`/test-result/${test.id}`, {
-        state: {
-          score: result.score,
-          // status: "COMPLETED",
-        },
-      });
+      // Navigate to results page with the survey ID in the URL
+      navigate(`/test-result/${test.id}`);
     } catch (error) {
       console.error("Failed to submit survey:", error);
       message.error("Failed to submit your answers. Please try again.");
