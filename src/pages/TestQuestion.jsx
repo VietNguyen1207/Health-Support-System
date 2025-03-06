@@ -1,12 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Radio, Button, Progress, Card, Spin, message } from "antd";
+import {
+  Radio,
+  Button,
+  Progress,
+  Card,
+  Spin,
+  message,
+  Typography,
+  Space,
+  Divider,
+} from "antd";
+import {
+  ArrowLeftOutlined,
+  ArrowRightOutlined,
+  CheckCircleOutlined,
+  QuestionCircleOutlined,
+  FileTextOutlined,
+} from "@ant-design/icons";
 import { useSurveyStore } from "../stores/surveyStore";
+import { useAuthStore } from "../stores/authStore";
+
+const { Title, Text, Paragraph } = Typography;
 
 const TestQuestion = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const test = location.state?.test;
+  const { user } = useAuthStore();
 
   const {
     questions,
@@ -19,7 +40,6 @@ const TestQuestion = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [selectedOption, setSelectedOption] = useState(null);
-  const [user, setUser] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Fetch questions when component mounts
@@ -79,30 +99,41 @@ const TestQuestion = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user?.id || !test?.id) return;
+    if (!user?.studentId || !test?.id) {
+      message.error("User or test information is missing.");
+      return;
+    }
 
     // Check if all questions have been answered
-    const unansweredQuestions = answers.filter((answer) => !answer.answerId);
-    if (unansweredQuestions.length > 0) {
-      // Show a warning that not all questions are answered
-      // You could use Ant Design's message or notification component here
+    const unansweredCount = questions.length - Object.keys(answers).length;
+    if (unansweredCount > 0) {
+      message.warning(
+        `You have ${unansweredCount} unanswered question(s). Please answer all questions before submitting.`
+      );
       return;
     }
 
     setSubmitting(true);
     try {
-      // Submit just the answer IDs
-      const result = await submitSurveyAnswers(test.id, user.id, answers);
+      // Extract just the answer IDs for submission
+      const answerIDs = Object.values(answers).map((answer) => answer.answerID);
 
-      // Navigate to results page with the score data
-      navigate(`/test-result/${test.id}`, {
-        state: {
-          score: result.score,
-          status: result.status,
-        },
-      });
+      console.log("Submitting answer IDs:", answerIDs);
+
+      // Submit the answer IDs
+      const result = await submitSurveyAnswers(
+        test.id,
+        user.studentId,
+        answerIDs
+      );
+
+      console.log("Survey submission result:", result);
+
+      // Navigate to results page with the survey ID in the URL
+      navigate(`/test-result/${test.id}`);
     } catch (error) {
       console.error("Failed to submit survey:", error);
+      message.error("Failed to submit your answers. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -112,8 +143,15 @@ const TestQuestion = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Spin size="large" />
-          <p className="mt-4 text-gray-600">Loading questions...</p>
+          <div className="mb-4">
+            <Spin size="large" />
+          </div>
+          <Title level={4} className="text-gray-700">
+            Loading Assessment
+          </Title>
+          <Paragraph className="text-gray-500">
+            Please wait while we prepare your questions...
+          </Paragraph>
         </div>
       </div>
     );
@@ -122,16 +160,24 @@ const TestQuestion = () => {
   if (!questions || questions.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-lg text-gray-800">No questions available.</p>
+        <Card className="shadow-md rounded-lg text-center p-8 max-w-md">
+          <FileTextOutlined className="text-5xl text-primary-green mb-4" />
+          <Title level={3} className="mb-2">
+            No Questions Available
+          </Title>
+          <Paragraph className="text-gray-500 mb-6">
+            We couldn't find any questions for this assessment.
+          </Paragraph>
           <Button
             type="primary"
             onClick={() => navigate("/test")}
-            className="mt-4 bg-custom-green hover:bg-custom-green/90"
+            className="bg-primary-green hover:bg-primary-green/90"
+            size="large"
+            icon={<ArrowLeftOutlined />}
           >
             Back to Tests
           </Button>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -142,49 +188,86 @@ const TestQuestion = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         {/* Test Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {test?.title || "Psychological Assessment"}
-          </h1>
-          <p className="text-gray-600">
-            {test?.description ||
-              "Please answer each question honestly based on your experiences over the last 2 weeks."}
-          </p>
-        </div>
+        <Card className="shadow-sm mb-8 border-t-4 border-t-primary-green">
+          <div className="flex items-start">
+            <div className="mr-4">
+              <div className="bg-primary-green/10 p-3 rounded-full">
+                <FileTextOutlined className="text-2xl text-primary-green" />
+              </div>
+            </div>
+            <div>
+              <Title level={3} className="mb-1">
+                {test?.title || "Psychological Assessment"}
+              </Title>
+              <Paragraph className="text-gray-500">
+                {test?.description ||
+                  "Please answer each question honestly based on your experiences over the last 2 weeks."}
+              </Paragraph>
+            </div>
+          </div>
+        </Card>
 
         {/* Progress Bar */}
-        <div className="mb-8">
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <Text className="text-gray-600">
+              Question {currentQuestion + 1} of {questions.length}
+            </Text>
+            <Text className="text-primary-green font-medium">
+              {Math.round(progress)}% Complete
+            </Text>
+          </div>
           <Progress
             percent={progress}
             showInfo={false}
             strokeColor="#4a7c59"
             trailColor="#e5e7eb"
+            strokeWidth={10}
+            className="rounded-full overflow-hidden"
           />
-          <p className="text-center text-sm text-gray-500 mt-2">
-            Question {currentQuestion + 1} of {questions.length}
-          </p>
         </div>
 
         {/* Question Card */}
-        <Card className="shadow-md rounded-lg mb-8">
-          <h2 className="text-lg font-medium text-gray-900 mb-6">
-            {questions[currentQuestion].questionText}
-          </h2>
+        <Card
+          className="shadow-md rounded-lg mb-8 hover:shadow-lg transition-shadow duration-300"
+          bordered={false}
+        >
+          <div className="flex items-start mb-6">
+            <div className="mr-4 mt-1">
+              <div className="bg-primary-green/10 p-2 rounded-full">
+                <QuestionCircleOutlined className="text-xl text-primary-green" />
+              </div>
+            </div>
+            <Title level={4} className="text-gray-800 mb-0">
+              {questions[currentQuestion].questionText}
+            </Title>
+          </div>
+
+          <Divider className="my-4" />
 
           <Radio.Group
             onChange={(e) => handleAnswer(e.target.value)}
             value={selectedOption}
-            className="flex flex-col space-y-4"
+            className="w-full"
           >
-            {questions[currentQuestion].questionOptions.map((option) => (
-              <Radio
-                key={option.answerID}
-                value={option.value}
-                className="text-gray-700 py-2"
-              >
-                {option.label}
-              </Radio>
-            ))}
+            <Space direction="vertical" className="w-full">
+              {questions[currentQuestion].questionOptions.map((option) => (
+                <Radio.Button
+                  key={option.answerID}
+                  value={option.value}
+                  className="w-full text-left py-3 px-4 border rounded-lg mb-2 hover:border-primary-green transition-colors"
+                  style={{
+                    height: "auto",
+                    backgroundColor:
+                      selectedOption === option.value ? "#f0f9f1" : "white",
+                    borderColor:
+                      selectedOption === option.value ? "#4a7c59" : "#d9d9d9",
+                  }}
+                >
+                  {option.label}
+                </Radio.Button>
+              ))}
+            </Space>
           </Radio.Group>
         </Card>
 
@@ -193,7 +276,9 @@ const TestQuestion = () => {
           <Button
             onClick={handlePrevious}
             disabled={currentQuestion === 0}
-            className="text-gray-600"
+            icon={<ArrowLeftOutlined />}
+            size="large"
+            className="border-gray-300 text-gray-600"
           >
             Previous
           </Button>
@@ -202,21 +287,46 @@ const TestQuestion = () => {
             <Button
               type="primary"
               onClick={handleSubmit}
-              disabled={!answers[currentQuestion]}
-              className="bg-custom-green hover:bg-custom-green/90"
+              disabled={!answers[currentQuestion] || submitting}
+              loading={submitting}
+              icon={<CheckCircleOutlined />}
+              size="large"
+              className="bg-primary-green hover:bg-primary-green/90"
             >
-              Submit
+              Submit Assessment
             </Button>
           ) : (
             <Button
               type="primary"
               onClick={handleNext}
               disabled={!answers[currentQuestion]}
+              icon={<ArrowRightOutlined />}
+              size="large"
               className="bg-primary-green hover:bg-primary-green/90"
             >
-              Next
+              Next Question
             </Button>
           )}
+        </div>
+
+        {/* Question Navigation Dots */}
+        <div className="mt-8 flex justify-center">
+          <div className="flex flex-wrap justify-center gap-2 max-w-md">
+            {questions.map((_, index) => (
+              <div
+                key={index}
+                className={`w-3 h-3 rounded-full cursor-pointer transition-all duration-300 ${
+                  index === currentQuestion
+                    ? "bg-primary-green scale-125"
+                    : answers[index]
+                    ? "bg-primary-green/40"
+                    : "bg-gray-300"
+                }`}
+                onClick={() => setCurrentQuestion(index)}
+                title={`Question ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
