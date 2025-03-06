@@ -1,64 +1,104 @@
-import React, { useEffect, useState } from "react";
-import { useUserStore } from "../../stores/userStore";
-import { useAuthStore } from "../../stores/authStore";
+import React, { useState, useEffect } from "react";
 import {
+  Tabs,
   Table,
   Tag,
-  Card,
-  Typography,
+  Button,
   Spin,
   Empty,
-  Tabs,
-  Button,
   Modal,
-  Result,
-  Skeleton,
+  Card,
+  Divider,
+  Typography,
+  notification,
+  Alert,
 } from "antd";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
   UserOutlined,
-  FileTextOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  InfoCircleOutlined,
   HistoryOutlined,
-  EnvironmentOutlined,
-  PhoneOutlined,
 } from "@ant-design/icons";
+import { useAppointmentStore } from "../../stores/appointmentStore";
+import { useAuthStore } from "../../stores/authStore";
 import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
 export default function AppointmentRecord() {
-  const { getUserWithAppointments, loading } = useUserStore();
   const { user } = useAuthStore();
-  const [appointments, setAppointments] = useState([]);
-  const [filteredAppointments, setFilteredAppointments] = useState([]);
+  const { fetchAppointmentRecords, loading, error, appointments } =
+    useAppointmentStore();
+
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
 
+  // Fetch appointments when component mounts
   useEffect(() => {
-    const fetchAppointments = async () => {
-      if (user?.userId) {
-        try {
-          const userData = await getUserWithAppointments(user.userId);
-          if (userData?.appointmentsRecord) {
-            // Filter only completed and cancelled appointments
-            const recordedAppointments = userData.appointmentsRecord.filter(
-              (app) => app.status === "COMPLETED" || app.status === "CANCELLED"
-            );
-            setAppointments(recordedAppointments);
-            setFilteredAppointments(recordedAppointments);
-          }
-        } catch (error) {
-          console.error("Failed to fetch appointments:", error);
-        }
-      }
-    };
+    if (user) {
+      loadAppointments();
+    }
+  }, [user]);
 
-    fetchAppointments();
-  }, [getUserWithAppointments, user]);
+  const loadAppointments = async () => {
+    try {
+      // Determine user role and ID
+      const userRole = user?.role?.toLowerCase() || "";
+
+      if (userRole === "student") {
+        if (!user?.studentId) {
+          console.error("Missing student ID:", user);
+          notification.error({
+            message: "Missing Information",
+            description: "Student ID is missing. Please contact support.",
+          });
+          return;
+        }
+
+        console.log("Loading appointments for student:", user.studentId);
+        await fetchAppointmentRecords(user.studentId, "student");
+      } else if (userRole === "psychologist") {
+        if (!user?.psychologistId) {
+          console.error("Missing psychologist ID:", user);
+          notification.error({
+            message: "Missing Information",
+            description: "Psychologist ID is missing. Please contact support.",
+          });
+          return;
+        }
+
+        console.log(
+          "Loading appointments for psychologist:",
+          user.psychologistId
+        );
+        await fetchAppointmentRecords(user.psychologistId, "psychologist");
+      } else {
+        console.error("Unsupported user role:", userRole);
+        notification.error({
+          message: "Unsupported Role",
+          description:
+            "Your user role is not supported for appointment records.",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load appointments:", error);
+      notification.error({
+        message: "Failed to load appointments",
+        description: error.message || "An unexpected error occurred",
+      });
+    }
+  };
+
+  // Filter appointments based on active tab
+  const filteredAppointments = appointments.filter((appointment) => {
+    if (activeTab === "all") return true;
+    return appointment.status === activeTab;
+  });
 
   const getStatusTag = (status) => {
     switch (status) {
@@ -82,35 +122,34 @@ export default function AppointmentRecord() {
   const columns = [
     {
       title: "Date",
-      dataIndex: "createdAt",
-      key: "date",
-      render: (text) => dayjs(text).format("MMM DD, YYYY"),
-      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+      dataIndex: "slotDate",
+      key: "slotDate",
+      render: (text) => (
+        <div className="flex items-center">
+          <CalendarOutlined className="mr-2 text-primary-green" />
+          {dayjs(text).format("MMM DD, YYYY")}
+        </div>
+      ),
+      sorter: (a, b) => new Date(a.slotDate) - new Date(b.slotDate),
     },
     {
       title: "Time",
       key: "time",
       render: (_, record) => (
-        <span>
-          {record.checkInTime
-            ? dayjs(record.checkInTime).format("hh:mm A")
-            : "N/A"}
-          {record.checkOutTime &&
-            ` - ${dayjs(record.checkOutTime).format("hh:mm A")}`}
-        </span>
+        <div className="flex items-center">
+          <ClockCircleOutlined className="mr-2 text-primary-green" />
+          {record.startTime} - {record.endTime}
+        </div>
       ),
     },
     {
       title: "Psychologist",
-      dataIndex: ["psychologistResponse", "name"],
-      key: "psychologist",
-      render: (text, record) => (
+      dataIndex: "psychologistID",
+      key: "psychologistID",
+      render: (text) => (
         <div className="flex items-center">
-          <UserOutlined className="mr-2" />
-          <span>{text}</span>
-          <Text type="secondary" className="ml-2">
-            ({record.psychologistResponse.departmentName})
-          </Text>
+          <UserOutlined className="mr-2 text-primary-green" />
+          {text}
         </div>
       ),
     },
@@ -119,11 +158,6 @@ export default function AppointmentRecord() {
       dataIndex: "status",
       key: "status",
       render: (status) => getStatusTag(status),
-      filters: [
-        { text: "Completed", value: "COMPLETED" },
-        { text: "Cancelled", value: "CANCELLED" },
-      ],
-      onFilter: (value, record) => record.status === value,
     },
     {
       title: "Actions",
@@ -143,8 +177,7 @@ export default function AppointmentRecord() {
   ];
 
   const renderAppointmentDetails = () => {
-    if (!selectedAppointment)
-      return <Skeleton active paragraph={{ rows: 6 }} />;
+    if (!selectedAppointment) return null;
 
     return (
       <div className="space-y-6">
@@ -154,159 +187,81 @@ export default function AppointmentRecord() {
               Appointment Record
             </Title>
             <Text type="secondary">
-              {dayjs(selectedAppointment.createdAt).format("MMMM DD, YYYY")}
+              {dayjs(selectedAppointment.slotDate).format("MMMM DD, YYYY")}
             </Text>
           </div>
           {getStatusTag(selectedAppointment.status)}
         </div>
 
+        <Divider />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Appointment Info */}
-          <Card
-            title={
-              <div className="flex items-center">
-                <CalendarOutlined className="mr-2 text-primary-green" />
-                <span>Appointment Details</span>
-              </div>
-            }
-            className="shadow-sm hover:shadow-md transition-shadow duration-300"
-          >
-            <div className="space-y-4">
-              <div className="flex justify-between">
-                <Text type="secondary">Appointment ID:</Text>
-                <Text copyable>{selectedAppointment.appointmentID}</Text>
-              </div>
-              <div className="flex justify-between">
-                <Text type="secondary">Date:</Text>
-                <Text>
-                  {dayjs(selectedAppointment.createdAt).format("MMMM DD, YYYY")}
-                </Text>
-              </div>
-              <div className="flex justify-between">
-                <Text type="secondary">Status:</Text>
-                {getStatusTag(selectedAppointment.status)}
-              </div>
-              {selectedAppointment.checkInTime && (
-                <div className="flex justify-between">
-                  <Text type="secondary">Check-in Time:</Text>
-                  <Text>
-                    {dayjs(selectedAppointment.checkInTime).format("hh:mm A")}
-                  </Text>
-                </div>
-              )}
-              {selectedAppointment.checkOutTime && (
-                <div className="flex justify-between">
-                  <Text type="secondary">Check-out Time:</Text>
-                  <Text>
-                    {dayjs(selectedAppointment.checkOutTime).format("hh:mm A")}
-                  </Text>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <Text type="secondary">Duration:</Text>
-                <Text>
-                  {selectedAppointment.checkInTime &&
-                  selectedAppointment.checkOutTime
-                    ? `${Math.round(
-                        (new Date(selectedAppointment.checkOutTime) -
-                          new Date(selectedAppointment.checkInTime)) /
-                          60000
-                      )} minutes`
-                    : "N/A"}
-                </Text>
-              </div>
-            </div>
-          </Card>
-
-          {/* Psychologist Info */}
-          <Card
-            title={
-              <div className="flex items-center">
-                <UserOutlined className="mr-2 text-primary-green" />
-                <span>Psychologist Information</span>
-              </div>
-            }
-            className="shadow-sm hover:shadow-md transition-shadow duration-300"
-          >
-            <div className="space-y-4">
-              <div className="flex justify-between">
-                <Text type="secondary">Name:</Text>
-                <Text>{selectedAppointment.psychologistResponse.name}</Text>
-              </div>
-              <div className="flex justify-between">
-                <Text type="secondary">Department:</Text>
-                <Text>
-                  {selectedAppointment.psychologistResponse.departmentName}
-                </Text>
-              </div>
-              <div className="flex justify-between">
-                <Text type="secondary">Experience:</Text>
-                <Text>
-                  {selectedAppointment.psychologistResponse.yearsOfExperience}{" "}
-                  years
-                </Text>
-              </div>
-              <div className="flex justify-between">
-                <Text type="secondary">Status:</Text>
-                <Tag
-                  color={
-                    selectedAppointment.psychologistResponse.status === "ACTIVE"
-                      ? "green"
-                      : "orange"
-                  }
-                >
-                  {selectedAppointment.psychologistResponse.status.replace(
-                    "_",
-                    " "
-                  )}
-                </Tag>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Notes Section (if available) */}
-        {selectedAppointment.psychologistNotes ? (
-          <Card
-            title={
-              <div className="flex items-center">
-                <FileTextOutlined className="mr-2 text-primary-green" />
-                <span>Session Notes</span>
-              </div>
-            }
-            className="shadow-sm hover:shadow-md transition-shadow duration-300"
-          >
-            <div className="p-4 bg-gray-50 rounded-md">
-              <Text>{selectedAppointment.psychologistNotes}</Text>
-            </div>
-          </Card>
-        ) : selectedAppointment.status === "COMPLETED" ? (
-          <Card
-            title={
-              <div className="flex items-center">
-                <FileTextOutlined className="mr-2 text-primary-green" />
-                <span>Session Notes</span>
-              </div>
-            }
-            className="shadow-sm hover:shadow-md transition-shadow duration-300"
-          >
-            <div className="p-4 bg-gray-50 rounded-md text-center">
-              <Text type="secondary">
-                No session notes were provided for this appointment.
+          <div>
+            <Text type="secondary">Appointment ID</Text>
+            <div className="flex items-center mt-1">
+              <Text strong copyable>
+                {selectedAppointment.appointmentID}
               </Text>
             </div>
-          </Card>
-        ) : null}
+          </div>
+
+          <div>
+            <Text type="secondary">Date & Time</Text>
+            <div className="flex items-center mt-1">
+              <CalendarOutlined className="mr-2 text-primary-green" />
+              <Text strong>
+                {dayjs(selectedAppointment.slotDate).format("MMMM DD, YYYY")} (
+                {selectedAppointment.startTime} - {selectedAppointment.endTime})
+              </Text>
+            </div>
+          </div>
+
+          <div>
+            <Text type="secondary">Psychologist ID</Text>
+            <div className="flex items-center mt-1">
+              <UserOutlined className="mr-2 text-primary-green" />
+              <Text strong>{selectedAppointment.psychologistID}</Text>
+            </div>
+          </div>
+
+          <div>
+            <Text type="secondary">Student ID</Text>
+            <div className="flex items-center mt-1">
+              <UserOutlined className="mr-2 text-primary-green" />
+              <Text strong>{selectedAppointment.studentID}</Text>
+            </div>
+          </div>
+        </div>
+
+        <Divider />
+
+        <div>
+          <Text type="secondary">Created At</Text>
+          <div className="flex items-center mt-1">
+            <InfoCircleOutlined className="mr-2 text-primary-green" />
+            <Text>
+              {dayjs(selectedAppointment.createdAt).format(
+                "MMMM DD, YYYY HH:mm"
+              )}
+            </Text>
+          </div>
+        </div>
+
+        {selectedAppointment.updatedAt && (
+          <div className="mt-4">
+            <Text type="secondary">Last Updated</Text>
+            <div className="flex items-center mt-1">
+              <InfoCircleOutlined className="mr-2 text-primary-green" />
+              <Text>
+                {dayjs(selectedAppointment.updatedAt).format(
+                  "MMMM DD, YYYY HH:mm"
+                )}
+              </Text>
+            </div>
+          </div>
+        )}
       </div>
     );
-  };
-
-  const handleTabChange = (key) => {
-    if (key === "all") {
-      setFilteredAppointments(appointments);
-    } else {
-      setFilteredAppointments(appointments.filter((app) => app.status === key));
-    }
   };
 
   return (
@@ -327,78 +282,49 @@ export default function AppointmentRecord() {
         </div>
       </div>
 
-      {loading ? (
-        <Card className="shadow-sm">
-          <div className="py-10">
-            <div className="flex justify-center mb-6">
-              <Spin size="large" />
-            </div>
-            <div className="text-center">
-              <Text type="secondary">Loading your appointment records...</Text>
-            </div>
-            <div className="mt-8">
-              <Skeleton active paragraph={{ rows: 6 }} />
-            </div>
-          </div>
-        </Card>
-      ) : appointments.length > 0 ? (
-        <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
-          <Tabs
-            defaultActiveKey="all"
-            onChange={handleTabChange}
-            tabBarExtraContent={
-              <div className="flex items-center">
-                <HistoryOutlined className="mr-2" />
-                <Text type="secondary">{appointments.length} Records</Text>
-              </div>
-            }
-          >
-            <TabPane tab="All Records" key="all">
-              <Table
-                columns={columns}
-                dataSource={filteredAppointments}
-                rowKey="appointmentID"
-                pagination={{ pageSize: 10 }}
-                rowClassName="hover:bg-gray-50"
-                loading={loading}
-              />
-            </TabPane>
-            <TabPane tab="Completed" key="COMPLETED">
-              <Table
-                columns={columns}
-                dataSource={filteredAppointments}
-                rowKey="appointmentID"
-                pagination={{ pageSize: 10 }}
-                rowClassName="hover:bg-gray-50"
-                loading={loading}
-              />
-            </TabPane>
-            <TabPane tab="Cancelled" key="CANCELLED">
-              <Table
-                columns={columns}
-                dataSource={filteredAppointments}
-                rowKey="appointmentID"
-                pagination={{ pageSize: 10 }}
-                rowClassName="hover:bg-gray-50"
-                loading={loading}
-              />
-            </TabPane>
-          </Tabs>
-        </Card>
-      ) : (
-        <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
-          <Result
-            icon={<HistoryOutlined style={{ color: "#1890ff" }} />}
-            title="No Appointment Records"
-            subTitle="You don't have any completed or cancelled appointments yet."
-            extra={
-              <Button type="primary" href="/student/appointments">
-                Book an Appointment
-              </Button>
-            }
-          />
-        </Card>
+      {user?.role?.toLowerCase() === "student" && !user?.studentId && (
+        <Alert
+          message="Missing Student ID"
+          description="Your student ID is missing. Please update your profile or contact support."
+          type="warning"
+          showIcon
+          className="mb-6"
+        />
       )}
+
+      {user?.role?.toLowerCase() === "psychologist" &&
+        !user?.psychologistId && (
+          <Alert
+            message="Missing Psychologist ID"
+            description="Your psychologist ID is missing. Please update your profile or contact support."
+            type="warning"
+            showIcon
+            className="mb-6"
+          />
+        )}
+
+      <Card className="shadow-sm hover:shadow-md transition-shadow duration-300">
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          tabBarExtraContent={
+            <div className="flex items-center">
+              <HistoryOutlined className="mr-2" />
+              <Text type="secondary">{appointments.length} Records</Text>
+            </div>
+          }
+        >
+          <TabPane tab="All Records" key="all">
+            {renderAppointmentTable(filteredAppointments)}
+          </TabPane>
+          <TabPane tab="Completed" key="COMPLETED">
+            {renderAppointmentTable(filteredAppointments)}
+          </TabPane>
+          <TabPane tab="Cancelled" key="CANCELLED">
+            {renderAppointmentTable(filteredAppointments)}
+          </TabPane>
+        </Tabs>
+      </Card>
 
       <Modal
         title={null}
@@ -416,4 +342,48 @@ export default function AppointmentRecord() {
       </Modal>
     </div>
   );
+
+  function renderAppointmentTable(appointments) {
+    if (loading) {
+      return (
+        <div className="py-10">
+          <div className="flex justify-center mb-6">
+            <Spin size="large" />
+          </div>
+          <div className="text-center">
+            <Text type="secondary">Loading your appointment records...</Text>
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="text-center py-8">
+          <Text type="danger">{error}</Text>
+        </div>
+      );
+    }
+
+    if (appointments.length === 0) {
+      return (
+        <Empty
+          description={`No ${
+            activeTab === "all" ? "" : activeTab.toLowerCase()
+          } appointment records found`}
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      );
+    }
+
+    return (
+      <Table
+        columns={columns}
+        dataSource={appointments}
+        rowKey="appointmentID"
+        pagination={{ pageSize: 10 }}
+        rowClassName="hover:bg-gray-50"
+      />
+    );
+  }
 }

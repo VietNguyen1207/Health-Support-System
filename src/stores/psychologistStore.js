@@ -15,7 +15,8 @@ const initialState = {
 const PSYCHOLOGIST_URL = "/psychologists";
 
 const PSYCHOLOGIST_PATH = {
-  CREATE_TIME_SLOT: `${PSYCHOLOGIST_URL}/timeslots/batch`,
+  CREATE_TIME_SLOT: (id) =>
+    `${PSYCHOLOGIST_URL}/timeslots/batch?psychologistId=${id}`,
   GET_TIME_SLOTS: (psychId, date) =>
     `${PSYCHOLOGIST_URL}/timeslots?psychologistId=${psychId}&date=${date}`,
   GET_PSYCHOLOGIST_BY_DEPARTMENT: (departmentId) =>
@@ -94,11 +95,10 @@ export const usePsychologistStore = create((set, get) => {
       }
     },
 
-    createTimeSlot: async (psychId, { slotDate, defaultSlotIds }) => {
+    createTimeSlot: async (psyId, { slotDate, defaultSlotIds }) => {
       set({ loading: true, error: null });
       try {
-        const endpoint = PSYCHOLOGIST_PATH.CREATE_TIME_SLOT;
-        await api.post(endpoint, {
+        await api.post(PSYCHOLOGIST_PATH.CREATE_TIME_SLOT(psyId), {
           slotDate,
           defaultSlotIds,
         });
