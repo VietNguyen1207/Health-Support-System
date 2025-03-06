@@ -162,12 +162,12 @@ const Booking = () => {
   const { loading: bookingLoading, CreateBooking } = useAppointmentStore();
   const {
     timeSlots,
-    loading: timeSlotsLoading,
     getTimeSlots,
     psychologists,
     fetchPsychologists,
     loading: psychologistsLoading,
   } = usePsychologistStore();
+  const [timeSlotsLoading, setTimeSlotsLoading] = useState(false);
 
   // Use refs to track mounted state
   const isMountedRef = useRef(true);
@@ -299,47 +299,35 @@ const Booking = () => {
   }, [navigate]);
 
   // Handle form submission - optimized with error handling
-  const handleSubmit = useCallback(
-    async (e) => {
-      if (e) e.preventDefault();
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
 
-      if (!validateFormData()) {
-        return;
+    if (!validateFormData()) {
+      return;
+    }
+
+    try {
+      const bookingData = {
+        userId: user?.userId,
+        timeSlotId: formData.timeSlotId,
+        note: formData.reason || "No notes provided",
+      };
+
+      await CreateBooking(bookingData);
+
+      showSuccessNotification();
+      resetFormData();
+    } catch (error) {
+      if (isMountedRef.current) {
+        notification.error({
+          message: "Booking Failed",
+          description:
+            error.message || "Failed to create booking. Please try again.",
+        });
+        console.error("Booking error:", error);
       }
-
-      try {
-        const bookingData = {
-          userId: user?.userId,
-          timeSlotId: formData.timeSlotId,
-          note: formData.reason || "No notes provided",
-        };
-
-        await CreateBooking(bookingData);
-
-        if (isMountedRef.current) {
-          showSuccessNotification();
-          resetFormData();
-        }
-      } catch (error) {
-        if (isMountedRef.current) {
-          notification.error({
-            message: "Booking Failed",
-            description:
-              error.message || "Failed to create booking. Please try again.",
-          });
-          console.error("Booking error:", error);
-        }
-      }
-    },
-    [
-      formData,
-      user,
-      CreateBooking,
-      validateFormData,
-      showSuccessNotification,
-      resetFormData,
-    ]
-  );
+    }
+  };
 
   // Optimized way to check form validity
   useEffect(() => {
@@ -385,6 +373,8 @@ const Booking = () => {
           timeSlotId: null, // Reset timeSlotId when psychologist changes
         }));
 
+        setTimeSlotsLoading(true);
+
         // Clear related error
         if (errors[name]) {
           setErrors((prev) => ({
@@ -398,6 +388,8 @@ const Booking = () => {
         if (value) {
           await getTimeSlots(value); // Call API to get time slots by psychologistId
         }
+
+        setTimeSlotsLoading(false);
       } else {
         setFormData((prev) => ({
           ...prev,
@@ -417,10 +409,10 @@ const Booking = () => {
   );
 
   // Handle cancel button
-  const handleCancel = useCallback(() => {
+  const handleCancel = () => {
     resetFormData();
     navigate(-1);
-  }, [resetFormData, navigate]);
+  };
 
   // Combined loading state
   const isLoading = psychologistsLoading;
