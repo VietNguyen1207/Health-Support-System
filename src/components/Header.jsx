@@ -21,24 +21,24 @@ const Header = () => {
   const stopPolling = useNotificationStore((state) => state.stopPolling);
   const { getNotifications } = useNotificationStore();
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (user?.userId) await getNotifications(user?.userId);
-  //   };
-  //   fetchData();
-  // }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (user?.userId) await getNotifications(user?.userId);
+    };
+    fetchData();
+  }, []);
 
-  // useEffect(() => {
-  //   if (user?.userId) {
-  //     console.log("Starting polling...");
-  //     startPolling(user.userId);
+  useEffect(() => {
+    if (user?.userId) {
+      console.log("Starting polling...");
+      startPolling(user.userId);
 
-  //     return () => {
-  //       console.log("Cleanup: stopping polling...");
-  //       stopPolling();
-  //     };
-  //   }
-  // }, [user]);
+      return () => {
+        console.log("Cleanup: stopping polling...");
+        stopPolling();
+      };
+    }
+  }, [user]);
 
   const handleLogout = async () => {
     await logout();

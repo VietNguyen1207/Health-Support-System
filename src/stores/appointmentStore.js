@@ -204,7 +204,7 @@ export const useAppointmentStore = create((set) => ({
         queryParams.append("psychologistId", id); // Use psychologistId instead of userId
       }
 
-      // Add status parameters for completed and cancelled appointments
+      // Add status parameters for completed and cancelled appointment - fetch into Appointment record
       queryParams.append("status", "COMPLETED");
       queryParams.append("status", "CANCELLED");
 
