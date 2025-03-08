@@ -10,6 +10,9 @@ import {
   Button,
   Tooltip,
   Statistic,
+  List,
+  Avatar,
+  Badge,
 } from "antd";
 import {
   CalendarOutlined,
@@ -28,19 +31,29 @@ import {
   EditOutlined,
   EnvironmentOutlined,
   BulbOutlined,
+  VideoCameraOutlined,
+  RightOutlined,
 } from "@ant-design/icons";
 import { useUserStore } from "../../stores/userStore";
 import { useAuthStore } from "../../stores/authStore";
+import { useAppointmentStore } from "../../stores/appointmentStore";
+import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 
 const { TabPane } = Tabs;
 
 const StudentProfile = () => {
   const { user: authUser } = useAuthStore();
-  const { getUserDetails, loading } = useUserStore();
+  const { getUserDetails, loading: userLoading } = useUserStore();
+  const { fetchUpcomingAppointments, loading: appointmentLoading } =
+    useAppointmentStore();
   const [userData, setUserData] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("1");
+  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -56,6 +69,29 @@ const StudentProfile = () => {
 
     fetchUserDetails();
   }, [getUserDetails, authUser]);
+
+  useEffect(() => {
+    // Fetch upcoming appointments when the appointments tab is selected
+    if (activeTab === "3" && userData?.studentInfo?.studentId) {
+      fetchAppointments();
+    }
+  }, [activeTab, userData]);
+
+  const fetchAppointments = async () => {
+    if (!userData?.studentInfo?.studentId) return;
+
+    setLoadingAppointments(true);
+    try {
+      const appointments = await fetchUpcomingAppointments(
+        userData.studentInfo.studentId
+      );
+      setUpcomingAppointments(appointments);
+    } catch (error) {
+      console.error("Failed to fetch upcoming appointments:", error);
+    } finally {
+      setLoadingAppointments(false);
+    }
+  };
 
   const handleProgramClick = (program) => {
     setSelectedProgram(program);
@@ -116,7 +152,163 @@ const StudentProfile = () => {
     </Card>
   );
 
-  if (loading) {
+  // Render the appointments tab content
+  const renderAppointmentsTab = () => {
+    if (loadingAppointments) {
+      return (
+        <div className="py-10 flex justify-center">
+          <Spin size="large" />
+        </div>
+      );
+    }
+
+    if (upcomingAppointments.length === 0) {
+      return (
+        <div className="min-h-[300px] flex items-center justify-center">
+          <Empty
+            description="No upcoming appointments"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          >
+            <Button
+              type="primary"
+              className="bg-custom-green hover:bg-custom-green/90 mt-4"
+              onClick={() => navigate("/book-appointment")}
+            >
+              Schedule Appointment
+            </Button>
+          </Empty>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Upcoming Appointments
+          </h2>
+          <Button
+            type="primary"
+            className="bg-custom-green hover:bg-custom-green/90"
+            icon={<CalendarOutlined />}
+            onClick={() => navigate("/book-appointment")}
+          >
+            Schedule New
+          </Button>
+        </div>
+
+        <List
+          className="appointment-list"
+          itemLayout="horizontal"
+          dataSource={upcomingAppointments}
+          renderItem={(appointment) => {
+            const appointmentDate = dayjs(appointment.slotDate);
+            const isToday = appointmentDate.isSame(dayjs(), "day");
+            const isPast = appointmentDate.isBefore(dayjs(), "day");
+
+            return (
+              <Card
+                className="mb-4 hover:shadow-md transition-all"
+                bodyStyle={{ padding: "16px" }}
+              >
+                <div className="flex flex-col md:flex-row md:items-center">
+                  {/* Date column */}
+                  <div className="md:w-1/4 mb-4 md:mb-0">
+                    <div className="flex items-start">
+                      <div className="bg-custom-green/10 p-3 rounded-lg mr-3 text-center">
+                        <div className="text-custom-green font-bold text-xl">
+                          {appointmentDate.format("DD")}
+                        </div>
+                        <div className="text-custom-green text-sm">
+                          {appointmentDate.format("MMM")}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-900 font-medium">
+                          {appointmentDate.format("dddd")}
+                        </div>
+                        <div className="flex items-center text-gray-500 text-sm">
+                          <ClockCircleOutlined className="mr-1" />
+                          {appointment.startTime} - {appointment.endTime}
+                        </div>
+                        {isToday && (
+                          <Badge
+                            status="processing"
+                            color="#4a7c59"
+                            text={
+                              <span className="text-custom-green text-xs">
+                                Today
+                              </span>
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Psychologist info */}
+                  <div className="md:w-2/4 mb-4 md:mb-0">
+                    <div className="flex items-center">
+                      <Avatar
+                        icon={<UserOutlined />}
+                        className="bg-custom-green mr-3"
+                        size={40}
+                      />
+                      <div>
+                        <div className="text-gray-900 font-medium">
+                          {appointment.psychologistName}
+                        </div>
+                        <div className="text-gray-500 text-sm">
+                          Psychologist ({appointment.psychologistID})
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="md:w-1/4 flex justify-end items-center">
+                    <div className="flex flex-col md:flex-row gap-2">
+                      {appointment.type === "ONLINE" && (
+                        <Button
+                          type="primary"
+                          icon={<VideoCameraOutlined />}
+                          className="bg-custom-green hover:bg-custom-green/90"
+                        >
+                          Join
+                        </Button>
+                      )}
+                      <Button
+                        type="default"
+                        onClick={() =>
+                          navigate(
+                            `/appointment-details/${appointment.appointmentID}`
+                          )
+                        }
+                      >
+                        Details <RightOutlined />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          }}
+        />
+
+        <div className="text-center mt-4">
+          <Button
+            type="link"
+            onClick={() => navigate("/appointment-record")}
+            className="text-custom-green"
+          >
+            View Appointment History
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  if (userLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spin size="large" />
@@ -511,19 +703,7 @@ const StudentProfile = () => {
             }
             key="3"
           >
-            <div className="min-h-[300px] flex items-center justify-center">
-              <Empty
-                description="No upcoming appointments"
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              >
-                <Button
-                  type="primary"
-                  className="bg-custom-green hover:bg-custom-green/90 mt-4"
-                >
-                  Schedule Appointment
-                </Button>
-              </Empty>
-            </div>
+            {renderAppointmentsTab()}
           </TabPane>
         </Tabs>
 
