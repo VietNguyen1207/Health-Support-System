@@ -32,17 +32,22 @@ const Program = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [localPrograms, setLocalPrograms] = useState([]);
   const pageSize = 6;
 
   useEffect(() => {
-    fetchPrograms();
+    fetchPrograms().then((data) => {
+      if (data) {
+        setLocalPrograms(data);
+      }
+    });
   }, [fetchPrograms]);
 
   // Calculate current programs to display
   const getCurrentPrograms = () => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    return programs.slice(startIndex, endIndex);
+    return localPrograms.slice(startIndex, endIndex);
   };
 
   // Handle page change
@@ -71,7 +76,24 @@ const Program = () => {
     setTimeout(clearSelectedProgram, 300);
   }, [clearSelectedProgram]);
 
-  if (loading) {
+  // Handle program join success
+  const handleProgramJoined = useCallback((programId, updatedProgram) => {
+    // Update the local programs state to reflect the change
+    setLocalPrograms((prevPrograms) =>
+      prevPrograms.map((program) => {
+        if (program.programID === programId) {
+          return {
+            ...program,
+            currentParticipants: updatedProgram.currentParticipants,
+            status: updatedProgram.status,
+          };
+        }
+        return program;
+      })
+    );
+  }, []);
+
+  if (loading && localPrograms.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spin size="large" />
@@ -215,11 +237,11 @@ const Program = () => {
         </div>
 
         {/* Pagination */}
-        {programs.length > 0 && (
+        {localPrograms.length > 0 && (
           <div className="flex justify-center mt-12">
             <Pagination
               current={currentPage}
-              total={programs.length}
+              total={localPrograms.length}
               pageSize={pageSize}
               onChange={handlePageChange}
               showSizeChanger={false}
@@ -234,6 +256,7 @@ const Program = () => {
         onClose={handleModalClose}
         program={selectedProgram}
         loading={loadingDetails}
+        onJoinProgram={handleProgramJoined}
       />
     </div>
   );
