@@ -20,7 +20,7 @@ const NOTIFICATION_ENDPOINT = {
 export const useNotificationStore = create((set, get) => ({
   ...initialState,
 
-  // Get all notifications - updated to use query parameter
+  // Get all notifications
   getNotifications: async (userId) => {
     set({ loading: true, error: null });
     try {
@@ -37,7 +37,7 @@ export const useNotificationStore = create((set, get) => ({
     }
   },
 
-  // Get unread notifications - updated to use query parameter
+  // Get unread notifications
   getUnreadNotifications: async (userId) => {
     set({ loading: true, error: null });
     try {
@@ -55,12 +55,13 @@ export const useNotificationStore = create((set, get) => ({
     }
   },
 
-  // Mark notification as read - updated to use query parameter
-  markNotificationAsRead: async (notificationId, userId) => {
+  // Mark notification as read
+  markNotificationAsRead: async (notificationId) => {
     set({ loading: true, error: null });
     try {
+      // The correct API endpoint format: /notifications/{notificationId}/read?notificationId=NOT004
       const { data } = await api.post(
-        `${NOTIFICATION_URL}${NOTIFICATION_ENDPOINT.READ_NOTIFICATION}?notificationId=${notificationId}&userId=${userId}`
+        `${NOTIFICATION_URL}/${notificationId}/read?notificationId=${notificationId}`
       );
 
       // Update the notification in the local state

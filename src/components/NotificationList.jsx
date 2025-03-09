@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { useNotificationStore } from "../stores/notificationStore";
 import { BellOutlined, CheckOutlined, ReloadOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -37,6 +37,7 @@ const NotificationList = ({ onClose }) => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [displayedNotifications, setDisplayedNotifications] = useState([]);
+  const hoverTimeoutsRef = useRef({});
 
   // Fetch notifications when component mounts
   useEffect(() => {
@@ -49,6 +50,15 @@ const NotificationList = ({ onClose }) => {
   useEffect(() => {
     handleFilter(activeFilter === "unread");
   }, [notifications, activeFilter]);
+
+  // Clean up hover timeouts when component unmounts
+  useEffect(() => {
+    return () => {
+      Object.values(hoverTimeoutsRef.current).forEach((timeout) =>
+        clearTimeout(timeout)
+      );
+    };
+  }, []);
 
   const fetchData = async () => {
     if (!user?.userId) return;
@@ -75,9 +85,11 @@ const NotificationList = ({ onClose }) => {
   );
 
   const handleNotificationClick = async (notification) => {
-    if (!notification.isRead && user?.userId) {
+    if (!notification.isRead) {
       try {
-        await markNotificationAsRead(notification.id, user.userId);
+        console.log(`Marking notification ${notification.id} as read`);
+        // Call the API to mark the notification as read
+        await markNotificationAsRead(notification.id);
       } catch (error) {
         console.error("Error marking notification as read:", error);
       }
@@ -85,16 +97,37 @@ const NotificationList = ({ onClose }) => {
 
     onClose();
 
-    // Navigate based on notification type
-    if (notification.type === "PROGRAM" && notification.idtype) {
-      navigate(`/program-details/${notification.idtype}`);
-    } else if (notification.type === "APPOINTMENT" && notification.idtype) {
-      navigate(`/appointment-record?id=${notification.idtype}`);
-    } else if (notification.type === "SURVEY" && notification.idtype) {
-      navigate(`/test-result/${notification.idtype}`);
-    } else {
-      // Default fallback
-      navigate(`/notifications/${notification.id}`);
+    // Navigate to the NotificationDetails page with the notification ID
+    navigate(`/notifications/${notification.id}`);
+  };
+
+  const handleNotificationHover = (notification) => {
+    // Only set up hover timeout for unread notifications
+    if (!notification.isRead) {
+      // Clear any existing timeout for this notification
+      if (hoverTimeoutsRef.current[notification.id]) {
+        clearTimeout(hoverTimeoutsRef.current[notification.id]);
+      }
+
+      // Set a new timeout - mark as read after 2 seconds of hovering
+      hoverTimeoutsRef.current[notification.id] = setTimeout(async () => {
+        try {
+          console.log(
+            `Marking notification ${notification.id} as read after hover`
+          );
+          await markNotificationAsRead(notification.id);
+        } catch (error) {
+          console.error("Error marking notification as read on hover:", error);
+        }
+      }, 2000);
+    }
+  };
+
+  const handleNotificationLeave = (notification) => {
+    // Clear the timeout if the user stops hovering before the timeout completes
+    if (hoverTimeoutsRef.current[notification.id]) {
+      clearTimeout(hoverTimeoutsRef.current[notification.id]);
+      delete hoverTimeoutsRef.current[notification.id];
     }
   };
 
@@ -188,6 +221,8 @@ const NotificationList = ({ onClose }) => {
                 !notification.isRead ? "bg-blue-50" : ""
               }`}
               onClick={() => handleNotificationClick(notification)}
+              onMouseEnter={() => handleNotificationHover(notification)}
+              onMouseLeave={() => handleNotificationLeave(notification)}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
