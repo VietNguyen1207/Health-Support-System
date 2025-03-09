@@ -473,10 +473,18 @@ const StudentProfile = () => {
                     title="Overall Well-being"
                     value={
                       Math.round(
-                        ((10 -
-                          studentInfo.anxietyScore +
-                          (10 - studentInfo.stressScore) +
-                          (10 - studentInfo.depressionScore)) /
+                        ((Math.min(
+                          10,
+                          Math.max(0, 10 - studentInfo.anxietyScore)
+                        ) +
+                          Math.min(
+                            10,
+                            Math.max(0, 10 - studentInfo.stressScore)
+                          ) +
+                          Math.min(
+                            10,
+                            Math.max(0, 10 - studentInfo.depressionScore)
+                          )) /
                           3) *
                           10
                       ) / 10
