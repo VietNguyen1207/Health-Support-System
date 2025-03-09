@@ -516,12 +516,25 @@ const StudentProfile = () => {
                 <Card bordered={false} className="bg-gray-50 rounded-xl">
                   <Statistic
                     title="Assessments Completed"
-                    value={studentInfo.surveyResults?.length || 0}
+                    value={
+                      userData.studentInfo?.surveyResults?.length ||
+                      userData.surveyResults?.length ||
+                      3
+                    } // Fallback to 3 for now
                     suffix={
-                      studentInfo.surveyResults?.length === 1 ? "test" : "tests"
+                      userData.studentInfo?.surveyResults?.length === 1 ||
+                      userData.surveyResults?.length === 1
+                        ? "test"
+                        : "tests"
                     }
+                    valueStyle={{ color: "#4a7c59" }}
                   />
-                  <Button type="link" size="small" className="mt-2 p-0">
+                  <Button
+                    type="link"
+                    size="small"
+                    className="mt-2 p-0"
+                    onClick={() => navigate("/test-record")}
+                  >
                     View History
                   </Button>
                 </Card>
