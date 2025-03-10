@@ -170,19 +170,17 @@ export const useAppointmentStore = create((set) => ({
   clearAppointmentStatus: () => set({ appointmentStatus: null }),
 
   //Cancel Appointment
-  cancelAppointment: async (appointmentId, userId) => {
+  cancelAppointment: async (appointmentId) => {
     set({ loading: true, error: null });
     try {
-      const { data } = await api.put(
-        `/appointments/${appointmentId}/cancel/${userId}`
-      );
+      const { data } = await api.put(`/appointments/${appointmentId}/cancel/`);
       set({
         loading: false,
         appointmentStatus: data.status,
       });
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || "Failed to check-out appointment";
+        error.response?.data?.message || "Failed to cancel appointment";
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }

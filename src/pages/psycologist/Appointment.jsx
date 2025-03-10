@@ -297,7 +297,7 @@ export default function Appointment() {
   const disabledDate = useCallback(
     (current) => {
       return (
-        current.isBefore(today.subtract(1, "day")) ||
+        current.isBefore(today) ||
         current.isAfter(today.add(1, "year").endOf("year"))
       );
     },
@@ -319,12 +319,14 @@ export default function Appointment() {
           cellRender={dateCellRender}
           headerRender={headerRender}
           disabledDate={disabledDate}
+          key={Math.random().toString(36).substring(2, 9)}
         />
       </div>
 
       {isModalVisible && (
         <DetailCalendar
           user={user}
+          date={selectedDate}
           events={selectedDateDetails}
           visible={isModalVisible}
           onClose={handleModalClose}
