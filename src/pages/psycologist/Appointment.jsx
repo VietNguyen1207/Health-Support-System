@@ -319,7 +319,6 @@ export default function Appointment() {
           cellRender={dateCellRender}
           headerRender={headerRender}
           disabledDate={disabledDate}
-          key={Math.random().toString(36).substring(2, 9)}
         />
       </div>
 

@@ -280,9 +280,9 @@ const WorkSchedule = () => {
 
     setSubmitting(true);
     try {
-      await createTimeSlot(user.userId, {
+      await createTimeSlot(user.psychologistId, {
         slotDate: selectedDate.format("YYYY-MM-DD"),
-        timeSlotIds: selectedSlots,
+        defaultSlotIds: selectedSlots,
       });
 
       notification.success({

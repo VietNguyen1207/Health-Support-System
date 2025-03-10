@@ -9,6 +9,7 @@ import {
   Input,
   Popconfirm,
   Progress,
+  notification,
 } from "antd";
 import PropTypes from "prop-types";
 import { useAppointmentStore } from "../stores/appointmentStore";
@@ -34,7 +35,6 @@ function DetailCalendar({ user, date, events, visible, onClose, fetchData }) {
   const { fetchProgramDetails } = useProgramStore();
 
   const [isLoading, setIsLoading] = useState(false);
-
   const [formattedItem, setFormattedItem] = useState([]);
 
   const formattedProgram = async (id) => {
@@ -306,6 +306,11 @@ const AppointmentDetailContent = ({ appointment, date, user, fetchData }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [notes, setNotes] = useState("");
 
+  // Add these state variables for the cancel modal
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Determine if appointment is in progress
   const isInProgress =
     appointmentStatus === "IN_PROGRESS" ||
@@ -367,16 +372,39 @@ const AppointmentDetailContent = ({ appointment, date, user, fetchData }) => {
     }
   };
 
+  // Show cancel modal
+  const showCancelModal = () => {
+    setIsModalVisible(true);
+  };
+
+  // Handle cancel appointment
   const handleCancel = async () => {
-    setIsLoading(true);
+    if (!cancelReason.trim()) {
+      notification.error({
+        message: "Reason Required",
+        description: "Please provide a reason for cancellation.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      await cancelAppointment(appointment.appointmentID);
-      message.success("Appointment cancelled successfully!");
-      fetchData();
+      await cancelAppointment(appointment.appointmentID, cancelReason);
+      notification.success({
+        message: "Appointment Cancelled",
+        description: "Your appointment has been successfully cancelled.",
+      });
+      setIsModalVisible(false);
+      setCancelReason("");
+      fetchData(); // Refresh data after cancellation
     } catch (error) {
-      console.log("Failed to cancel appointment:", error);
+      notification.error({
+        message: "Cancellation Failed",
+        description:
+          error.message || "Failed to cancel appointment. Please try again.",
+      });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -481,16 +509,36 @@ const AppointmentDetailContent = ({ appointment, date, user, fetchData }) => {
           user.role === "student" &&
           !isInProgress && (
             <>
-              <Popconfirm
+              <Button danger onClick={showCancelModal}>
+                Cancel
+              </Button>
+              <Modal
                 title="Cancel Appointment"
-                description="Are you sure you want to cancel appointment?"
-                onConfirm={handleCancel}
-                okText="Yes"
-                cancelText="No">
-                <Button danger loading={isLoading}>
-                  Cancel
-                </Button>
-              </Popconfirm>
+                open={isModalVisible}
+                onOk={handleCancel}
+                onCancel={() => {
+                  setIsModalVisible(false);
+                  setCancelReason("");
+                }}
+                okText="Confirm Cancellation"
+                cancelText="Keep Appointment"
+                okButtonProps={{ danger: true, loading: isSubmitting }}>
+                <p>Are you sure you want to cancel this appointment?</p>
+                <div style={{ marginTop: 16 }}>
+                  <label
+                    htmlFor="cancelReason"
+                    style={{ display: "block", marginBottom: 8 }}>
+                    Please provide a reason for cancellation:
+                  </label>
+                  <Input.TextArea
+                    id="cancelReason"
+                    rows={4}
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    placeholder="Enter your reason for cancellation..."
+                  />
+                </div>
+              </Modal>
             </>
           )
         )}
@@ -612,7 +660,7 @@ const AppointmentDetailContent = ({ appointment, date, user, fetchData }) => {
             </Tag>
           }>
           <div className="space-y-4">
-            <Input.TextArean
+            <Input.TextArea
               placeholder="Enter session notes here..."
               rows={4}
               className="w-full"

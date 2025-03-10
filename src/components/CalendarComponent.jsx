@@ -6,7 +6,6 @@ function CustomCalendar({
   mode = "month",
   className = "rounded-lg border-2 px-3",
   onSelect,
-  key,
   ...props
 }) {
   return (
@@ -14,7 +13,6 @@ function CustomCalendar({
       {...props}
       defaultValue={dayjs()}
       className={className}
-      key={key}
       mode={mode}
       onSelect={onSelect}
     />

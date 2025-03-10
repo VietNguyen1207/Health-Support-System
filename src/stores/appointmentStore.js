@@ -170,10 +170,12 @@ export const useAppointmentStore = create((set) => ({
   clearAppointmentStatus: () => set({ appointmentStatus: null }),
 
   //Cancel Appointment
-  cancelAppointment: async (appointmentId) => {
+  cancelAppointment: async (appointmentId, reason) => {
     set({ loading: true, error: null });
     try {
-      const { data } = await api.put(`/appointments/${appointmentId}/cancel/`);
+      const { data } = await api.put(`/appointments/${appointmentId}/cancel`, {
+        reason,
+      });
       set({
         loading: false,
         appointmentStatus: data.status,

@@ -2,12 +2,29 @@ import { useCallback, useEffect, useMemo, useState, memo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import DateTimeSelector from "../components/DateTimeSelector";
 import { useAuthStore } from "../stores/authStore";
-import { Button, Spin, notification } from "antd";
+import {
+  Button,
+  Spin,
+  notification,
+  Select,
+  Avatar,
+  Card,
+  Empty,
+  Divider,
+  Tag,
+} from "antd";
 import { useAppointmentStore } from "../stores/appointmentStore";
 // import { useUserStore } from "../stores/userStore";
 import PropTypes from "prop-types";
 import { getPsychologistSpecializations } from "../utils/Helper";
 import { usePsychologistStore } from "../stores/psychologistStore";
+import {
+  UserOutlined,
+  ClockCircleOutlined,
+  TeamOutlined,
+  ExclamationCircleOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 
 // Memoized form components to prevent unnecessary re-renders
 const SpecializationSelect = memo(
@@ -52,33 +69,123 @@ SpecializationSelect.displayName = "SpecializationSelect";
 
 const PsychologistSelect = memo(
   ({ psychologists, selectedPsychologist, onChange, error, disabled }) => (
-    <div>
+    <div className="space-y-3">
       <label
         htmlFor="psychologist"
-        className="block text-base font-medium text-gray-700 mb-4">
+        className="block text-base font-medium text-gray-700">
         Select Psychologist<span className="text-red-500">*</span>
       </label>
-      <select
-        name="psychologist"
-        id="psychologist"
-        required
-        value={selectedPsychologist}
-        onChange={onChange}
-        disabled={disabled}
-        className={`mt-1 block w-full rounded-md shadow-sm focus:border-custom-green focus:ring-custom-green ${
-          error ? "border-red-500" : "border-gray-300"
-        } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}>
-        <option value="" className="text-gray-400">
-          --- Select a psychologist ---
-        </option>
-        {psychologists.map((psych) => (
-          <option key={psych.psychologistId} value={psych.psychologistId}>
-            {psych.info.fullName} - {psych.yearsOfExperience} years of
-            experience
-          </option>
-        ))}
-      </select>
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+
+      {/* Search hint */}
+      <p className="text-sm text-gray-500 italic">
+        Select a psychologist to view their available time slots
+      </p>
+
+      {disabled ? (
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
+          <UserOutlined className="text-gray-400 text-xl mb-2" />
+          <p className="text-gray-500">Please select a specialization first</p>
+        </div>
+      ) : psychologists.length === 0 ? (
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
+          <Empty
+            description="No psychologists available for this specialization"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
+        </div>
+      ) : (
+        <Select
+          id="psychologist"
+          name="psychologist"
+          value={selectedPsychologist}
+          onChange={(value) =>
+            onChange({ target: { name: "psychologist", value } })
+          }
+          disabled={disabled}
+          placeholder="Select a psychologist"
+          className={`w-full ${error ? "ant-select-status-error" : ""}`}
+          size="large"
+          optionFilterProp="children"
+          filterOption={(input, option) =>
+            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+          }
+          notFoundContent={<Empty description="No matching psychologists" />}
+          dropdownStyle={{ padding: "8px 0" }}
+          dropdownRender={(menu) => (
+            <div>
+              {menu}
+              <Divider style={{ margin: "8px 0" }} />
+              <div className="px-3 py-1 text-xs text-gray-500">
+                <InfoCircleOutlined className="mr-1" />
+                Select a psychologist to view their available appointment slots
+              </div>
+            </div>
+          )}>
+          {psychologists.map((psych) => (
+            <Select.Option
+              key={psych.psychologistId}
+              value={psych.psychologistId}>
+              <div className="flex items-center gap-5 py-2 px-1">
+                <div className="font-medium text-base text-gray-700">
+                  {psych.info.fullName}
+                </div>
+                <span className="text-sm text-gray-600 flex items-center">
+                  {psych.yearsOfExperience} years of experience
+                </span>
+              </div>
+            </Select.Option>
+          ))}
+        </Select>
+      )}
+
+      {error && (
+        <div className="flex items-center text-red-500">
+          <ExclamationCircleOutlined className="mr-1" />
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Selected psychologist card */}
+      {!disabled && selectedPsychologist && psychologists.length > 0 && (
+        <div className="mt-4">
+          {psychologists
+            .filter((p) => p.psychologistId === selectedPsychologist)
+            .map((psych) => (
+              <Card
+                key={psych.psychologistId}
+                className="bg-green-50 border border-green-100 shadow-sm">
+                <div className="flex items-start">
+                  <Avatar
+                    icon={<UserOutlined />}
+                    className="bg-primary-green text-white"
+                    size={64}
+                    style={{ minWidth: "64px" }}
+                  />
+                  <div className="ml-4">
+                    <h3 className="text-lg font-medium">
+                      {psych.info.fullName}
+                    </h3>
+                    <div className="grid grid-cols-1 gap-2 mt-2">
+                      <p className="text-gray-600 flex items-center">
+                        <ClockCircleOutlined className="mr-2" />
+                        {psych.yearsOfExperience} years of experience
+                      </p>
+                      <p className="text-gray-600 flex items-center">
+                        <TeamOutlined className="mr-2" />
+                        {psych.departmentName}
+                      </p>
+                    </div>
+                    <div className="mt-3">
+                      <Tag color="green" className="px-3 py-1">
+                        Available for booking
+                      </Tag>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+        </div>
+      )}
     </div>
   )
 );
@@ -315,10 +422,8 @@ const Booking = () => {
 
         await CreateBooking(bookingData);
 
-        if (isMountedRef.current) {
-          showSuccessNotification();
-          resetFormData();
-        }
+        showSuccessNotification();
+        resetFormData();
       } catch (error) {
         if (isMountedRef.current) {
           notification.error({

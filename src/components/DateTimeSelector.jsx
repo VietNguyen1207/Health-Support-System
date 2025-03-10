@@ -244,15 +244,46 @@ const DateTimeSelector = ({ selectedPsychologist = null, setFormData }) => {
       const data = await getTimeSlots(selectedPsychologist);
 
       if (data?.length) {
-        setAvailableSlots(data);
+        // Filter out past time slots
+        const now = dayjs();
+        const filteredSlots = data.filter((slot) => {
+          const slotDate = dayjs(slot.slotDate);
+          const slotTime = slot.startTime.split(":");
+          const slotHour = parseInt(slotTime[0], 10);
+          const slotMinute = parseInt(slotTime[1], 10);
 
-        // Find first available slot and set as selected date
-        const availableSlot = data.find((slot) => slot.status === "AVAILABLE");
-        if (availableSlot) {
-          const firstDate = dayjs(availableSlot.slotDate);
-          setSelectedDate(firstDate);
+          // If date is in the past, filter out
+          if (slotDate.isBefore(now, "day")) return false;
+
+          // If it's today, check if the time is in the future
+          if (slotDate.isSame(now, "day")) {
+            const currentHour = now.hour();
+            const currentMinute = now.minute();
+
+            // Compare hours and minutes
+            if (slotHour < currentHour) return false;
+            if (slotHour === currentHour && slotMinute <= currentMinute)
+              return false;
+          }
+
+          return true;
+        });
+
+        setAvailableSlots(filteredSlots);
+
+        if (filteredSlots.length > 0) {
+          // Find first available slot and set as selected date
+          const availableSlot = filteredSlots.find(
+            (slot) => slot.status === "AVAILABLE"
+          );
+          if (availableSlot) {
+            const firstDate = dayjs(availableSlot.slotDate);
+            setSelectedDate(firstDate);
+          } else {
+            setSelectedDate(dayjs(filteredSlots[0].slotDate));
+          }
         } else {
-          setSelectedDate(dayjs(data[0].slotDate));
+          setMessage("No future time slots available.");
         }
       } else {
         setAvailableSlots([]);
@@ -311,21 +342,65 @@ const DateTimeSelector = ({ selectedPsychologist = null, setFormData }) => {
   const slotsForSelectedDate = useMemo(() => {
     if (!availableSlots.length) return [];
 
-    return availableSlots.filter(
-      (slot) =>
-        dayjs(slot.slotDate).format("YYYY-MM-DD") ===
-        selectedDate.format("YYYY-MM-DD")
-    );
+    const now = dayjs();
+    const selectedDateStr = selectedDate.format("YYYY-MM-DD");
+    const isToday = now.format("YYYY-MM-DD") === selectedDateStr;
+
+    return availableSlots.filter((slot) => {
+      // Match the date
+      const matchesDate =
+        dayjs(slot.slotDate).format("YYYY-MM-DD") === selectedDateStr;
+
+      // If it's today, also check if the time is in the future
+      if (isToday && matchesDate) {
+        const slotTime = slot.startTime.split(":");
+        const slotHour = parseInt(slotTime[0], 10);
+        const slotMinute = parseInt(slotTime[1], 10);
+        const currentHour = now.hour();
+        const currentMinute = now.minute();
+
+        // Compare hours and minutes
+        if (slotHour < currentHour) return false;
+        if (slotHour === currentHour && slotMinute <= currentMinute)
+          return false;
+      }
+
+      return matchesDate;
+    });
   }, [availableSlots, selectedDate]);
 
   // Check if a date has available slots
   const hasAvailableSlots = useCallback(
     (date) => {
       const formattedDate = date.format("YYYY-MM-DD");
-      const dateSlots = availableSlots.filter(
-        (slot) => slot.slotDate === formattedDate
-      );
-      return dateSlots.some((slot) => slot.status === "AVAILABLE");
+      const now = dayjs();
+      const isToday = now.format("YYYY-MM-DD") === formattedDate;
+
+      const dateSlots = availableSlots.filter((slot) => {
+        // Match the date
+        if (slot.slotDate !== formattedDate) return false;
+
+        // Check if slot is available
+        if (slot.status !== "AVAILABLE") return false;
+
+        // If it's today, also check if the time is in the future
+        if (isToday) {
+          const slotTime = slot.startTime.split(":");
+          const slotHour = parseInt(slotTime[0], 10);
+          const slotMinute = parseInt(slotTime[1], 10);
+          const currentHour = now.hour();
+          const currentMinute = now.minute();
+
+          // Compare hours and minutes
+          if (slotHour < currentHour) return false;
+          if (slotHour === currentHour && slotMinute <= currentMinute)
+            return false;
+        }
+
+        return true;
+      });
+
+      return dateSlots.length > 0;
     },
     [availableSlots]
   );
