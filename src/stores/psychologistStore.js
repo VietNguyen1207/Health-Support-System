@@ -15,9 +15,13 @@ const initialState = {
 const PSYCHOLOGIST_URL = "/psychologists";
 
 const PSYCHOLOGIST_PATH = {
-  CREATE_TIME_SLOT: `${PSYCHOLOGIST_URL}/timeslots/batch`,
+  CREATE_TIME_SLOT: (id) =>
+    `${PSYCHOLOGIST_URL}/timeslots/batch?psychologistId=${id}`,
   GET_TIME_SLOTS: (psychId, date) =>
     `${PSYCHOLOGIST_URL}/timeslots?psychologistId=${psychId}&date=${date}`,
+  GET_PSYCHOLOGIST_BY_DEPARTMENT: (departmentId) =>
+    `${PSYCHOLOGIST_URL}/specializationS?department=${departmentId}`,
+  GET_DEPARTMENT: `${PSYCHOLOGIST_URL}/departments`,
   // GET_LEAVE_REQUEST: (psychId) => `/${psychId}/leave-requests`,
   // POST_LEAVE_REQUEST: (psychId) => `/${psychId}/leave-requests`,
   // CANCEL_LEAVE_REQUEST: (psychId, leaveRequestId) =>
@@ -91,11 +95,10 @@ export const usePsychologistStore = create((set, get) => {
       }
     },
 
-    createTimeSlot: async (psychId, { slotDate, defaultSlotIds }) => {
+    createTimeSlot: async (psyId, { slotDate, defaultSlotIds }) => {
       set({ loading: true, error: null });
       try {
-        const endpoint = PSYCHOLOGIST_PATH.CREATE_TIME_SLOT;
-        await api.post(endpoint, {
+        await api.post(PSYCHOLOGIST_PATH.CREATE_TIME_SLOT(psyId), {
           slotDate,
           defaultSlotIds,
         });
@@ -124,6 +127,42 @@ export const usePsychologistStore = create((set, get) => {
         console.error("Psychologist fetch error:", error);
         const errorMessage =
           error.response?.data?.message || "Failed to fetch psychologists";
+        set({ error: errorMessage, loading: false });
+        throw new Error(errorMessage);
+      }
+    },
+
+    // Fetch psychologists by department
+    fetchPsychologistsByDepartment: async (departmentId) => {
+      set({ loading: true, error: null });
+      try {
+        const endpoint = buildEndpoint(
+          PSYCHOLOGIST_PATH.GET_PSYCHOLOGIST_BY_DEPARTMENT(departmentId)
+        );
+        const { data } = await api.get(endpoint);
+        set({ psychologists: data, loading: false });
+        return data;
+      } catch (error) {
+        console.error("Psychologist fetch error:", error);
+        const errorMessage =
+          error.response?.data?.message || "Failed to fetch psychologists";
+        set({ error: errorMessage, loading: false });
+        throw new Error(errorMessage);
+      }
+    },
+
+    // Fetch departments
+    fetchDepartments: async () => {
+      set({ loading: true, error: null });
+      try {
+        const endpoint = buildEndpoint(PSYCHOLOGIST_PATH.GET_DEPARTMENT);
+        const { data } = await api.get(endpoint);
+        set({ departments: data, loading: false });
+        return data;
+      } catch (error) {
+        console.error("Department fetch error:", error);
+        const errorMessage =
+          error.response?.data?.message || "Failed to fetch departments";
         set({ error: errorMessage, loading: false });
         throw new Error(errorMessage);
       }

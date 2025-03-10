@@ -144,14 +144,25 @@ export default function AppointmentRecord() {
     },
     {
       title: "Psychologist",
-      dataIndex: "psychologistID",
-      key: "psychologistID",
-      render: (text) => (
+      key: "psychologist",
+      render: (_, record) => (
         <div className="flex items-center">
           <UserOutlined className="mr-2 text-primary-green" />
-          {text}
+          {record.psychologistName || record.psychologistID}
         </div>
       ),
+    },
+    {
+      title: "Student",
+      key: "student",
+      render: (_, record) => (
+        <div className="flex items-center">
+          <UserOutlined className="mr-2 text-primary-green" />
+          {record.studentName || record.studentID}
+        </div>
+      ),
+      // Hide this column for students, only show for psychologists
+      hidden: user?.role?.toLowerCase() === "student",
     },
     {
       title: "Status",
@@ -175,6 +186,11 @@ export default function AppointmentRecord() {
       ),
     },
   ];
+
+  // Filter columns based on user role
+  const filteredColumns = columns.filter(
+    (col) => col.hidden !== true || user?.role?.toLowerCase() !== "student"
+  );
 
   const renderAppointmentDetails = () => {
     if (!selectedAppointment) return null;
@@ -217,18 +233,26 @@ export default function AppointmentRecord() {
           </div>
 
           <div>
-            <Text type="secondary">Psychologist ID</Text>
+            <Text type="secondary">Psychologist</Text>
             <div className="flex items-center mt-1">
               <UserOutlined className="mr-2 text-primary-green" />
-              <Text strong>{selectedAppointment.psychologistID}</Text>
+              <Text strong>
+                {selectedAppointment.psychologistName || "Not specified"}{" "}
+                <Text type="secondary">
+                  ({selectedAppointment.psychologistID})
+                </Text>
+              </Text>
             </div>
           </div>
 
           <div>
-            <Text type="secondary">Student ID</Text>
+            <Text type="secondary">Student</Text>
             <div className="flex items-center mt-1">
               <UserOutlined className="mr-2 text-primary-green" />
-              <Text strong>{selectedAppointment.studentID}</Text>
+              <Text strong>
+                {selectedAppointment.studentName || "Not specified"}{" "}
+                <Text type="secondary">({selectedAppointment.studentID})</Text>
+              </Text>
             </div>
           </div>
         </div>
@@ -378,7 +402,7 @@ export default function AppointmentRecord() {
 
     return (
       <Table
-        columns={columns}
+        columns={filteredColumns}
         dataSource={appointments}
         rowKey="appointmentID"
         pagination={{ pageSize: 10 }}
