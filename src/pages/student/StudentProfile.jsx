@@ -40,6 +40,7 @@ import { useAppointmentStore } from "../../stores/appointmentStore";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import ProgramDetailsModal from "../../components/ProgramDetailsModal";
+import { useSurveyStore } from "../../stores/surveyStore";
 
 const { TabPane } = Tabs;
 
@@ -48,12 +49,14 @@ const StudentProfile = () => {
   const { getUserDetails, loading: userLoading } = useUserStore();
   const { fetchUpcomingAppointments, loading: appointmentLoading } =
     useAppointmentStore();
+  const { surveys, fetchSurveys } = useSurveyStore();
   const [userData, setUserData] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [isProgramModalVisible, setIsProgramModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("1");
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
+  const [completedSurveysCount, setCompletedSurveysCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,6 +80,28 @@ const StudentProfile = () => {
       fetchAppointments();
     }
   }, [activeTab, userData]);
+
+  useEffect(() => {
+    const loadSurveys = async () => {
+      try {
+        await fetchSurveys();
+      } catch (error) {
+        console.error("Failed to fetch surveys:", error);
+      }
+    };
+
+    loadSurveys();
+  }, [fetchSurveys]);
+
+  useEffect(() => {
+    if (surveys && surveys.length > 0) {
+      const completedCount = surveys.filter(
+        (survey) => survey.completeStatus === "COMPLETED"
+      ).length;
+
+      setCompletedSurveysCount(completedCount);
+    }
+  }, [surveys]);
 
   const fetchAppointments = async () => {
     if (!userData?.studentInfo?.studentId) return;
@@ -680,17 +705,8 @@ const StudentProfile = () => {
                 <Card bordered={false} className="bg-gray-50 rounded-xl">
                   <Statistic
                     title="Assessments Completed"
-                    value={
-                      userData.studentInfo?.surveyResults?.length ||
-                      userData.surveyResults?.length ||
-                      3
-                    } // Fallback to 3 for now
-                    suffix={
-                      userData.studentInfo?.surveyResults?.length === 1 ||
-                      userData.surveyResults?.length === 1
-                        ? "test"
-                        : "tests"
-                    }
+                    value={completedSurveysCount}
+                    suffix={completedSurveysCount === 1 ? "test" : "tests"}
                     valueStyle={{ color: "#4a7c59" }}
                   />
                   <Button
