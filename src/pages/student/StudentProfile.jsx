@@ -39,6 +39,7 @@ import { useAuthStore } from "../../stores/authStore";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import ProgramDetailsModal from "../../components/ProgramDetailsModal";
 
 const { TabPane } = Tabs;
 
@@ -49,7 +50,7 @@ const StudentProfile = () => {
     useAppointmentStore();
   const [userData, setUserData] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isProgramModalVisible, setIsProgramModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("1");
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
@@ -95,7 +96,28 @@ const StudentProfile = () => {
 
   const handleProgramClick = (program) => {
     setSelectedProgram(program);
-    setIsModalVisible(true);
+    setIsProgramModalVisible(true);
+  };
+
+  const handleProgramJoined = (programId, updatedProgram) => {
+    if (userData && userData.programsRecord) {
+      const updatedProgramsRecord = userData.programsRecord.map((program) => {
+        if (program.programID === programId) {
+          return {
+            ...program,
+            currentParticipants: updatedProgram.currentParticipants,
+            status: updatedProgram.status,
+            studentStatus: "JOINED",
+          };
+        }
+        return program;
+      });
+
+      setUserData({
+        ...userData,
+        programsRecord: updatedProgramsRecord,
+      });
+    }
   };
 
   const getIndicatorColor = (score) => {
@@ -307,6 +329,148 @@ const StudentProfile = () => {
       </div>
     );
   };
+
+  // Modify the Support Programs tab content
+  const renderSupportProgramsTab = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-900">
+          Active Support Programs
+        </h2>
+        <Button
+          type="primary"
+          className="bg-custom-green hover:bg-custom-green/90"
+          icon={<TeamOutlined />}
+          onClick={() => navigate("/programs")}
+        >
+          Browse All Programs
+        </Button>
+      </div>
+
+      {userData &&
+      userData.programsRecord &&
+      userData.programsRecord.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {userData.programsRecord.map((program) => (
+            <Card
+              key={program.programID}
+              className="hover:shadow-lg transition-all cursor-pointer border border-gray-100 rounded-xl overflow-hidden"
+              bodyStyle={{ padding: 0 }}
+              onClick={() => handleProgramClick(program)}
+            >
+              <div className="p-5">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-lg font-medium text-gray-800">
+                    {program.title}
+                  </h3>
+                  <Tag
+                    color={program.type === "ONLINE" ? "blue" : "green"}
+                    className="rounded-full"
+                  >
+                    {program.type.charAt(0) +
+                      program.type.slice(1).toLowerCase()}
+                  </Tag>
+                </div>
+
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  {program.description}
+                </p>
+
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <CalendarOutlined className="text-custom-green" />
+                    <span className="text-sm">
+                      {new Date(program.startDate).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <FieldTimeOutlined className="text-custom-green" />
+                    <span className="text-sm">{program.duration} weeks</span>
+                  </div>
+                </div>
+
+                {/* Add Weekly Schedule */}
+                {program.weeklySchedule && (
+                  <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm text-gray-500">
+                        Weekly Schedule
+                      </span>
+                      <span className="text-sm font-medium">
+                        {program.weeklySchedule.weeklyAt}s
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <CalendarOutlined className="text-custom-green mr-2" />
+                      <span>
+                        {program.weeklySchedule.startTime.substring(0, 5)} -{" "}
+                        {program.weeklySchedule.endTime.substring(0, 5)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm text-gray-500">Participants</span>
+                    <span className="text-sm font-medium">
+                      {program.currentParticipants}/{program.maxParticipants}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                    <div
+                      className="bg-custom-green h-1.5 rounded-full"
+                      style={{
+                        width: `${
+                          (program.currentParticipants /
+                            program.maxParticipants) *
+                          100
+                        }%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 p-3 bg-gray-50 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <UserOutlined className="text-custom-green" />
+                  <span className="text-sm text-gray-600">
+                    {program.facilitatorName}
+                  </span>
+                </div>
+                <Button
+                  type="link"
+                  className="text-custom-green p-0 flex items-center"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (program.type === "ONLINE" && program.meetingLink) {
+                      window.open(program.meetingLink, "_blank");
+                    } else {
+                      handleProgramClick(program);
+                    }
+                  }}
+                >
+                  {program.type === "ONLINE" && program.meetingLink && (
+                    <LinkOutlined className="mr-1" />
+                  )}
+                  {program.type === "ONLINE" && program.meetingLink
+                    ? "Join Meeting"
+                    : "View Details"}
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Empty
+          description="No active support programs"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      )}
+    </div>
+  );
 
   if (userLoading) {
     return (
@@ -598,121 +762,7 @@ const StudentProfile = () => {
             }
             key="2"
           >
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Active Support Programs
-                </h2>
-                <Button
-                  type="primary"
-                  className="bg-custom-green hover:bg-custom-green/90"
-                  icon={<TeamOutlined />}
-                >
-                  Browse All Programs
-                </Button>
-              </div>
-
-              {programsRecord && programsRecord.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {programsRecord.map((program) => (
-                    <Card
-                      key={program.programID}
-                      className="hover:shadow-lg transition-all cursor-pointer border border-gray-100 rounded-xl overflow-hidden"
-                      bodyStyle={{ padding: 0 }}
-                      onClick={() => handleProgramClick(program)}
-                    >
-                      <div className="p-5">
-                        <div className="flex justify-between items-start mb-3">
-                          <h3 className="text-lg font-medium text-gray-800">
-                            {program.title}
-                          </h3>
-                          <Tag
-                            color={program.type === "ONLINE" ? "blue" : "green"}
-                            className="rounded-full"
-                          >
-                            {program.type.charAt(0) +
-                              program.type.slice(1).toLowerCase()}
-                          </Tag>
-                        </div>
-
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                          {program.description}
-                        </p>
-
-                        <div className="grid grid-cols-2 gap-3 mb-4">
-                          <div className="flex items-center gap-2">
-                            <CalendarOutlined className="text-custom-green" />
-                            <span className="text-sm">
-                              {new Date(program.startDate).toLocaleDateString()}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <FieldTimeOutlined className="text-custom-green" />
-                            <span className="text-sm">
-                              {program.duration} weeks
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="bg-gray-50 p-3 rounded-lg">
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-sm text-gray-500">
-                              Participants
-                            </span>
-                            <span className="text-sm font-medium">
-                              {program.currentParticipants}/
-                              {program.maxParticipants}
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-1.5">
-                            <div
-                              className="bg-custom-green h-1.5 rounded-full"
-                              style={{
-                                width: `${
-                                  (program.currentParticipants /
-                                    program.maxParticipants) *
-                                  100
-                                }%`,
-                              }}
-                            ></div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="border-t border-gray-100 p-3 bg-gray-50 flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          <UserOutlined className="text-custom-green" />
-                          <span className="text-sm text-gray-600">
-                            {program.facilitatorName}
-                          </span>
-                        </div>
-                        <Button
-                          type="link"
-                          className="text-custom-green p-0 flex items-center"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(program.meetingLink, "_blank");
-                          }}
-                        >
-                          {program.type === "ONLINE" && (
-                            <LinkOutlined className="mr-1" />
-                          )}
-                          {program.type === "ONLINE"
-                            ? "Join Meeting"
-                            : "View Details"}
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <Empty
-                  description="No active support programs"
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                />
-              )}
-            </div>
+            {renderSupportProgramsTab()}
           </TabPane>
 
           <TabPane
@@ -729,194 +779,13 @@ const StudentProfile = () => {
         </Tabs>
 
         {/* Program Details Modal */}
-        <Modal
-          title={
-            <div className="flex items-center gap-3 border-b pb-3">
-              <div className="bg-custom-green/10 p-2 rounded-lg">
-                <CalendarOutlined className="text-xl text-custom-green" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800 m-0">
-                  Program Details
-                </h3>
-                <p className="text-sm text-gray-500 m-0">
-                  View complete program information
-                </p>
-              </div>
-            </div>
-          }
-          open={isModalVisible}
-          onCancel={() => setIsModalVisible(false)}
-          footer={
-            <div className="flex justify-end">
-              <Button onClick={() => setIsModalVisible(false)}>Close</Button>
-              {selectedProgram?.type === "ONLINE" &&
-                selectedProgram?.meetingLink && (
-                  <Button
-                    type="primary"
-                    className="bg-custom-green hover:bg-custom-green/90 ml-3"
-                    onClick={() =>
-                      window.open(selectedProgram.meetingLink, "_blank")
-                    }
-                  >
-                    Join Meeting
-                  </Button>
-                )}
-            </div>
-          }
-          width={600}
-          centered
-        >
-          {selectedProgram ? (
-            <div className="space-y-4 py-2">
-              <h2 className="text-xl font-semibold">{selectedProgram.title}</h2>
-              <p className="text-gray-600">{selectedProgram.description}</p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Program Date */}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <CalendarOutlined className="text-custom-green" />
-                    <p className="text-gray-500 text-sm">Start Date</p>
-                  </div>
-                  <p className="font-medium text-sm">
-                    {new Date(selectedProgram.startDate).toLocaleDateString(
-                      "en-US",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      }
-                    )}
-                  </p>
-                </div>
-
-                {/* Duration */}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <FieldTimeOutlined className="text-custom-green" />
-                    <p className="text-gray-500 text-sm">Duration</p>
-                  </div>
-                  <p className="font-medium text-sm">
-                    {selectedProgram.duration} weeks
-                  </p>
-                </div>
-
-                {/* Participants */}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <TeamOutlined className="text-custom-green" />
-                    <p className="text-gray-500 text-sm">Participants</p>
-                  </div>
-                  <p className="font-medium text-sm">
-                    {selectedProgram.currentParticipants}/
-                    {selectedProgram.maxParticipants} participants
-                  </p>
-                  <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                    <div
-                      className="bg-custom-green h-1.5 rounded-full"
-                      style={{
-                        width: `${
-                          (selectedProgram.currentParticipants /
-                            selectedProgram.maxParticipants) *
-                          100
-                        }%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                {/* Type */}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <i className="text-custom-green" />
-                    <p className="text-gray-500 text-sm">Type</p>
-                  </div>
-                  <Tag
-                    color={selectedProgram.type === "ONLINE" ? "blue" : "green"}
-                    className="mt-1"
-                  >
-                    {selectedProgram.type.charAt(0) +
-                      selectedProgram.type.slice(1).toLowerCase()}
-                  </Tag>
-                </div>
-              </div>
-
-              {/* Facilitator Info */}
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <div className="flex items-center">
-                  <div className="bg-custom-green/10 p-2 rounded-full mr-3">
-                    <UserOutlined className="text-custom-green" />
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-sm mb-0">Facilitator</p>
-                    <p className="font-medium text-sm">
-                      {selectedProgram.facilitatorName}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {selectedProgram.departmentName}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Online Meeting Link */}
-              {selectedProgram.type === "ONLINE" &&
-                selectedProgram.meetingLink && (
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <p className="text-gray-500 text-sm mb-1">Meeting Link</p>
-                    <div className="flex items-center gap-2">
-                      <LinkOutlined className="text-custom-green" />
-                      <a
-                        href={selectedProgram.meetingLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-custom-green hover:text-custom-green/80"
-                      >
-                        {selectedProgram.meetingLink}
-                      </a>
-                    </div>
-                  </div>
-                )}
-
-              {/* Status */}
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-gray-500 text-sm mb-1">Program Status</p>
-                <Tag
-                  className={`mt-1 ${
-                    selectedProgram.status === "ACTIVE"
-                      ? "bg-green-50 text-green-700 border-green-200"
-                      : selectedProgram.status === "FULL"
-                      ? "bg-orange-50 text-orange-700 border-orange-200"
-                      : "bg-red-50 text-red-700 border-red-200"
-                  }`}
-                >
-                  {selectedProgram.status.charAt(0) +
-                    selectedProgram.status.slice(1).toLowerCase()}
-                </Tag>
-              </div>
-
-              {/* Tags */}
-              {selectedProgram.tags && selectedProgram.tags.length > 0 && (
-                <div className="pt-2">
-                  <p className="text-gray-500 text-sm mb-2">Program Tags</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedProgram.tags.map((tag) => (
-                      <Tag
-                        key={tag}
-                        className="bg-gray-50 border border-gray-200 text-sm"
-                      >
-                        {tag}
-                      </Tag>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <Empty description="Program details not available" />
-          )}
-        </Modal>
+        <ProgramDetailsModal
+          isOpen={isProgramModalVisible}
+          onClose={() => setIsProgramModalVisible(false)}
+          program={selectedProgram}
+          loading={false}
+          onJoinProgram={handleProgramJoined}
+        />
       </div>
     </div>
   );
