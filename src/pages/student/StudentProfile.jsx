@@ -145,59 +145,123 @@ const StudentProfile = () => {
     }
   };
 
-  const getIndicatorColor = (score) => {
-    if (score <= 3) return "#4a7c59";
-    if (score <= 6) return "#fbbf24";
-    return "#ef4444";
+  const getIndicatorColor = (score, type) => {
+    switch (type) {
+      case "anxiety":
+        // Anxiety (max 21): 0-7 low, 8-14 moderate, 15-21 high
+        if (score <= 7) return "#4a7c59"; // Green - Low
+        if (score <= 14) return "#fbbf24"; // Yellow - Moderate
+        return "#ef4444"; // Red - High
+
+      case "depression":
+        // Depression (max 28): 0-9 low, 10-18 moderate, 19-28 high
+        if (score <= 9) return "#4a7c59"; // Green - Low
+        if (score <= 18) return "#fbbf24"; // Yellow - Moderate
+        return "#ef4444"; // Red - High
+
+      case "stress":
+        // Stress (max 40): 0-14 low, 15-25 moderate, 26-40 high
+        if (score <= 14) return "#4a7c59"; // Green - Low
+        if (score <= 25) return "#fbbf24"; // Yellow - Moderate
+        return "#ef4444"; // Red - High
+
+      default:
+        // Default fallback
+        if (score <= 30) return "#4a7c59";
+        if (score <= 60) return "#fbbf24";
+        return "#ef4444";
+    }
   };
 
-  const getIndicatorText = (score) => {
-    if (score <= 3) return "Low";
-    if (score <= 6) return "Moderate";
-    return "High";
+  const getIndicatorText = (score, type) => {
+    switch (type) {
+      case "anxiety":
+        if (score <= 7) return "Low";
+        if (score <= 14) return "Moderate";
+        return "High";
+
+      case "depression":
+        if (score <= 9) return "Low";
+        if (score <= 18) return "Moderate";
+        return "High";
+
+      case "stress":
+        if (score <= 14) return "Low";
+        if (score <= 25) return "Moderate";
+        return "High";
+
+      default:
+        if (score <= 30) return "Low";
+        if (score <= 60) return "Moderate";
+        return "High";
+    }
   };
 
-  const renderAssessmentCard = (title, score, icon, maxScore = 10) => (
-    <Card
-      className="assessment-card bg-white rounded-xl shadow-sm hover:shadow-md transition-all"
-      bordered={false}
-    >
-      <div className="flex items-center mb-4">
-        <div className="bg-custom-green/10 p-2 rounded-full mr-3">{icon}</div>
-        <h3 className="text-lg font-semibold text-gray-900 m-0">{title}</h3>
-      </div>
+  const renderAssessmentCard = (title, score, icon, type, maxScore) => {
+    // Determine max score based on type if not provided
+    if (!maxScore) {
+      switch (type) {
+        case "anxiety":
+          maxScore = 21;
+          break;
+        case "depression":
+          maxScore = 28;
+          break;
+        case "stress":
+          maxScore = 40;
+          break;
+        default:
+          maxScore = 10;
+      }
+    }
 
-      <div className="flex items-center justify-between">
-        <Progress
-          type="circle"
-          percent={(score / maxScore) * 100}
-          strokeColor={getIndicatorColor(score)}
-          strokeWidth={10}
-          width={80}
-          format={() => <span className="text-lg">{score}</span>}
-        />
-        <div className="text-right">
-          <span className="text-sm text-gray-500">Level</span>
-          <div
-            className={`mt-1 px-3 py-1 rounded-full text-sm font-medium inline-block
-              ${
-                score <= 3
-                  ? "bg-green-50 text-green-700"
-                  : score <= 6
-                  ? "bg-yellow-50 text-yellow-700"
-                  : "bg-red-50 text-red-700"
-              }`}
-          >
-            {getIndicatorText(score)}
+    return (
+      <Card
+        className="assessment-card bg-white rounded-xl shadow-sm hover:shadow-md transition-all"
+        bordered={false}
+      >
+        <div className="flex items-center mb-4">
+          <div className="bg-custom-green/10 p-2 rounded-full mr-3">{icon}</div>
+          <h3 className="text-lg font-semibold text-gray-900 m-0">{title}</h3>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Progress
+            type="circle"
+            percent={(score / maxScore) * 100}
+            strokeColor={getIndicatorColor(score, type)}
+            strokeWidth={10}
+            width={80}
+            format={() => <span className="text-lg">{score}</span>}
+          />
+          <div className="text-right">
+            <span className="text-sm text-gray-500">Level</span>
+            <div
+              className={`mt-1 px-3 py-1 rounded-full text-sm font-medium inline-block
+                ${
+                  getIndicatorText(score, type) === "Low"
+                    ? "bg-green-50 text-green-700"
+                    : getIndicatorText(score, type) === "Moderate"
+                    ? "bg-yellow-50 text-yellow-700"
+                    : "bg-red-50 text-red-700"
+                }`}
+            >
+              {getIndicatorText(score, type)}
+            </div>
           </div>
         </div>
-      </div>
 
-      <p className="text-xs text-gray-500 mt-4 mb-0">
-        Last updated: {new Date().toLocaleDateString()}
-      </p>
-    </Card>
-  );
+        <div className="flex justify-between items-center mt-4">
+          <p className="text-xs text-gray-500 mb-0">
+            Last updated: {new Date().toLocaleDateString()}
+          </p>
+          <p className="text-xs text-gray-500 mb-0">
+            Score: {score}/{maxScore}
+          </p>
+        </div>
+      </Card>
+    );
+  };
 
   // Render the appointments tab content
   const renderAppointmentsTab = () => {
@@ -662,18 +726,13 @@ const StudentProfile = () => {
                     title="Overall Well-being"
                     value={
                       Math.round(
-                        ((Math.min(
-                          10,
-                          Math.max(0, 10 - studentInfo.anxietyScore)
-                        ) +
-                          Math.min(
-                            10,
-                            Math.max(0, 10 - studentInfo.stressScore)
-                          ) +
-                          Math.min(
-                            10,
-                            Math.max(0, 10 - studentInfo.depressionScore)
-                          )) /
+                        // Normalize each score to a 0-10 scale
+                        (((Math.max(0, 21 - studentInfo.anxietyScore) / 21) *
+                          10 +
+                          (Math.max(0, 40 - studentInfo.stressScore) / 40) *
+                            10 +
+                          (Math.max(0, 28 - studentInfo.depressionScore) / 28) *
+                            10) /
                           3) *
                           10
                       ) / 10
@@ -697,7 +756,12 @@ const StudentProfile = () => {
                     })}
                     valueStyle={{ fontSize: "16px" }}
                   />
-                  <Button type="link" size="small" className="mt-2 p-0">
+                  <Button
+                    type="link"
+                    size="small"
+                    className="mt-2 p-0"
+                    onClick={() => navigate("/test")}
+                  >
                     Take New Assessment
                   </Button>
                 </Card>
@@ -709,14 +773,14 @@ const StudentProfile = () => {
                     suffix={completedSurveysCount === 1 ? "test" : "tests"}
                     valueStyle={{ color: "#4a7c59" }}
                   />
-                  <Button
+                  {/* <Button
                     type="link"
                     size="small"
                     className="mt-2 p-0"
                     onClick={() => navigate("/test-record")}
                   >
                     View History
-                  </Button>
+                  </Button> */}
                 </Card>
               </div>
 
@@ -725,17 +789,23 @@ const StudentProfile = () => {
                 {renderAssessmentCard(
                   "Anxiety Level",
                   studentInfo.anxietyScore,
-                  <BarChartOutlined className="text-custom-green" />
+                  <BarChartOutlined className="text-custom-green" />,
+                  "anxiety",
+                  21
                 )}
                 {renderAssessmentCard(
                   "Stress Level",
                   studentInfo.stressScore,
-                  <ClockCircleOutlined className="text-custom-green" />
+                  <ClockCircleOutlined className="text-custom-green" />,
+                  "stress",
+                  40
                 )}
                 {renderAssessmentCard(
                   "Depression Score",
                   studentInfo.depressionScore,
-                  <HeartOutlined className="text-custom-green" />
+                  <HeartOutlined className="text-custom-green" />,
+                  "depression",
+                  28
                 )}
               </div>
 

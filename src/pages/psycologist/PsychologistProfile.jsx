@@ -360,13 +360,13 @@ const PsychologistProfile = () => {
                 Join Meeting
               </Button>
             )}
-            <Button
+            {/* <Button
               type="link"
               className="text-custom-green p-0"
               onClick={() => navigate(`/program-details/${program.programID}`)}
             >
               View Details
-            </Button>
+            </Button> */}
           </div>
         </div>
       </Card>
