@@ -187,7 +187,7 @@ export const useAppointmentStore = create((set) => ({
     }
   },
 
-  // Fetch appointment records with correct ID fields
+  // Fetch appointment records for student and psychologist
   fetchAppointmentRecords: async (id, userType = "student") => {
     set({ loading: true, error: null });
     try {
@@ -196,11 +196,11 @@ export const useAppointmentStore = create((set) => ({
       // Build query parameters
       const queryParams = new URLSearchParams();
 
-      // Use the correct ID field based on user type
+      // Use studentId or psychologistId based on user type
       if (userType === "student") {
-        queryParams.append("studentId", id); // Use studentId instead of userId
+        queryParams.append("studentId", id);
       } else if (userType === "psychologist") {
-        queryParams.append("psychologistId", id); // Use psychologistId instead of userId
+        queryParams.append("psychologistId", id);
       }
 
       // Add status parameters for completed appointment - fetch into Appointment record
@@ -241,16 +241,24 @@ export const useAppointmentStore = create((set) => ({
     }
   },
 
-  // Fetch upcoming appointments for student
-  fetchUpcomingAppointments: async (studentId) => {
+  // Fetch upcoming appointments for student and psychologist
+  fetchUpcomingAppointments: async (id, userType = "student") => {
     set({ loading: true, error: null });
     try {
       const token = localStorage.getItem("token");
 
       // Build query parameters
       const queryParams = new URLSearchParams();
-      queryParams.append("studentId", studentId);
+
+      // Use studentId or psychologistId based on user type
+      if (userType === "student") {
+        queryParams.append("studentId", id);
+      } else if (userType === "psychologist") {
+        queryParams.append("psychologistId", id);
+      }
+
       queryParams.append("status", "SCHEDULED");
+      queryParams.append("status", "IN_PROGRESS");
 
       const url = `/appointments/filter?${queryParams.toString()}`;
       console.log("Fetching upcoming appointments from:", url);

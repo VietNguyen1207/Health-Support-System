@@ -101,12 +101,12 @@ export const dropdownMenu = [
     icon: <UserOutlined />,
     roles: ["parent"],
   },
-  {
-    label: "Patient Record",
-    key: "/patient-record",
-    icon: <UserOutlined />,
-    roles: ["psychologist"],
-  },
+  // {
+  //   label: "Patient Record",
+  //   key: "/patient-record",
+  //   icon: <UserOutlined />,
+  //   roles: ["psychologist"],
+  // },
   {
     label: "Dashboard",
     key: "dashboard",
