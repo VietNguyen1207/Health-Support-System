@@ -14,6 +14,7 @@ import {
   Badge,
   List,
   Timeline,
+  Progress,
 } from "antd";
 import {
   UserOutlined,
@@ -33,10 +34,12 @@ import {
   BookOutlined,
   VideoCameraOutlined,
   RightOutlined,
+  LinkOutlined,
 } from "@ant-design/icons";
 import { useUserStore } from "../../stores/userStore";
 import { useAuthStore } from "../../stores/authStore";
 import { useAppointmentStore } from "../../stores/appointmentStore";
+import { useProgramStore } from "../../stores/programStore";
 import dayjs from "dayjs";
 
 const { TabPane } = Tabs;
@@ -46,10 +49,13 @@ const PsychologistProfile = () => {
   const { getUserDetails, loading: userLoading } = useUserStore();
   const { fetchUpcomingAppointments, loading: appointmentLoading } =
     useAppointmentStore();
+  const { fetchFacilitatedPrograms } = useProgramStore();
   const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState("1");
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+  const [facilitatedPrograms, setFacilitatedPrograms] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
+  const [loadingPrograms, setLoadingPrograms] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -72,6 +78,11 @@ const PsychologistProfile = () => {
     if (activeTab === "1" && userData?.psychologistInfo?.psychologistId) {
       fetchAppointments();
     }
+
+    // Fetch facilitated programs when the programs tab is selected
+    if (activeTab === "4" && userData?.psychologistInfo?.psychologistId) {
+      fetchPrograms();
+    }
   }, [activeTab, userData]);
 
   const fetchAppointments = async () => {
@@ -91,9 +102,30 @@ const PsychologistProfile = () => {
     }
   };
 
+  const fetchPrograms = async () => {
+    if (!userData?.psychologistInfo?.psychologistId) return;
+
+    setLoadingPrograms(true);
+    try {
+      const programs = await fetchFacilitatedPrograms(
+        userData.psychologistInfo.psychologistId
+      );
+      setFacilitatedPrograms(programs);
+    } catch (error) {
+      console.error("Failed to fetch facilitated programs:", error);
+    } finally {
+      setLoadingPrograms(false);
+    }
+  };
+
   // Function to navigate to appointments page
   const handleNavigateToAppointments = () => {
     navigate("/calendar");
+  };
+
+  // Function to navigate to add program page
+  const handleNavigateToAddProgram = () => {
+    navigate("/add-program");
   };
 
   if (userLoading) {
@@ -126,6 +158,219 @@ const PsychologistProfile = () => {
       default:
         return "default";
     }
+  };
+
+  // Function to get program status color
+  const getProgramStatusColor = (status) => {
+    switch (status?.toUpperCase()) {
+      case "ACTIVE":
+        return "green";
+      case "COMPLETED":
+        return "blue";
+      case "CANCELLED":
+        return "red";
+      case "FULL":
+        return "orange";
+      default:
+        return "default";
+    }
+  };
+
+  // Render the programs tab content
+  const renderProgramsTab = () => {
+    if (loadingPrograms) {
+      return (
+        <div className="py-10 flex justify-center">
+          <Spin size="large" />
+        </div>
+      );
+    }
+
+    if (facilitatedPrograms.length === 0) {
+      return (
+        <div className="min-h-[300px] flex items-center justify-center">
+          <Empty
+            description="No programs available"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          >
+            <Button
+              type="primary"
+              className="bg-custom-green hover:bg-custom-green/90 mt-4"
+              onClick={handleNavigateToAddProgram}
+            >
+              Create First Program
+            </Button>
+          </Empty>
+        </div>
+      );
+    }
+
+    // Group programs by status
+    const activePrograms = facilitatedPrograms.filter(
+      (program) => program.status === "ACTIVE"
+    );
+    const completedPrograms = facilitatedPrograms.filter(
+      (program) => program.status === "COMPLETED"
+    );
+
+    return (
+      <div className="space-y-8">
+        {/* Active Programs Section */}
+        <div>
+          <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
+            <Badge status="success" className="mr-2" />
+            Active Programs ({activePrograms.length})
+          </h3>
+
+          {activePrograms.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {activePrograms.map((program) => (
+                <ProgramCard key={program.programID} program={program} />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-gray-50 rounded-lg p-4 text-center text-gray-500">
+              No active programs at the moment
+            </div>
+          )}
+        </div>
+
+        {/* Completed Programs Section */}
+        <div>
+          <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
+            <Badge status="processing" color="blue" className="mr-2" />
+            Completed Programs ({completedPrograms.length})
+          </h3>
+
+          {completedPrograms.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {completedPrograms.map((program) => (
+                <ProgramCard key={program.programID} program={program} />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-gray-50 rounded-lg p-4 text-center text-gray-500">
+              No completed programs yet
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Program Card Component
+  const ProgramCard = ({ program }) => {
+    const startDate = dayjs(program.startDate);
+    const endDate = startDate.add(program.duration, "week");
+    const isActive = program.status === "ACTIVE";
+    const participantPercentage =
+      (program.currentParticipants / program.maxParticipants) * 100;
+
+    return (
+      <Card
+        className="hover:shadow-lg transition-all border border-gray-100 rounded-xl overflow-hidden"
+        bodyStyle={{ padding: 0 }}
+      >
+        <div className="p-5">
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="text-lg font-medium text-gray-800">
+              {program.title}
+            </h3>
+            <Tag
+              color={getProgramStatusColor(program.status)}
+              className="rounded-full"
+            >
+              {program.status.charAt(0) + program.status.slice(1).toLowerCase()}
+            </Tag>
+          </div>
+
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+            {program.description}
+          </p>
+
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="flex items-center gap-2">
+              <CalendarOutlined className="text-custom-green" />
+              <span className="text-sm">
+                {startDate.format("MMM DD, YYYY")}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <ClockCircleOutlined className="text-custom-green" />
+              <span className="text-sm">{program.duration} weeks</span>
+            </div>
+          </div>
+
+          {/* Weekly Schedule */}
+          <div className="bg-gray-50 p-3 rounded-lg mb-4">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm text-gray-500">Weekly Schedule</span>
+              <span className="text-sm font-medium">
+                {program.weeklySchedule.weeklyAt}s
+              </span>
+            </div>
+            <div className="flex items-center text-sm text-gray-600">
+              <ClockCircleOutlined className="text-custom-green mr-2" />
+              <span>
+                {program.weeklySchedule.startTime.substring(0, 5)} -{" "}
+                {program.weeklySchedule.endTime.substring(0, 5)}
+              </span>
+            </div>
+          </div>
+
+          {/* Participants */}
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm text-gray-500">Participants</span>
+              <span className="text-sm font-medium">
+                {program.currentParticipants}/{program.maxParticipants}
+              </span>
+            </div>
+            <Progress
+              percent={participantPercentage}
+              showInfo={false}
+              strokeColor="#4a7c59"
+              trailColor="#e5e7eb"
+              size="small"
+            />
+
+            {/* Enrolled students count */}
+            <div className="mt-2 text-xs text-gray-500 flex items-center">
+              <UserOutlined className="mr-1" />
+              <span>{program.enrolled.length} students enrolled</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-100 p-3 bg-gray-50 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Tag color="cyan" className="m-0">
+              {program.type}
+            </Tag>
+          </div>
+          <div className="flex gap-2">
+            {program.type === "ONLINE" && program.meetingLink && (
+              <Button
+                type="link"
+                className="text-custom-green p-0 flex items-center"
+                onClick={() => window.open(program.meetingLink, "_blank")}
+              >
+                <LinkOutlined className="mr-1" />
+                Join Meeting
+              </Button>
+            )}
+            <Button
+              type="link"
+              className="text-custom-green p-0"
+              onClick={() => navigate(`/program-details/${program.programID}`)}
+            >
+              View Details
+            </Button>
+          </div>
+        </div>
+      </Card>
+    );
   };
 
   // Render the appointments tab content
@@ -662,24 +907,13 @@ const PsychologistProfile = () => {
                   type="primary"
                   className="bg-custom-green hover:bg-custom-green/90"
                   icon={<BulbOutlined />}
+                  onClick={handleNavigateToAddProgram}
                 >
                   Create Program
                 </Button>
               </div>
 
-              <div className="min-h-[300px] flex items-center justify-center">
-                <Empty
-                  description="No programs available"
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                >
-                  <Button
-                    type="primary"
-                    className="bg-custom-green hover:bg-custom-green/90 mt-4"
-                  >
-                    Browse Programs
-                  </Button>
-                </Empty>
-              </div>
+              {renderProgramsTab()}
             </div>
           </TabPane>
         </Tabs>

@@ -163,4 +163,27 @@ export const useProgramStore = create((set) => ({
       throw new Error(errorMessage);
     }
   },
+
+  // Fetch facilitated programs
+  fetchFacilitatedPrograms: async (facilitatorId) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.get(
+        `/programs/facilitator?facilitatorID=${facilitatorId}`
+      );
+      set({ loading: false });
+      return data;
+    } catch (error) {
+      console.error("Error fetching facilitated programs:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch facilitated programs";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
 }));
