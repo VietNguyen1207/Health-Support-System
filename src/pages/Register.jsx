@@ -4,6 +4,12 @@ import { useAuthStore } from "../stores/authStore";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
 
+const RequiredLabel = ({ text }) => (
+  <label className="form-label">
+    {text} <span className="text-red-500">*</span>
+  </label>
+);
+
 export default function Register() {
   const [userType, setUserType] = useState("student");
 
@@ -155,7 +161,7 @@ function StudentForm() {
     <form onSubmit={handleSubmit}>
       <div className="form-row">
         <div className="form-group">
-          <label className="form-label">Full Name</label>
+          <RequiredLabel text="Full Name" />
           <input
             type="text"
             name="fullName"
@@ -170,7 +176,7 @@ function StudentForm() {
           )}
         </div>
         <div className="form-group">
-          <label className="form-label">Your email</label>
+          <RequiredLabel text="Your email" />
           <input
             type="email"
             name="email"
@@ -187,7 +193,7 @@ function StudentForm() {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Gender</label>
+        <RequiredLabel text="Gender" />
         <div className="radio-group">
           <label className="radio-label">
             <input
@@ -230,7 +236,7 @@ function StudentForm() {
 
       <div className="form-row">
         <div className="form-group">
-          <label className="form-label">Grade</label>
+          <RequiredLabel text="Grade" />
           <input
             type="number"
             name="grade"
@@ -245,7 +251,7 @@ function StudentForm() {
           )}
         </div>
         <div className="form-group">
-          <label className="form-label">Class Name</label>
+          <RequiredLabel text="Class Name" />
           <input
             type="text"
             name="className"
@@ -262,7 +268,7 @@ function StudentForm() {
       </div>
 
       <div className="form-group">
-        <label className="form-label">School Name</label>
+        <RequiredLabel text="School Name" />
         <input
           type="text"
           name="schoolName"
@@ -279,7 +285,7 @@ function StudentForm() {
 
       <div className="form-row">
         <div className="form-group">
-          <label className="form-label">Phone Number</label>
+          <RequiredLabel text="Phone Number" />
           <input
             type="text"
             name="phoneNumber"
@@ -294,7 +300,7 @@ function StudentForm() {
           )}
         </div>
         <div className="form-group">
-          <label className="form-label">Address</label>
+          <RequiredLabel text="Address" />
           <input
             type="text"
             name="address"
@@ -312,7 +318,7 @@ function StudentForm() {
 
       <div className="form-row">
         <div className="form-group">
-          <label className="form-label">Password</label>
+          <RequiredLabel text="Password" />
           <input
             type="password"
             name="password"
@@ -327,7 +333,7 @@ function StudentForm() {
           )}
         </div>
         <div className="form-group">
-          <label className="form-label">Confirm Password</label>
+          <RequiredLabel text="Confirm Password" />
           <input
             type="password"
             name="rePassword"
@@ -517,7 +523,7 @@ function ParentForm() {
     <form onSubmit={handleSubmit}>
       <div className="form-row">
         <div className="form-group">
-          <label className="form-label">Full Name</label>
+          <RequiredLabel text="Full Name" />
           <input
             type="text"
             name="fullName"
@@ -532,7 +538,7 @@ function ParentForm() {
           )}
         </div>
         <div className="form-group">
-          <label className="form-label">Your email</label>
+          <RequiredLabel text="Your email" />
           <input
             type="email"
             name="email"
@@ -549,7 +555,7 @@ function ParentForm() {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Gender</label>
+        <RequiredLabel text="Gender" />
         <div className="radio-group">
           <label className="radio-label">
             <input
@@ -592,7 +598,7 @@ function ParentForm() {
 
       <div className="form-row">
         <div className="form-group">
-          <label className="form-label">Phone Number</label>
+          <RequiredLabel text="Phone Number" />
           <input
             type="text"
             name="phoneNumber"
@@ -607,7 +613,7 @@ function ParentForm() {
           )}
         </div>
         <div className="form-group">
-          <label className="form-label">Address</label>
+          <RequiredLabel text="Address" />
           <input
             type="text"
             name="address"
@@ -624,7 +630,7 @@ function ParentForm() {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Children's Student IDs</label>
+        <RequiredLabel text="Children's Student IDs" />
         <p className="text-sm text-gray-500 mb-2">
           Enter the student ID(s) of your children
         </p>
@@ -671,7 +677,7 @@ function ParentForm() {
 
       <div className="form-row">
         <div className="form-group">
-          <label className="form-label">Password</label>
+          <RequiredLabel text="Password" />
           <input
             type="password"
             name="password"
@@ -690,7 +696,7 @@ function ParentForm() {
           </p>
         </div>
         <div className="form-group">
-          <label className="form-label">Confirm Password</label>
+          <RequiredLabel text="Confirm Password" />
           <input
             type="password"
             name="rePassword"
