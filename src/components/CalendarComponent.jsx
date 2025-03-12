@@ -23,6 +23,7 @@ CustomCalendar.propTypes = {
   mode: PropTypes.oneOf(["month", "year"]), // Specify allowed values for mode
   className: PropTypes.string,
   onSelect: PropTypes.func,
+  key: PropTypes.string,
 };
 
 export default CustomCalendar;

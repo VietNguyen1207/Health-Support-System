@@ -7,8 +7,8 @@ import {
   Typography,
   Card,
   Input,
-  Popconfirm,
   Progress,
+  notification,
 } from "antd";
 import PropTypes from "prop-types";
 import { useAppointmentStore } from "../stores/appointmentStore";
@@ -29,12 +29,11 @@ import { message } from "antd";
 
 const { Text } = Typography;
 
-function DetailCalendar({ user, events, visible, onClose, fetchData }) {
+function DetailCalendar({ user, date, events, visible, onClose, fetchData }) {
   const { GetDetails } = useAppointmentStore();
   const { fetchProgramDetails } = useProgramStore();
 
   const [isLoading, setIsLoading] = useState(false);
-
   const [formattedItem, setFormattedItem] = useState([]);
 
   const formattedProgram = async (id) => {
@@ -76,6 +75,7 @@ function DetailCalendar({ user, events, visible, onClose, fetchData }) {
               children: (
                 <AppointmentDetailContent
                   appointment={data}
+                  date={date}
                   key={appt.appointmentID}
                   user={user}
                   fetchData={() => {
@@ -130,8 +130,7 @@ function DetailCalendar({ user, events, visible, onClose, fetchData }) {
           maxHeight: "78vh",
           padding: "5px 50px",
         },
-      }}
-    >
+      }}>
       {isLoading ? (
         <LoadingSkeleton />
       ) : formattedItem.length ? (
@@ -154,6 +153,7 @@ function DetailCalendar({ user, events, visible, onClose, fetchData }) {
 // Add prop types validation
 DetailCalendar.propTypes = {
   user: PropTypes.object.isRequired,
+  date: PropTypes.string.isRequired,
   events: PropTypes.shape({
     appointment: PropTypes.arrayOf(
       PropTypes.shape({
@@ -238,8 +238,7 @@ const ProgramDetailContent = ({ program, user }) => {
           </div>
           <Tag
             color={program.type === "Online" ? "blue" : "green"}
-            className="mt-1"
-          >
+            className="mt-1">
             {program.type}
           </Tag>
         </div>
@@ -270,8 +269,7 @@ const ProgramDetailContent = ({ program, user }) => {
               href={program.meetingLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-0 h-auto text-primary-green hover:text-primary-green/80"
-            >
+              className="p-0 h-auto text-primary-green hover:text-primary-green/80">
               Join Meeting
             </Button>
           </div>
@@ -285,8 +283,7 @@ const ProgramDetailContent = ({ program, user }) => {
             {program.tags.map((tag) => (
               <Tag
                 key={tag}
-                className="bg-gray-50 border border-gray-200 text-sm"
-              >
+                className="bg-gray-50 border border-gray-200 text-sm">
                 {tag}
               </Tag>
             ))}
@@ -297,7 +294,7 @@ const ProgramDetailContent = ({ program, user }) => {
   );
 };
 
-const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
+const AppointmentDetailContent = ({ appointment, date, user, fetchData }) => {
   const {
     checkInAppointment,
     checkOutAppointment,
@@ -308,14 +305,22 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [notes, setNotes] = useState("");
 
+  // Add these state variables for the cancel modal
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // Determine if appointment is in progress
   const isInProgress =
-    appointmentStatus === "IN_PROGRESS" || appointment.status === "IN_PROGRESS";
+    appointmentStatus === "IN_PROGRESS" ||
+    appointment?.status === "IN_PROGRESS";
 
   // Check if the appointment date has arrived
   const isAppointmentDateValid = () => {
     // Get the appointment date from the timeSlot
-    const appointmentDate = new Date(appointment.appointmentDate);
+    const appointmentDate = new Date(date);
+    // console.log(date);
+
     appointmentDate.setHours(0, 0, 0, 0); // Set to beginning of day
 
     // Get today's date
@@ -335,7 +340,7 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
 
     try {
       setIsLoading(true);
-      await checkInAppointment(appointment.appointmentID);
+      await checkInAppointment(appointment?.appointmentID);
       message.success("Student checked in successfully!");
     } catch (error) {
       message.error("Failed to check in student");
@@ -366,16 +371,39 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
     }
   };
 
+  // Show cancel modal
+  const showCancelModal = () => {
+    setIsModalVisible(true);
+  };
+
+  // Handle cancel appointment
   const handleCancel = async () => {
-    setIsLoading(true);
+    if (!cancelReason.trim()) {
+      notification.error({
+        message: "Reason Required",
+        description: "Please provide a reason for cancellation.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      await cancelAppointment(appointment.appointmentID, user.userId);
-      message.success("Appointment cancelled successfully!");
-      fetchData();
+      await cancelAppointment(appointment.appointmentID, cancelReason);
+      notification.success({
+        message: "Appointment Cancelled",
+        description: "Your appointment has been successfully cancelled.",
+      });
+      setIsModalVisible(false);
+      setCancelReason("");
+      fetchData(); // Refresh data after cancellation
     } catch (error) {
-      console.log("Failed to cancel appointment:", error);
+      notification.error({
+        message: "Cancellation Failed",
+        description:
+          error.message || "Failed to cancel appointment. Please try again.",
+      });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -426,8 +454,7 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
                   : appointment.status === "COMPLETED"
                   ? "success"
                   : "default"
-              }
-            >
+              }>
               {isInProgress
                 ? "In Progress"
                 : appointment.status === "COMPLETED"
@@ -437,8 +464,7 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
 
             {!canPerformActions && appointment.status !== "COMPLETED" && (
               <Tag color="warning">
-                Available on{" "}
-                {new Date(appointment.appointmentDate).toLocaleDateString()}
+                Available on {new Date(date).toLocaleDateString()}
               </Tag>
             )}
           </div>
@@ -457,8 +483,7 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
                   !canPerformActions
                     ? "Cannot check in before appointment date"
                     : ""
-                }
-              >
+                }>
                 Check-in Student
               </Button>
             )}
@@ -474,8 +499,7 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
                   !canPerformActions
                     ? "Cannot check out before appointment date"
                     : ""
-                }
-              >
+                }>
                 Complete & Check-out
               </Button>
             )}
@@ -484,17 +508,36 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
           user.role === "student" &&
           !isInProgress && (
             <>
-              <Popconfirm
+              <Button danger onClick={showCancelModal}>
+                Cancel
+              </Button>
+              <Modal
                 title="Cancel Appointment"
-                description="Are you sure you want to cancel appointment?"
-                onConfirm={handleCancel}
-                okText="Yes"
-                cancelText="No"
-              >
-                <Button danger loading={isLoading}>
-                  Cancel
-                </Button>
-              </Popconfirm>
+                open={isModalVisible}
+                onOk={handleCancel}
+                onCancel={() => {
+                  setIsModalVisible(false);
+                  setCancelReason("");
+                }}
+                okText="Confirm Cancellation"
+                cancelText="Keep Appointment"
+                okButtonProps={{ danger: true, loading: isSubmitting }}>
+                <p>Are you sure you want to cancel this appointment?</p>
+                <div style={{ marginTop: 16 }}>
+                  <label
+                    htmlFor="cancelReason"
+                    style={{ display: "block", marginBottom: 8 }}>
+                    Please provide a reason for cancellation:
+                  </label>
+                  <Input.TextArea
+                    id="cancelReason"
+                    rows={4}
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                    placeholder="Enter your reason for cancellation..."
+                  />
+                </div>
+              </Modal>
             </>
           )
         )}
@@ -510,8 +553,7 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
                 <span className="font-semibold">Psychologist Information</span>
               </div>
             }
-            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full"
-          >
+            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
             <div className="space-y-3">
               <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
                 <div className="w-28 text-gray-500">Name</div>
@@ -545,8 +587,7 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
                 <span className="font-semibold">Student Information</span>
               </div>
             }
-            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full"
-          >
+            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
             <div className="space-y-3">
               <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
                 <div className="w-28 text-gray-500">Name</div>
@@ -583,8 +624,7 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
             </div>
           </div>
         }
-        className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full"
-      >
+        className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
         <div className="grid grid-cols-3 gap-4">
           {scores.map((score, index) => (
             <div key={index} className="flex flex-col items-center gap-2">
@@ -596,7 +636,7 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
                 percent={calculatePercentage(score.score)}
                 strokeColor={getScoreColor(score.score)}
                 strokeWidth={10}
-                width={120}
+                size={120}
                 format={(percent) => (
                   <span className="text-lg font-medium">
                     {Math.round(percent)}%
@@ -617,10 +657,9 @@ const AppointmentDetailContent = ({ appointment, user, fetchData }) => {
             <Tag color="processing" className="mr-0">
               Current Session
             </Tag>
-          }
-        >
+          }>
           <div className="space-y-4">
-            <Input.TextArean
+            <Input.TextArea
               placeholder="Enter session notes here..."
               rows={4}
               className="w-full"
@@ -655,6 +694,7 @@ ProgramDetailContent.propTypes = {
 // Update PropTypes
 AppointmentDetailContent.propTypes = {
   user: PropTypes.object.isRequired,
+  date: PropTypes.string.isRequired,
   appointment: PropTypes.shape({
     appointmentID: PropTypes.string.isRequired,
     timeSlotID: PropTypes.string.isRequired,

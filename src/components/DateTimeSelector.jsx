@@ -25,7 +25,7 @@ const { Text, Title } = Typography;
 // Memoized component for time slot card with availability indicator
 const TimeSlotCard = memo(({ slot, isSelected, onSelect }) => {
   // Determine if slot is available
-  const isAvailable = slot.status === "AVAILABLE" && !slot.booked;
+  const isAvailable = slot.status === "AVAILABLE";
 
   // Calculate availability for visual indicator
   const availabilityText = `${slot.currentBookings}/${slot.maxCapacity}`;
@@ -66,7 +66,7 @@ const TimeSlotCard = memo(({ slot, isSelected, onSelect }) => {
           </div>
           {!isAvailable && (
             <Tag className="mt-1" color="default">
-              {slot.booked ? "Booked" : "Unavailable"}
+              Unavailable
             </Tag>
           )}
         </div>
@@ -84,7 +84,6 @@ TimeSlotCard.propTypes = {
     status: PropTypes.string.isRequired,
     maxCapacity: PropTypes.number.isRequired,
     currentBookings: PropTypes.number.isRequired,
-    booked: PropTypes.bool.isRequired,
   }).isRequired,
   isSelected: PropTypes.bool.isRequired,
   onSelect: PropTypes.func.isRequired,
@@ -146,42 +145,6 @@ const DateTimeSelector = ({
   const [availableDates, setAvailableDates] = useState([]);
   const [activeTabKey, setActiveTabKey] = useState("thisWeek");
 
-  // Update availableSlots when timeSlots prop changes
-  useEffect(() => {
-    if (timeSlots && timeSlots.length > 0) {
-      // Filter out slots with dates before today
-      const today = dayjs().startOf("day");
-      const futureSlots = timeSlots.filter((slot) => {
-        const slotDate = dayjs(slot.slotDate);
-
-        // If it's today, also check if the slot time is in the future
-        if (slotDate.isSame(today, "day")) {
-          const slotHour = parseInt(slot.startTime.split(":")[0], 10);
-          const slotMinute = parseInt(slot.startTime.split(":")[1], 10);
-          const currentHour = dayjs().hour();
-          const currentMinute = dayjs().minute();
-
-          // Compare hours and minutes to determine if the slot is in the future
-          return (
-            slotHour > currentHour ||
-            (slotHour === currentHour && slotMinute > currentMinute)
-          );
-        }
-
-        // For future dates, include all slots
-        return slotDate.isAfter(today);
-      });
-
-      setAvailableSlots(futureSlots);
-      setMessage(
-        futureSlots.length > 0 ? null : "No future time slots available."
-      );
-    } else {
-      setAvailableSlots([]);
-      setMessage("No time slots found.");
-    }
-  }, [timeSlots]);
-
   // Group time slots by date and period
   const groupedTimeSlots = useMemo(() => {
     if (!availableSlots.length) return {};
@@ -231,16 +194,11 @@ const DateTimeSelector = ({
       const uniqueDates = [
         ...new Set(availableSlots.map((slot) => slot.slotDate)),
       ];
-
-      // Sort dates chronologically
-      uniqueDates.sort((a, b) => dayjs(a).diff(dayjs(b)));
-
-      const dayJsDates = uniqueDates.map((date) => dayjs(date));
-      setAvailableDates(dayJsDates);
+      setAvailableDates(uniqueDates.map((date) => dayjs(date)));
 
       // Set active tab based on available dates
-      if (dayJsDates.length > 0) {
-        const firstDate = dayJsDates[0];
+      if (uniqueDates.length > 0) {
+        const firstDate = dayjs(uniqueDates[0]);
         const today = dayjs();
         const endOfThisWeek = today.endOf("week");
 
@@ -249,27 +207,105 @@ const DateTimeSelector = ({
         } else {
           setActiveTabKey("thisWeek");
         }
-
-        // Set selected date to the first available date
-        setSelectedDate(firstDate);
       }
-    } else {
-      setAvailableDates([]);
     }
   }, [availableSlots]);
 
-  // Reset component when formData is reset
+  // Update availableSlots when timeSlots prop changes
   useEffect(() => {
-    if (!formData.psychologist && !formData.timeSlotId) {
-      // Reset all internal state
+    if (timeSlots && timeSlots.length > 0) {
+      // console.log("timeSlots", timeSlots);
+      // Filter out past time slots
+      const now = dayjs();
+      const filteredSlots = timeSlots.filter((slot) => {
+        // Skip slots without proper data
+        if (!slot || !slot.slotDate || !slot.startTime) return false;
+
+        const slotDate = dayjs(slot.slotDate);
+
+        // Parse time safely
+        let slotHour = 0,
+          slotMinute = 0;
+        try {
+          const timeStr = slot.startTime.split(".")[0]; // Remove milliseconds if present
+          const timeParts = timeStr.split(":");
+          slotHour = parseInt(timeParts[0], 10);
+          slotMinute = parseInt(timeParts[1], 10);
+
+          if (isNaN(slotHour) || isNaN(slotMinute)) {
+            console.warn("Invalid time format:", slot.startTime);
+            return false;
+          }
+        } catch (error) {
+          console.error("Error parsing time:", slot.startTime, error);
+          return false;
+        }
+
+        // If date is in the future, keep the slot
+        if (slotDate.isAfter(now, "day")) return true;
+
+        // If it's today, check if the time is in the future
+        if (slotDate.isSame(now, "day")) {
+          const currentHour = now.hour();
+          const currentMinute = now.minute();
+
+          // Compare hours and minutes
+          if (slotHour > currentHour) return true;
+          if (slotHour === currentHour && slotMinute > currentMinute)
+            return true;
+          return false;
+        }
+
+        // Date is in the past
+        return false;
+      });
+
+      setAvailableSlots(filteredSlots);
+
+      if (filteredSlots.length > 0) {
+        // Find first available slot
+        const availableSlot = filteredSlots.find(
+          (slot) => slot.status === "AVAILABLE"
+        );
+        if (availableSlot) {
+          const firstDate = dayjs(availableSlot.slotDate);
+          setSelectedDate(firstDate);
+        } else {
+          setSelectedDate(dayjs(filteredSlots[0].slotDate));
+        }
+        setMessage(null);
+      } else {
+        setMessage("No future time slots available.");
+      }
+    } else {
+      setAvailableSlots([]);
+      setMessage("No time slots found.");
+    }
+  }, [timeSlots]);
+
+  // Reset state when formData.psychologist changes
+  useEffect(() => {
+    if (formData.psychologist) {
+      // Reset selection but keep the slots (they will be updated via props)
+      setSelectedTimeSlot(null);
+      setFormData((prev) => ({
+        ...prev,
+        timeSlotId: null,
+      }));
+    } else {
+      // Reset everything when psychologist is cleared
       setSelectedDate(dayjs());
       setSelectedTimeSlot(null);
       setAvailableSlots([]);
       setMessage(null);
       setAvailableDates([]);
       setActiveTabKey("thisWeek");
+      setFormData((prev) => ({
+        ...prev,
+        timeSlotId: null,
+      }));
     }
-  }, [formData]);
+  }, [formData.psychologist, setFormData]);
 
   // Handle date selection
   const handleDateSelection = useCallback(
@@ -296,25 +332,93 @@ const DateTimeSelector = ({
     [setFormData]
   );
 
-  // Filter slots for the selected date
+  // Filter slots for the selected date - ensure safe parsing of time
   const slotsForSelectedDate = useMemo(() => {
     if (!availableSlots.length) return [];
 
-    return availableSlots.filter(
-      (slot) =>
-        dayjs(slot.slotDate).format("YYYY-MM-DD") ===
-        selectedDate.format("YYYY-MM-DD")
-    );
+    const now = dayjs();
+    const selectedDateStr = selectedDate.format("YYYY-MM-DD");
+    const isToday = now.format("YYYY-MM-DD") === selectedDateStr;
+
+    return availableSlots.filter((slot) => {
+      // Match the date
+      const matchesDate =
+        dayjs(slot.slotDate).format("YYYY-MM-DD") === selectedDateStr;
+
+      // If it's today, also check if the time is in the future
+      if (isToday && matchesDate) {
+        try {
+          const timeStr = slot.startTime.split(".")[0]; // Remove milliseconds if present
+          const timeParts = timeStr.split(":");
+          const slotHour = parseInt(timeParts[0], 10);
+          const slotMinute = parseInt(timeParts[1], 10);
+
+          if (isNaN(slotHour) || isNaN(slotMinute)) return false;
+
+          const currentHour = now.hour();
+          const currentMinute = now.minute();
+
+          // Compare hours and minutes
+          if (slotHour < currentHour) return false;
+          if (slotHour === currentHour && slotMinute <= currentMinute)
+            return false;
+        } catch (error) {
+          console.error(
+            "Error parsing time in slotsForSelectedDate:",
+            slot.startTime
+          );
+          return false;
+        }
+      }
+
+      return matchesDate;
+    });
   }, [availableSlots, selectedDate]);
 
-  // Check if a date has available slots
+  // Check if a date has available slots - ensure safe parsing of time
   const hasAvailableSlots = useCallback(
     (date) => {
       const formattedDate = date.format("YYYY-MM-DD");
-      const dateSlots = availableSlots.filter(
-        (slot) => slot.slotDate === formattedDate
-      );
-      return dateSlots.some((slot) => slot.status === "AVAILABLE");
+      const now = dayjs();
+      const isToday = now.format("YYYY-MM-DD") === formattedDate;
+
+      const dateSlots = availableSlots.filter((slot) => {
+        // Match the date
+        if (slot.slotDate !== formattedDate) return false;
+
+        // Check if slot is available
+        if (slot.status !== "AVAILABLE") return false;
+
+        // If it's today, also check if the time is in the future
+        if (isToday) {
+          try {
+            const timeStr = slot.startTime.split(".")[0]; // Remove milliseconds if present
+            const timeParts = timeStr.split(":");
+            const slotHour = parseInt(timeParts[0], 10);
+            const slotMinute = parseInt(timeParts[1], 10);
+
+            if (isNaN(slotHour) || isNaN(slotMinute)) return false;
+
+            const currentHour = now.hour();
+            const currentMinute = now.minute();
+
+            // Compare hours and minutes
+            if (slotHour < currentHour) return false;
+            if (slotHour === currentHour && slotMinute <= currentMinute)
+              return false;
+          } catch (error) {
+            console.error(
+              "Error parsing time in hasAvailableSlots:",
+              slot.startTime
+            );
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      return dateSlots.length > 0;
     },
     [availableSlots]
   );
@@ -388,18 +492,13 @@ const DateTimeSelector = ({
     return availableSlots.find((slot) => slot.timeSlotId === selectedTimeSlot);
   }, [selectedTimeSlot, availableSlots]);
 
-  // Check if psychologist is selected
-  const isPsychologistSelected = useMemo(() => {
-    return formData && formData.psychologist !== "";
-  }, [formData]);
-
   return (
     <div className="p-5">
       <Text strong className="block text-base mb-4">
         Appointment Time<span className="text-red-500">*</span>
       </Text>
 
-      {!isPsychologistSelected ? (
+      {!formData.psychologist ? (
         <div className="bg-gray-50 p-6 rounded-lg text-center">
           <Text className="text-gray-500">
             Please select a psychologist first to view available time slots.
@@ -553,8 +652,8 @@ const DateTimeSelector = ({
 };
 
 DateTimeSelector.propTypes = {
-  timeSlots: PropTypes.array.isRequired,
-  loading: PropTypes.bool.isRequired,
+  timeSlots: PropTypes.array,
+  loading: PropTypes.bool,
   setFormData: PropTypes.func.isRequired,
   formData: PropTypes.object.isRequired,
 };

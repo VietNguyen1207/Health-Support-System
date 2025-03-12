@@ -76,6 +76,10 @@ export const usePsychologistStore = create((set, get) => {
       }
     },
 
+    clearTimeSlots: () => {
+      set({ timeSlots: [] });
+    },
+
     // Default Time Slots Management
     fetchDefaultTimeSlots: async () => {
       set({ loading: true, error: null });
