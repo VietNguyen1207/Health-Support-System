@@ -17,22 +17,67 @@ const ProgramDetailsModal = ({
   loading,
   onJoinProgram,
 }) => {
-  const { registerProgram } = useProgramStore();
+  const { registerProgram, fetchProgramDetails } = useProgramStore();
   const { user } = useAuthStore();
   const [registering, setRegistering] = useState(false);
+  const [registered, setRegistered] = useState(false);
+  const [updatedProgram, setUpdatedProgram] = useState(null);
+
+  // Use the updated program data if available, otherwise use the original program
+  const displayProgram = updatedProgram || program;
 
   const handleJoinProgram = async () => {
     if (!program || !user) return;
 
     // Get studentID from user object
     const studentId = user.studentId || user.studentInfo?.studentId;
+    if (!studentId) {
+      message.error("Student ID not found. Please update your profile.");
+      return;
+    }
 
     try {
       setRegistering(true);
+
+      // Call the API to register for the program
       await registerProgram(program.programID, studentId);
+
+      // Update local state to show success
+      setRegistered(true);
+
+      // Optimistically update the participant count in the local state
+      setUpdatedProgram({
+        ...program,
+        currentParticipants: program.currentParticipants + 1,
+        status:
+          program.currentParticipants + 1 >= program.maxParticipants
+            ? "FULL"
+            : program.status,
+      });
+
+      // Show success message
       message.success("Successfully registered for the program!");
-      if (onJoinProgram) onJoinProgram();
-      onClose();
+
+      // Call the callback if provided to update the parent component
+      if (onJoinProgram) {
+        onJoinProgram(program.programID, {
+          ...program,
+          currentParticipants: program.currentParticipants + 1,
+          status:
+            program.currentParticipants + 1 >= program.maxParticipants
+              ? "FULL"
+              : program.status,
+        });
+      }
+
+      // Fetch the updated program details in the background
+      try {
+        const updatedData = await fetchProgramDetails(program.programID);
+        setUpdatedProgram(updatedData);
+      } catch (error) {
+        console.error("Failed to fetch updated program details:", error);
+        // We already have the optimistic update, so no need to show an error
+      }
     } catch (error) {
       console.error("Registration error in component:", error);
       message.error(
@@ -42,6 +87,14 @@ const ProgramDetailsModal = ({
       setRegistering(false);
     }
   };
+
+  // Reset registered state when modal closes or program changes
+  React.useEffect(() => {
+    if (!isOpen || !program) {
+      setRegistered(false);
+      setUpdatedProgram(null);
+    }
+  }, [isOpen, program]);
 
   return (
     <Modal
@@ -68,30 +121,113 @@ const ProgramDetailsModal = ({
       destroyOnClose={true}
       footer={
         <div className="flex justify-end gap-3">
-          <Button onClick={onClose}>Back</Button>
-          <Button
-            type="primary"
-            className="bg-primary-green hover:bg-primary-green/90"
-            onClick={handleJoinProgram}
-            loading={registering || loading}
-            disabled={!user || !(user.studentId || user.studentInfo?.studentId)}
-          >
-            Join Program
-          </Button>
+          <Button onClick={onClose}>{registered ? "Close" : "Back"}</Button>
+          {!registered ? (
+            <Button
+              type="primary"
+              className="bg-primary-green hover:bg-primary-green/90"
+              onClick={handleJoinProgram}
+              loading={registering}
+              disabled={
+                !user ||
+                !(user.studentId || user.studentInfo?.studentId) ||
+                registering ||
+                displayProgram?.status === "FULL"
+              }
+            >
+              {displayProgram?.status === "FULL"
+                ? "Program Full"
+                : "Join Program"}
+            </Button>
+          ) : (
+            <Button
+              type="primary"
+              className="bg-primary-green hover:bg-primary-green/90"
+              icon={<LinkOutlined />}
+              onClick={onClose}
+            >
+              Done
+            </Button>
+          )}
         </div>
       }
     >
-      <ModalContent program={program} loading={loading} />
+      <ModalContent
+        program={displayProgram}
+        loading={loading}
+        registered={registered}
+      />
     </Modal>
   );
 };
 
-const ModalContent = React.memo(({ program, loading }) => {
+const ModalContent = React.memo(({ program, loading, registered }) => {
   if (loading) {
     return <LoadingSkeleton />;
   }
 
   if (!program) return null;
+
+  // Show success message if registered
+  if (registered) {
+    return (
+      <div className="py-8 text-center animate-fadeIn">
+        <div className="bg-green-50 p-6 rounded-xl mb-6">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8 text-green-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+            Registration Successful!
+          </h3>
+          <p className="text-gray-600">
+            You have successfully registered for{" "}
+            <strong>{program.title}</strong>. You can now access this program
+            from your profile.
+          </p>
+        </div>
+
+        <div className="bg-blue-50 p-4 rounded-lg text-left">
+          <h4 className="text-md font-medium text-gray-800 mb-2">
+            What's Next?
+          </h4>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li className="flex items-start">
+              <span className="mr-2">•</span>
+              <span>Check your student profile to access this program</span>
+            </li>
+            <li className="flex items-start">
+              <span className="mr-2">•</span>
+              <span>
+                Prepare for your first session on{" "}
+                {new Date(program.startDate).toLocaleDateString()}
+              </span>
+            </li>
+            {program.type === "ONLINE" && (
+              <li className="flex items-start">
+                <span className="mr-2">•</span>
+                <span>
+                  Make sure you have access to the online meeting platform
+                </span>
+              </li>
+            )}
+          </ul>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 animate-fadeIn">

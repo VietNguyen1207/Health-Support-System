@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { api } from "./apiConfig";
 
 const initialState = {
+  timeSlots: [],
   appointments: [],
   departments: [],
   loading: false,
@@ -43,20 +44,18 @@ export const useAppointmentStore = create((set) => ({
   GetTimeSlots: async (id, date) => {
     // set({ loading: true, error: null });
     try {
-      if (date) {
-        const response = await api.get(
-          `/psychologists/${id}/timeslots?date=${date}`
-        );
+      const response = await api.get(
+        `/psychologists/${id}/timeslots?date=${date}`
+      );
+      console.log(response.data);
 
-        set({ loading: false });
+      set({ timeSlots: response.data.timeSlots, loading: false });
 
-        return {
-          timeSlots: response.data.timeSlots,
-          message: response.data?.message || null,
-        };
-      }
+      return {
+        timeSlots: response.data.timeSlots,
+        message: response.data?.message || null,
+      };
       // Ensure we return an array, even if empty
-      return [];
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Failed to fetch time slots";
@@ -204,7 +203,7 @@ export const useAppointmentStore = create((set) => ({
         queryParams.append("psychologistId", id); // Use psychologistId instead of userId
       }
 
-      // Add status parameters for completed and cancelled appointments
+      // Add status parameters for completed appointment - fetch into Appointment record
       queryParams.append("status", "COMPLETED");
       queryParams.append("status", "CANCELLED");
 
@@ -239,6 +238,53 @@ export const useAppointmentStore = create((set) => ({
 
       set({ error: errorMessage, loading: false, appointments: [] });
       return []; // Return empty array instead of throwing
+    }
+  },
+
+  // Fetch upcoming appointments for student
+  fetchUpcomingAppointments: async (studentId) => {
+    set({ loading: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      queryParams.append("studentId", studentId);
+      queryParams.append("status", "SCHEDULED");
+
+      const url = `/appointments/filter?${queryParams.toString()}`;
+      console.log("Fetching upcoming appointments from:", url);
+
+      const response = await api.get(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      const upcomingAppointments = response.data || [];
+      return upcomingAppointments;
+    } catch (error) {
+      console.error("Error fetching upcoming appointments:", {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      let errorMessage = "Failed to fetch upcoming appointments";
+
+      if (error.response?.status === 500) {
+        errorMessage =
+          "The server encountered an error. Please try again later or contact support.";
+      } else if (error.response?.status === 403) {
+        errorMessage =
+          "You don't have permission to access these appointments.";
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      set({ error: errorMessage, loading: false });
+      return []; // Return empty array instead of throwing
+    } finally {
+      set({ loading: false });
     }
   },
 }));

@@ -143,6 +143,7 @@ const WorkSchedule = () => {
       const groupedSlots = {};
       if (slots && Array.isArray(slots)) {
         slots.forEach((slot) => {
+          if (dayjs(slot.slotDate).isBefore(dayjs().startOf("day"))) return;
           if (!groupedSlots[slot.slotDate]) {
             groupedSlots[slot.slotDate] = [];
           }
@@ -216,9 +217,11 @@ const WorkSchedule = () => {
           `Found ${existingIds.size} existing slots for ${formattedDate}`
         );
 
-        console.log("====================================");
+        {
+          /* console.log("====================================");
         console.log(createdTimeSlots[formattedDate]);
-        console.log("====================================");
+        console.log("===================================="); */
+        }
       } else {
         // Reset nếu không có ngày được chọn
         setExistingSlotIds(new Set());

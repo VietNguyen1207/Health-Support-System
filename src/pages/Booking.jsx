@@ -273,7 +273,12 @@ const Booking = () => {
     psychologists,
     loading: psychologistsLoading,
     fetchPsychologists,
+    timeSlots,
+    getTimeSlots,
+    clearTimeSlots,
   } = usePsychologistStore();
+
+  const [timeSlotsLoading, setTimeSlotsLoading] = useState(false);
 
   // Use refs to track mounted state
   const isMountedRef = useRef(true);
@@ -372,6 +377,7 @@ const Booking = () => {
 
   // Reset form data
   const resetFormData = useCallback(() => {
+    clearTimeSlots();
     setSelectedSpecialization("");
     setFormData({
       specialization: "",
@@ -462,7 +468,7 @@ const Booking = () => {
 
   // Handle form field changes with optimized batch updates
   const handleChange = useCallback(
-    (e) => {
+    async (e) => {
       const { name, value, type, checked } = e.target;
 
       if (name === "specialization") {
@@ -471,6 +477,7 @@ const Booking = () => {
           ...prev,
           [name]: value,
           psychologist: "", // Reset psychologist when specialization changes
+          timeSlotId: null, // Reset timeSlotId when specialization changes
         }));
 
         // Clear related errors
@@ -478,7 +485,45 @@ const Booking = () => {
           ...prev,
           specialization: undefined,
           psychologist: undefined,
+          timeSlotId: undefined,
         }));
+      } else if (name === "psychologist") {
+        // Update form data with selected psychologist
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          timeSlotId: null, // Reset timeSlotId when psychologist changes
+        }));
+
+        // Clear related error
+        if (errors[name]) {
+          setErrors((prev) => ({
+            ...prev,
+            [name]: undefined,
+            timeSlotId: undefined,
+          }));
+        }
+
+        // Fetch time slots for the selected psychologist
+        if (value) {
+          try {
+            // console.log("Fetching time slots for psychologist:", value);
+            setTimeSlotsLoading(true);
+            await getTimeSlots(value);
+            // console.log("Time slots fetched:", result);
+            setTimeSlotsLoading(false);
+
+            // Check if timeSlots is available in the store after fetching
+            // console.log("Current timeSlots in store:", timeSlots);
+          } catch (error) {
+            console.error("Error fetching time slots:", error);
+            notification.error({
+              message: "Failed to load time slots",
+              description: "Please try selecting the psychologist again",
+            });
+            setTimeSlotsLoading(false);
+          }
+        }
       } else {
         setFormData((prev) => ({
           ...prev,
@@ -494,8 +539,13 @@ const Booking = () => {
         }
       }
     },
-    [errors]
+    [errors, timeSlots] // Add timeSlots to dependencies
   );
+
+  // Add a useEffect to monitor timeSlots changes
+  // useEffect(() => {
+  //   console.log("timeSlots changed:", timeSlots);
+  // }, [timeSlots]);
 
   // Handle cancel button
   const handleCancel = useCallback(() => {
@@ -566,6 +616,8 @@ const Booking = () => {
 
               <div className="w-3/5 flex-1">
                 <DateTimeSelector
+                  timeSlots={timeSlots}
+                  loading={timeSlotsLoading}
                   selectedPsychologist={formData.psychologist}
                   setFormData={setFormData}
                   formData={formData}

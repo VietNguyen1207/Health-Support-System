@@ -244,7 +244,8 @@ const NotificationDetail = () => {
         return data.status ? (
           <Button
             type="primary"
-            onClick={() => navigate(`/appointment-record`)}>
+            onClick={() => navigate(`/appointment-record`)}
+          >
             View Appointment
           </Button>
         ) : (
@@ -332,7 +333,8 @@ const NotificationDetail = () => {
             </div>
           }
           className="shadow-md"
-          styles={{ body: { padding: 0 } }}>
+          styles={{ body: { padding: 0 } }}
+        >
           <div className="flex flex-col md:flex-row">
             {/* Left side - Notification List */}
             <div className="w-full md:w-1/3 border-r">
@@ -353,7 +355,8 @@ const NotificationDetail = () => {
                             ? notifications.filter((n) => !n.isRead).length
                             : 0
                         }
-                        size="small">
+                        size="small"
+                      >
                         Unread
                       </Badge>
                     ),
@@ -378,7 +381,8 @@ const NotificationDetail = () => {
                             ? "bg-blue-100 hover:bg-blue-100"
                             : ""
                         } ${!item.isRead ? "bg-blue-50" : ""}`}
-                        onClick={() => handleNotificationSelect(item)}>
+                        onClick={() => handleNotificationSelect(item)}
+                      >
                         <List.Item.Meta
                           className="px-5"
                           avatar={
@@ -401,7 +405,8 @@ const NotificationDetail = () => {
                             <div>
                               <Text
                                 ellipsis
-                                className="text-gray-600 mb-1 block">
+                                className="text-gray-600 mb-1 block"
+                              >
                                 {item.message}
                               </Text>
                               <div className="flex justify-between items-center mt-1">
@@ -412,7 +417,8 @@ const NotificationDetail = () => {
                                       : item.type.toLowerCase() === "survey"
                                       ? "green"
                                       : "orange"
-                                  }>
+                                  }
+                                >
                                   {item.type}
                                 </Tag>
                                 <Text type="secondary" className="text-xs">
@@ -487,7 +493,8 @@ const AppointmentDetail = ({ appointment, user }) => {
                   : appointment.status === "CANCELLED"
                   ? "volcano"
                   : "default"
-              }>
+              }
+            >
               {isInProgress
                 ? "In Progress"
                 : appointment.status === "COMPLETED"
@@ -510,7 +517,8 @@ const AppointmentDetail = ({ appointment, user }) => {
                 <span className="font-semibold">Psychologist Information</span>
               </div>
             }
-            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
+            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full"
+          >
             <div className="space-y-3">
               <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
                 <div className="w-28 text-gray-500">Name</div>
@@ -544,7 +552,8 @@ const AppointmentDetail = ({ appointment, user }) => {
                 <span className="font-semibold">Student Information</span>
               </div>
             }
-            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
+            className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full"
+          >
             <div className="space-y-3">
               <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-md">
                 <div className="w-28 text-gray-500">Name</div>
@@ -581,7 +590,8 @@ const AppointmentDetail = ({ appointment, user }) => {
             </div>
           </div>
         }
-        className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
+        className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full"
+      >
         <div className="grid grid-cols-3 gap-4">
           {scores.map((score, index) => (
             <div key={index} className="flex flex-col items-center gap-2">
@@ -672,7 +682,8 @@ const ProgramDetail = ({ program, user }) => {
           </div>
           <Tag
             color={program.type === "Online" ? "blue" : "green"}
-            className="mt-1">
+            className="mt-1"
+          >
             {program.type}
           </Tag>
         </div>
@@ -703,7 +714,8 @@ const ProgramDetail = ({ program, user }) => {
               href={program.meetingLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-0 h-auto text-primary-green hover:text-primary-green/80">
+              className="p-0 h-auto text-primary-green hover:text-primary-green/80"
+            >
               Join Meeting
             </Button>
           </div>
@@ -717,7 +729,8 @@ const ProgramDetail = ({ program, user }) => {
             {program.tags.map((tag) => (
               <Tag
                 key={tag}
-                className="bg-gray-50 border border-gray-200 text-sm">
+                className="bg-gray-50 border border-gray-200 text-sm"
+              >
                 {tag}
               </Tag>
             ))}

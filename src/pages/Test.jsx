@@ -178,9 +178,8 @@ const Test = () => {
     </div>
   );
 
-  // Add this function before the return statement
+  // Map categories to specific colors
   const getCategoryColor = (category) => {
-    // Map categories to specific colors
     const colorMap = {
       anxiety: {
         bg: "bg-blue-50",
@@ -197,31 +196,6 @@ const Test = () => {
         text: "text-amber-600",
         border: "border-amber-400",
       },
-      // wellbeing: {
-      //   bg: "bg-emerald-50",
-      //   text: "text-emerald-600",
-      //   border: "border-emerald-400",
-      // },
-      // personality: {
-      //   bg: "bg-indigo-50",
-      //   text: "text-indigo-600",
-      //   border: "border-indigo-400",
-      // },
-      // cognitive: {
-      //   bg: "bg-cyan-50",
-      //   text: "text-cyan-600",
-      //   border: "border-cyan-400",
-      // },
-      // emotional: {
-      //   bg: "bg-rose-50",
-      //   text: "text-rose-600",
-      //   border: "border-rose-400",
-      // },
-      // social: {
-      //   bg: "bg-yellow-50",
-      //   text: "text-yellow-600",
-      //   border: "border-yellow-400",
-      // },
     };
 
     // Default color if category not found in map
@@ -270,7 +244,7 @@ const Test = () => {
             <div className="h-1 w-16 bg-custom-green/30 rounded-full mt-2"></div>
           </div>
 
-          {/* Search Bar - Enhanced */}
+          {/* Search Bar */}
           <div className="flex items-center bg-gray-50 rounded-xl p-4 mb-6 border border-gray-200 focus-within:ring-2 focus-within:ring-custom-green/30 focus-within:border-custom-green/50 transition-all hover:border-custom-green/30 shadow-sm">
             <SearchOutlined className="text-gray-400 text-lg mr-3" />
             <Input
@@ -564,7 +538,7 @@ const Test = () => {
         </>
       )}
 
-      {/* Modal for Test Details - keeping as is per your request */}
+      {/* Modal for Test Details  */}
       {isModalOpen && selectedTest && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 backdrop-blur-sm z-[100]"
