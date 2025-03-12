@@ -803,7 +803,7 @@ const PsychologistProfile = () => {
                   icon={<CalendarOutlined />}
                   onClick={handleNavigateToAppointments}
                 >
-                  Manage Schedule
+                  View Calendar
                 </Button>
               </div>
 
@@ -811,7 +811,7 @@ const PsychologistProfile = () => {
             </div>
           </TabPane>
 
-          <TabPane
+          {/* <TabPane
             tab={
               <span className="flex items-center gap-2">
                 <TeamOutlined />
@@ -848,9 +848,9 @@ const PsychologistProfile = () => {
                 </Empty>
               </div>
             </div>
-          </TabPane>
+          </TabPane> */}
 
-          <TabPane
+          {/* <TabPane
             tab={
               <span className="flex items-center gap-2">
                 <FileTextOutlined />
@@ -887,7 +887,7 @@ const PsychologistProfile = () => {
                 </Empty>
               </div>
             </div>
-          </TabPane>
+          </TabPane> */}
 
           <TabPane
             tab={
