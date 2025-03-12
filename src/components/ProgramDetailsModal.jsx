@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Tag, Space, Skeleton, message } from "antd";
 import {
   CalendarOutlined,
@@ -20,11 +20,21 @@ const ProgramDetailsModal = ({
   const { registerProgram, fetchProgramDetails } = useProgramStore();
   const { user } = useAuthStore();
   const [registering, setRegistering] = useState(false);
-  const [registered, setRegistered] = useState(false);
+  const [registered, setRegistered] = useState(
+    program?.studentStatus === "JOINED"
+  );
   const [updatedProgram, setUpdatedProgram] = useState(null);
 
   // Use the updated program data if available, otherwise use the original program
   const displayProgram = updatedProgram || program;
+
+  // Reset registered state when modal opens with new program
+  useEffect(() => {
+    if (program) {
+      setRegistered(program.studentStatus === "JOINED");
+      setUpdatedProgram(null);
+    }
+  }, [program]);
 
   const handleJoinProgram = async () => {
     if (!program || !user) return;
@@ -45,7 +55,7 @@ const ProgramDetailsModal = ({
       // Update local state to show success
       setRegistered(true);
 
-      // Optimistically update the participant count in the local state
+      // Optimistically update the participant count and status in the local state
       setUpdatedProgram({
         ...program,
         currentParticipants: program.currentParticipants + 1,
@@ -53,6 +63,7 @@ const ProgramDetailsModal = ({
           program.currentParticipants + 1 >= program.maxParticipants
             ? "FULL"
             : program.status,
+        studentStatus: "JOINED",
       });
 
       // Show success message
@@ -67,6 +78,7 @@ const ProgramDetailsModal = ({
             program.currentParticipants + 1 >= program.maxParticipants
               ? "FULL"
               : program.status,
+          studentStatus: "JOINED",
         });
       }
 
@@ -76,7 +88,6 @@ const ProgramDetailsModal = ({
         setUpdatedProgram(updatedData);
       } catch (error) {
         console.error("Failed to fetch updated program details:", error);
-        // We already have the optimistic update, so no need to show an error
       }
     } catch (error) {
       console.error("Registration error in component:", error);
@@ -87,14 +98,6 @@ const ProgramDetailsModal = ({
       setRegistering(false);
     }
   };
-
-  // Reset registered state when modal closes or program changes
-  React.useEffect(() => {
-    if (!isOpen || !program) {
-      setRegistered(false);
-      setUpdatedProgram(null);
-    }
-  }, [isOpen, program]);
 
   return (
     <Modal
@@ -132,11 +135,14 @@ const ProgramDetailsModal = ({
                 !user ||
                 !(user.studentId || user.studentInfo?.studentId) ||
                 registering ||
-                displayProgram?.status === "FULL"
+                displayProgram?.status === "FULL" ||
+                displayProgram?.studentStatus === "JOINED"
               }
             >
               {displayProgram?.status === "FULL"
                 ? "Program Full"
+                : displayProgram?.studentStatus === "JOINED"
+                ? "Already Registered"
                 : "Join Program"}
             </Button>
           ) : (
@@ -190,37 +196,39 @@ const ModalContent = React.memo(({ program, loading, registered }) => {
             </svg>
           </div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">
-            Registration Successful!
+            {program.studentStatus === "JOINED"
+              ? "Already Registered"
+              : "Registration Successful!"}
           </h3>
           <p className="text-gray-600">
-            You have successfully registered for{" "}
-            <strong>{program.title}</strong>. You can now access this program
-            from your profile.
+            You are registered for <strong>{program.title}</strong>. You can
+            access this program from your profile.
           </p>
         </div>
 
         <div className="bg-blue-50 p-4 rounded-lg text-left">
           <h4 className="text-md font-medium text-gray-800 mb-2">
-            What's Next?
+            Program Schedule
           </h4>
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>Check your student profile to access this program</span>
+              <span>
+                Weekly on {program.weeklySchedule.weeklyAt}s from{" "}
+                {program.weeklySchedule.startTime} to{" "}
+                {program.weeklySchedule.endTime}
+              </span>
             </li>
             <li className="flex items-start">
               <span className="mr-2">•</span>
               <span>
-                Prepare for your first session on{" "}
-                {new Date(program.startDate).toLocaleDateString()}
+                Starting from {new Date(program.startDate).toLocaleDateString()}
               </span>
             </li>
             {program.type === "ONLINE" && (
               <li className="flex items-start">
                 <span className="mr-2">•</span>
-                <span>
-                  Make sure you have access to the online meeting platform
-                </span>
+                <span>Join via the meeting link in your profile</span>
               </li>
             )}
           </ul>
@@ -261,6 +269,33 @@ const ModalContent = React.memo(({ program, loading, registered }) => {
             <p className="text-gray-500 text-sm">Duration</p>
           </div>
           <p className="font-medium text-sm">{program.duration} weeks</p>
+        </div>
+
+        {/* Add Weekly Schedule Card */}
+        <div className="bg-gray-50 p-3 rounded-lg col-span-2">
+          <div className="flex items-center gap-2 mb-2">
+            <CalendarOutlined className="text-primary-green" />
+            <p className="text-gray-500 text-sm">Weekly Schedule</p>
+          </div>
+          <div className="flex flex-col space-y-1">
+            <div className="flex items-center">
+              <span className="text-sm font-medium text-gray-700 w-20">
+                Day:
+              </span>
+              <span className="text-sm text-gray-600">
+                {program.weeklySchedule.weeklyAt}s
+              </span>
+            </div>
+            <div className="flex items-center">
+              <span className="text-sm font-medium text-gray-700 w-20">
+                Time:
+              </span>
+              <span className="text-sm text-gray-600">
+                {program.weeklySchedule.startTime.substring(0, 5)} -{" "}
+                {program.weeklySchedule.endTime.substring(0, 5)}
+              </span>
+            </div>
+          </div>
         </div>
 
         <div className="bg-gray-50 p-3 rounded-lg">
