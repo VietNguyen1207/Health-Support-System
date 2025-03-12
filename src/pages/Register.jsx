@@ -384,7 +384,7 @@ function ParentForm() {
         ...formData,
         childrenDetails: {
           ...formData.childrenDetails,
-          studentIds: [value], // Currently only supporting one student ID
+          studentIds: [value],
         },
       });
     } else {
