@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Tabs,
   Table,
@@ -179,8 +179,7 @@ export default function AppointmentRecord() {
           onClick={() => {
             setSelectedAppointment(record);
             setIsModalVisible(true);
-          }}
-        >
+          }}>
           View Details
         </Button>
       ),
@@ -336,8 +335,7 @@ export default function AppointmentRecord() {
               <HistoryOutlined className="mr-2" />
               <Text type="secondary">{appointments.length} Records</Text>
             </div>
-          }
-        >
+          }>
           <TabPane tab="All Records" key="all">
             {renderAppointmentTable(filteredAppointments)}
           </TabPane>
@@ -360,8 +358,7 @@ export default function AppointmentRecord() {
           </Button>,
         ]}
         width={800}
-        className="appointment-detail-modal"
-      >
+        className="appointment-detail-modal">
         {renderAppointmentDetails()}
       </Modal>
     </div>
