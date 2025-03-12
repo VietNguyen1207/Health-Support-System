@@ -196,6 +196,30 @@ export const useAuthStore = create(
         }
       },
 
+      // Register parent
+      registerParent: async (userData) => {
+        set({ loading: true, error: null });
+        try {
+          const { data } = await api.post("/auth/register-parent", userData);
+
+          // Return the response data
+          set({ loading: false });
+          return data;
+        } catch (error) {
+          console.error("Parent registration error details:", {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message,
+          });
+
+          const errorMessage =
+            error.response?.data?.message ||
+            "Failed to register parent account";
+          set({ error: errorMessage, loading: false });
+          throw new Error(errorMessage);
+        }
+      },
+
       // Thêm các actions khác nếu cần
       // updateProfile: async (profileData) => {
       //   const { data } = await api.put("/api/profile", profileData);
