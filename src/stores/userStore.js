@@ -263,6 +263,30 @@ export const useUserStore = create((set, get) => {
       }
     },
 
+    feedbackAppointment: async (userId, feedbackText) => {
+      set({ loading: true, error: null });
+      try {
+        // Create the endpoint with userId as a query parameter
+        const endpoint = `${USER_URL}feedback?userId=${userId}`;
+
+        // Make the POST request with the feedback text as the body
+        await api.post(endpoint, feedbackText);
+
+        // Update state with success
+        set({
+          loading: false,
+        });
+      } catch (error) {
+        // Handle error and update state
+        set({
+          loading: false,
+          error: error.message || "Failed to submit feedback",
+        });
+
+        return handleError(error, "Failed to submit feedback");
+      }
+    },
+
     // Reset store to initial state
     reset: () => {
       set(initialState);

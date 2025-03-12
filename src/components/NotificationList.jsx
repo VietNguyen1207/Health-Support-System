@@ -3,27 +3,38 @@ import { useNotificationStore } from "../stores/notificationStore";
 import { BellOutlined, CheckOutlined, ReloadOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Empty, Skeleton, Button, Tooltip, Badge } from "antd";
+import {
+  Empty,
+  Button,
+  Tooltip,
+  Badge,
+  Modal,
+  Input,
+  notification,
+} from "antd";
 import { useAuthStore } from "../stores/authStore";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
+import { useUserStore } from "../stores/userStore";
 
 dayjs.extend(relativeTime);
 
-const NotificationSkeleton = () => (
-  <div className="p-3 border-b">
-    <div className="flex items-start gap-3">
-      <div className="flex-1">
-        <Skeleton.Input active size="small" className="w-1/3 mb-2" />
-        <Skeleton.Input active size="small" className="w-2/3 mb-2" block />
-        <div className="flex gap-2">
-          <Skeleton.Button active size="small" className="w-16" />
-          <Skeleton.Input active size="small" className="w-24" />
-        </div>
-      </div>
-    </div>
-  </div>
-);
+const { TextArea } = Input;
+
+// const NotificationSkeleton = () => (
+//   <div className="p-3 border-b">
+//     <div className="flex items-start gap-3">
+//       <div className="flex-1">
+//         <Skeleton.Input active size="small" className="w-1/3 mb-2" />
+//         <Skeleton.Input active size="small" className="w-2/3 mb-2" block />
+//         <div className="flex gap-2">
+//           <Skeleton.Button active size="small" className="w-16" />
+//           <Skeleton.Input active size="small" className="w-24" />
+//         </div>
+//       </div>
+//     </div>
+//   </div>
+// );
 
 const NotificationList = ({ onClose }) => {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -34,6 +45,7 @@ const NotificationList = ({ onClose }) => {
     getNotifications,
     markNotificationAsRead,
   } = useNotificationStore();
+  const { feedbackAppointment } = useUserStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [displayedNotifications, setDisplayedNotifications] = useState([]);
@@ -84,21 +96,66 @@ const NotificationList = ({ onClose }) => {
     [notifications]
   );
 
-  const handleNotificationClick = async (notification) => {
-    if (!notification.isRead) {
+  const handleNotificationClick = async (noti) => {
+    if (!noti.isRead) {
       try {
-        console.log(`Marking notification ${notification.id} as read`);
+        console.log(`Marking notification ${noti.id} as read`);
         // Call the API to mark the notification as read
-        await markNotificationAsRead(notification.id);
+        await markNotificationAsRead(noti.id);
       } catch (error) {
         console.error("Error marking notification as read:", error);
       }
     }
 
-    onClose();
+    // Check if notification title contains "Check-out"
+    if (noti.title.includes("Check-out")) {
+      // Show feedback modal/form
+      Modal.confirm({
+        title: "Appointment Feedback",
+        content: (
+          <div>
+            <p>Please provide your feedback about the appointment:</p>
+            <TextArea
+              rows={4}
+              placeholder="Your feedback here..."
+              id="feedback-text"
+              style={{ marginTop: "10px" }}
+            />
+          </div>
+        ),
+        onOk: async () => {
+          const feedbackText = document.getElementById("feedback-text").value;
+          if (feedbackText.trim()) {
+            // Send feedback to backend
+            try {
+              // Replace with your actual API call
+              await feedbackAppointment(user.userId, feedbackText);
 
-    // Navigate to the NotificationDetails page with the notification ID
-    navigate(`/notifications/${notification.id}`);
+              notification.success({
+                message: "Feedback Sent",
+                description: "Thank you for your feedback!",
+              });
+            } catch (error) {
+              console.error("Error sending feedback:", error);
+              notification.error({
+                message: "Error",
+                description: "Failed to send feedback. Please try again.",
+              });
+            } finally {
+              onClose();
+            }
+          } else {
+            notification.warning({
+              message: "Empty Feedback",
+              description: "Please provide some feedback before submitting.",
+            });
+            return Promise.reject("Empty feedback");
+          }
+        },
+        okText: "Submit Feedback",
+        cancelText: "Cancel",
+      });
+    }
   };
 
   const handleNotificationHover = (notification) => {
@@ -176,8 +233,7 @@ const NotificationList = ({ onClose }) => {
               ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
               : "text-gray-600 hover:bg-gray-100"
           }`}
-          onClick={() => handleFilter(false)}
-        >
+          onClick={() => handleFilter(false)}>
           All
         </button>
         <button
@@ -186,8 +242,7 @@ const NotificationList = ({ onClose }) => {
               ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
               : "text-gray-600 hover:bg-gray-100"
           }`}
-          onClick={() => handleFilter(true)}
-        >
+          onClick={() => handleFilter(true)}>
           Unread
           {unreadCount > 0 && (
             <span className="ml-1 px-1.5 py-0.5 bg-blue-600 text-white text-xs rounded-full">
@@ -199,14 +254,15 @@ const NotificationList = ({ onClose }) => {
 
       {/* Notification List */}
       <div className="max-h-[400px] overflow-y-auto">
-        {loading ? (
+        {/* loading ? (
           // Loading state
           <>
             <NotificationSkeleton />
             <NotificationSkeleton />
             <NotificationSkeleton />
           </>
-        ) : error ? (
+        ) :  */}
+        {error ? (
           <div className="py-8 text-center">
             <p className="text-red-500 mb-2">{error}</p>
             <Button type="primary" onClick={fetchData} size="small">
@@ -222,8 +278,7 @@ const NotificationList = ({ onClose }) => {
               }`}
               onClick={() => handleNotificationClick(notification)}
               onMouseEnter={() => handleNotificationHover(notification)}
-              onMouseLeave={() => handleNotificationLeave(notification)}
-            >
+              onMouseLeave={() => handleNotificationLeave(notification)}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -239,8 +294,7 @@ const NotificationList = ({ onClose }) => {
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${getTypeColor(
                         notification.type
-                      )}`}
-                    >
+                      )}`}>
                       {notification.type}
                     </span>
                     <span className="text-gray-500 text-xs">
@@ -268,8 +322,7 @@ const NotificationList = ({ onClose }) => {
           <Button
             type="link"
             onClick={() => navigate("/notifications")}
-            className="text-blue-600 hover:text-blue-800"
-          >
+            className="text-blue-600 hover:text-blue-800">
             View All Notifications
           </Button>
         </div>
