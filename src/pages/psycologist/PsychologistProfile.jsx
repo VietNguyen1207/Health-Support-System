@@ -31,24 +31,32 @@ import {
   CheckCircleOutlined,
   MedicineBoxOutlined,
   BookOutlined,
+  VideoCameraOutlined,
+  RightOutlined,
 } from "@ant-design/icons";
 import { useUserStore } from "../../stores/userStore";
 import { useAuthStore } from "../../stores/authStore";
+import { useAppointmentStore } from "../../stores/appointmentStore";
+import dayjs from "dayjs";
 
 const { TabPane } = Tabs;
 
 const PsychologistProfile = () => {
   const { user: authUser } = useAuthStore();
-  const { getUserDetails, loading } = useUserStore();
+  const { getUserDetails, loading: userLoading } = useUserStore();
+  const { fetchUpcomingAppointments, loading: appointmentLoading } =
+    useAppointmentStore();
   const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState("1");
+  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPsychologistDetails = async () => {
       try {
         // For now, we're using a hardcoded ID, but this could be dynamic
-        const psychologistId = "UID003";
+        const psychologistId = authUser?.userId || "UID003";
         const data = await getUserDetails(psychologistId);
         setUserData(data);
       } catch (error) {
@@ -57,14 +65,38 @@ const PsychologistProfile = () => {
     };
 
     fetchPsychologistDetails();
-  }, [getUserDetails]);
+  }, [getUserDetails, authUser]);
+
+  useEffect(() => {
+    // Fetch upcoming appointments when the appointments tab is selected
+    if (activeTab === "1" && userData?.psychologistInfo?.psychologistId) {
+      fetchAppointments();
+    }
+  }, [activeTab, userData]);
+
+  const fetchAppointments = async () => {
+    if (!userData?.psychologistInfo?.psychologistId) return;
+
+    setLoadingAppointments(true);
+    try {
+      const appointments = await fetchUpcomingAppointments(
+        userData.psychologistInfo.psychologistId,
+        "psychologist"
+      );
+      setUpcomingAppointments(appointments);
+    } catch (error) {
+      console.error("Failed to fetch upcoming appointments:", error);
+    } finally {
+      setLoadingAppointments(false);
+    }
+  };
 
   // Function to navigate to appointments page
   const handleNavigateToAppointments = () => {
     navigate("/calendar");
   };
 
-  if (loading) {
+  if (userLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spin size="large" />
@@ -94,6 +126,213 @@ const PsychologistProfile = () => {
       default:
         return "default";
     }
+  };
+
+  // Render the appointments tab content
+  const renderAppointmentsTab = () => {
+    if (loadingAppointments) {
+      return (
+        <div className="py-10 flex justify-center">
+          <Spin size="large" />
+        </div>
+      );
+    }
+
+    if (upcomingAppointments.length === 0) {
+      return (
+        <div className="min-h-[300px] flex items-center justify-center">
+          <Empty
+            description="No upcoming appointments"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          >
+            <Button
+              type="primary"
+              className="bg-custom-green hover:bg-custom-green/90 mt-4"
+              onClick={handleNavigateToAppointments}
+            >
+              View Calendar
+            </Button>
+          </Empty>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <List
+          className="appointment-list"
+          itemLayout="horizontal"
+          dataSource={upcomingAppointments}
+          renderItem={(appointment) => {
+            const appointmentDate = dayjs(appointment.slotDate);
+            const isToday = appointmentDate.isSame(dayjs(), "day");
+            const createdDate = dayjs(appointment.createdAt);
+            const updatedDate = dayjs(appointment.updatedAt);
+
+            return (
+              <Card
+                className="mb-4 hover:shadow-md transition-all"
+                bodyStyle={{ padding: "16px" }}
+                key={appointment.appointmentID}
+              >
+                <div className="flex flex-col space-y-4">
+                  {/* Header with appointment ID and status */}
+                  <div className="flex justify-between items-center border-b pb-3">
+                    <div className="flex items-center">
+                      <div className="bg-custom-green/10 p-2 rounded-full mr-2">
+                        <CalendarOutlined className="text-custom-green" />
+                      </div>
+                      <span className="text-gray-500 text-sm">
+                        Appointment ID:{" "}
+                        <span className="font-medium text-gray-700">
+                          {appointment.appointmentID}
+                        </span>
+                      </span>
+                    </div>
+                    <Tag
+                      color={
+                        appointment.status === "SCHEDULED"
+                          ? "blue"
+                          : appointment.status === "IN_PROGRESS"
+                          ? "orange"
+                          : "green"
+                      }
+                      className="rounded-full px-3 py-1"
+                    >
+                      {appointment.status}
+                    </Tag>
+                  </div>
+
+                  {/* Main content */}
+                  <div className="flex flex-col md:flex-row md:items-center">
+                    {/* Date column */}
+                    <div className="md:w-1/3 mb-4 md:mb-0">
+                      <div className="flex items-start">
+                        <div className="bg-custom-green/10 p-3 rounded-lg mr-3 text-center">
+                          <div className="text-custom-green font-bold text-xl">
+                            {appointmentDate.format("DD")}
+                          </div>
+                          <div className="text-custom-green text-sm">
+                            {appointmentDate.format("MMM YYYY")}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-900 font-medium">
+                            {appointmentDate.format("dddd")}
+                          </div>
+                          <div className="flex items-center text-gray-500 text-sm">
+                            <ClockCircleOutlined className="mr-1" />
+                            {appointment.startTime} - {appointment.endTime}
+                          </div>
+                          {isToday && (
+                            <Badge
+                              status="processing"
+                              color="#4a7c59"
+                              text={
+                                <span className="text-custom-green text-xs">
+                                  Today
+                                </span>
+                              }
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Student info */}
+                    <div className="md:w-1/3 mb-4 md:mb-0">
+                      <div className="flex items-center">
+                        <Avatar
+                          icon={<UserOutlined />}
+                          className="bg-custom-green mr-3"
+                          size={40}
+                        />
+                        <div>
+                          <div className="text-gray-900 font-medium">
+                            {appointment.studentName}
+                          </div>
+                          <div className="text-gray-500 text-sm">
+                            Student ID: {appointment.studentID}
+                          </div>
+                          <div className="text-gray-400 text-xs mt-1">
+                            Booked on {createdDate.format("MMM DD, YYYY")}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="md:w-1/3 flex justify-end items-center">
+                      <div className="flex flex-col md:flex-row gap-2">
+                        {/* <Button
+                          type="primary"
+                          icon={<CheckCircleOutlined />}
+                          className="bg-custom-green hover:bg-custom-green/90"
+                          onClick={() =>
+                            navigate(`/check-in/${appointment.appointmentID}`)
+                          }
+                        >
+                          Check In
+                        </Button> */}
+                        <Button
+                          type="default"
+                          onClick={() =>
+                            navigate(
+                              `/appointment-details/${appointment.appointmentID}`
+                            )
+                          }
+                        >
+                          Details <RightOutlined />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer with additional info */}
+                  <div className="border-t pt-3 mt-2 text-xs text-gray-500 flex flex-wrap justify-between">
+                    <div>
+                      Created: {createdDate.format("MMM DD, YYYY HH:mm")}
+                    </div>
+                    <div>
+                      Last Updated: {updatedDate.format("MMM DD, YYYY HH:mm")}
+                    </div>
+                    <div>
+                      Duration:{" "}
+                      {calculateDuration(
+                        appointment.startTime,
+                        appointment.endTime
+                      )}{" "}
+                      minutes
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          }}
+        />
+
+        <div className="text-center mt-4">
+          <Button
+            type="link"
+            onClick={() => navigate("/appointment-record")}
+            className="text-custom-green"
+          >
+            View Appointment History
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  // Helper function to calculate duration in minutes
+  const calculateDuration = (startTime, endTime) => {
+    const [startHour, startMinute] = startTime.split(":").map(Number);
+    const [endHour, endMinute] = endTime.split(":").map(Number);
+
+    const startMinutes = startHour * 60 + startMinute;
+    const endMinutes = endHour * 60 + endMinute;
+
+    return endMinutes - startMinutes;
   };
 
   return (
@@ -323,19 +562,7 @@ const PsychologistProfile = () => {
                 </Button>
               </div>
 
-              <div className="min-h-[300px] flex items-center justify-center">
-                <Empty
-                  description="No upcoming appointments"
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                >
-                  <Button
-                    type="primary"
-                    className="bg-custom-green hover:bg-custom-green/90 mt-4"
-                  >
-                    View Calendar
-                  </Button>
-                </Empty>
-              </div>
+              {renderAppointmentsTab()}
             </div>
           </TabPane>
 
