@@ -297,7 +297,7 @@ export default function Appointment() {
   const disabledDate = useCallback(
     (current) => {
       return (
-        current.isBefore(today.subtract(1, "day")) ||
+        current.isBefore(today) ||
         current.isAfter(today.add(1, "year").endOf("year"))
       );
     },
@@ -325,6 +325,7 @@ export default function Appointment() {
       {isModalVisible && (
         <DetailCalendar
           user={user}
+          date={selectedDate}
           events={selectedDateDetails}
           visible={isModalVisible}
           onClose={handleModalClose}

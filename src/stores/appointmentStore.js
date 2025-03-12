@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { api } from "./apiConfig";
 
 const initialState = {
+  timeSlots: [],
   appointments: [],
   departments: [],
   loading: false,
@@ -43,20 +44,18 @@ export const useAppointmentStore = create((set) => ({
   GetTimeSlots: async (id, date) => {
     // set({ loading: true, error: null });
     try {
-      if (date) {
-        const response = await api.get(
-          `/psychologists/${id}/timeslots?date=${date}`
-        );
+      const response = await api.get(
+        `/psychologists/${id}/timeslots?date=${date}`
+      );
+      console.log(response.data);
 
-        set({ loading: false });
+      set({ timeSlots: response.data.timeSlots, loading: false });
 
-        return {
-          timeSlots: response.data.timeSlots,
-          message: response.data?.message || null,
-        };
-      }
+      return {
+        timeSlots: response.data.timeSlots,
+        message: response.data?.message || null,
+      };
       // Ensure we return an array, even if empty
-      return [];
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Failed to fetch time slots";
@@ -170,19 +169,19 @@ export const useAppointmentStore = create((set) => ({
   clearAppointmentStatus: () => set({ appointmentStatus: null }),
 
   //Cancel Appointment
-  cancelAppointment: async (appointmentId, userId) => {
+  cancelAppointment: async (appointmentId, reason) => {
     set({ loading: true, error: null });
     try {
-      const { data } = await api.put(
-        `/appointments/${appointmentId}/cancel/${userId}`
-      );
+      const { data } = await api.put(`/appointments/${appointmentId}/cancel`, {
+        reason,
+      });
       set({
         loading: false,
         appointmentStatus: data.status,
       });
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || "Failed to check-out appointment";
+        error.response?.data?.message || "Failed to cancel appointment";
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
