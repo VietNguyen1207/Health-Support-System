@@ -476,7 +476,7 @@ const AppointmentDetailContent = ({ appointment, date, user, fetchData }) => {
               <Button
                 type="primary"
                 icon={<UserOutlined />}
-                // onClick={handleCheckIn}
+                onClick={handleCheckIn}
                 loading={isLoading}
                 disabled={!canPerformActions}
                 title={
