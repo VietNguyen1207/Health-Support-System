@@ -10,6 +10,7 @@ import {
   Switch,
   Space,
   Spin,
+  TimePicker,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useProgramStore } from "../../stores/programStore";
@@ -17,15 +18,20 @@ import { useState, useEffect } from "react";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 import { usePsychologistStore } from "../../stores/psychologistStore";
 import { useAuthStore } from "../../stores/authStore";
+import dayjs from "dayjs";
 
 const { TextArea } = Input;
 const { Option } = Select;
 
-// const TAGS = [
-//   { label: "Anxiety", value: "TAGS067" },
-//   { label: "Mindfulness", value: "Mindfulness" },
-//   { label: "Stress", value: "Stress" },
-// ];
+const DAYS_OF_WEEK = [
+  { label: "Monday", value: "Monday" },
+  { label: "Tuesday", value: "Tuesday" },
+  { label: "Wednesday", value: "Wednesday" },
+  { label: "Thursday", value: "Thursday" },
+  { label: "Friday", value: "Friday" },
+  { label: "Saturday", value: "Saturday" },
+  { label: "Sunday", value: "Sunday" },
+];
 
 const AddProgram = () => {
   const [form] = Form.useForm();
@@ -33,7 +39,6 @@ const AddProgram = () => {
   const [isOnline, setIsOnline] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingData, setIsFetchingData] = useState(false);
-  // const { getAllUsers } = useUserStore();
   const { user } = useAuthStore();
   const { createProgram, fetchTags, tags } = useProgramStore();
   const { fetchDepartments } = useAppointmentStore();
@@ -61,7 +66,6 @@ const AddProgram = () => {
         const psychologistOptions = data.map((psy) => ({
           label: psy.info.fullName,
           value: psy.psychologistId,
-          // department: psy.departmentName,
         }));
         setPsychologists(psychologistOptions);
       } catch (error) {
@@ -93,13 +97,21 @@ const AddProgram = () => {
   const onFinish = async (values) => {
     setIsLoading(true);
     try {
+      // Format time values to string format
+      const startTime = values.startTime.format("HH:mm:ss");
+      const endTime = values.endTime.format("HH:mm:ss");
+
       const newProgram = {
-        userId: user?.userId,
         name: values.title,
         description: values.description,
         numberParticipants: parseInt(values.numberParticipants),
         duration: parseInt(values.duration),
         startDate: values.startDate.format("YYYY-MM-DD"),
+        weeklyScheduleRequest: {
+          weeklyAt: values.weeklyAt,
+          startTime: startTime,
+          endTime: endTime,
+        },
         status: "Active",
         tags: values.tags,
         facilitatorId: values.facilitatorId,
@@ -206,10 +218,6 @@ const AddProgram = () => {
                       { required: true, message: "Please select a department" },
                     ]}
                   >
-                    {/* <Select placeholder="Select program department">
-                    {departments.map((department) => (
-                      <Option key={department} value={department}>
-                        {department} */}
                     <Select
                       placeholder="Select program department"
                       loading={isLoading}
@@ -346,11 +354,83 @@ const AddProgram = () => {
                       optionRender={(option) => (
                         <Space>
                           <span>{option.data.label}</span>
-                          <span className="text-gray-400">
-                            {/* ({option.data.department}) */}
-                          </span>
                         </Space>
                       )}
+                    />
+                  </Form.Item>
+                </div>
+              </div>
+
+              {/* Weekly Schedule Section - NEW */}
+              <div className="bg-gray-50 p-6 rounded-lg mb-8">
+                <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                  Weekly Schedule
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Form.Item
+                    name="weeklyAt"
+                    label={
+                      <span className="text-gray-700 font-medium">
+                        Day of Week
+                      </span>
+                    }
+                    rules={[{ required: true, message: "Please select a day" }]}
+                  >
+                    <Select
+                      placeholder="Select day"
+                      options={DAYS_OF_WEEK}
+                      className="rounded-lg"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="startTime"
+                    label={
+                      <span className="text-gray-700 font-medium">
+                        Start Time
+                      </span>
+                    }
+                    rules={[
+                      { required: true, message: "Please select start time" },
+                    ]}
+                  >
+                    <TimePicker
+                      format="HH:mm"
+                      className="w-full rounded-lg"
+                      placeholder="Select start time"
+                      minuteStep={15}
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="endTime"
+                    label={
+                      <span className="text-gray-700 font-medium">
+                        End Time
+                      </span>
+                    }
+                    rules={[
+                      { required: true, message: "Please select end time" },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          if (!value || !getFieldValue("startTime")) {
+                            return Promise.resolve();
+                          }
+                          if (value.isBefore(getFieldValue("startTime"))) {
+                            return Promise.reject(
+                              new Error("End time must be after start time")
+                            );
+                          }
+                          return Promise.resolve();
+                        },
+                      }),
+                    ]}
+                  >
+                    <TimePicker
+                      format="HH:mm"
+                      className="w-full rounded-lg"
+                      placeholder="Select end time"
+                      minuteStep={15}
                     />
                   </Form.Item>
                 </div>
