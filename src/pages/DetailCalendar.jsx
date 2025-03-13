@@ -190,7 +190,7 @@ const ProgramDetailContent = ({ program, user }) => {
   console.log(user);
 
   return (
-    <div className="space-y-4 w-full overflow-auto h-full">
+    <div className="space-y-4 animate-fadeIn max-h-[69vh] overflow-auto pr-5">
       {/* Program Header */}
       <div className="border-b pb-3">
         <h2 className="text-xl font-bold text-gray-800 mb-2">
@@ -223,14 +223,50 @@ const ProgramDetailContent = ({ program, user }) => {
           <p className="font-medium text-sm">{program.duration} weeks</p>
         </div>
 
+        {/* Add Weekly Schedule Card */}
+        <div className="bg-gray-50 p-3 rounded-lg col-span-2">
+          <div className="flex items-center gap-2 mb-2">
+            <CalendarOutlined className="text-primary-green" />
+            <p className="text-gray-500 text-sm">Weekly Schedule</p>
+          </div>
+          <div className="flex flex-col space-y-1">
+            <div className="flex items-center">
+              <span className="text-sm font-medium text-gray-700 w-20">
+                Day:
+              </span>
+              <span className="text-sm text-gray-600">
+                {program.weeklySchedule.weeklyAt}s
+              </span>
+            </div>
+            <div className="flex items-center">
+              <span className="text-sm font-medium text-gray-700 w-20">
+                Time:
+              </span>
+              <span className="text-sm text-gray-600">
+                {program.weeklySchedule.startTime.substring(0, 5)} -{" "}
+                {program.weeklySchedule.endTime.substring(0, 5)}
+              </span>
+            </div>
+          </div>
+        </div>
+
         <div className="bg-gray-50 p-3 rounded-lg">
           <div className="flex items-center gap-2 mb-1">
             <TeamOutlined className="text-primary-green" />
-            <p className="text-gray-500 text-sm">Capacity</p>
+            <p className="text-gray-500 text-sm">Participants</p>
           </div>
           <p className="font-medium text-sm">
-            {program?.numberParticipants} participants
+            {program.currentParticipants}/{program.maxParticipants} participants
           </p>
+          <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+            <div
+              className="bg-primary-green h-1.5 rounded-full"
+              style={{
+                width: `${
+                  (program.currentParticipants / program.maxParticipants) * 100
+                }%`,
+              }}></div>
+          </div>
         </div>
 
         <div className="bg-gray-50 p-3 rounded-lg">
@@ -239,9 +275,9 @@ const ProgramDetailContent = ({ program, user }) => {
             <p className="text-gray-500 text-sm">Type</p>
           </div>
           <Tag
-            color={program.type === "Online" ? "blue" : "green"}
+            color={program.type === "ONLINE" ? "blue" : "green"}
             className="mt-1">
-            {program.type}
+            {program.type.charAt(0) + program.type.slice(1).toLowerCase()}
           </Tag>
         </div>
       </div>
@@ -250,7 +286,7 @@ const ProgramDetailContent = ({ program, user }) => {
       <div className="bg-gray-50 p-3 rounded-lg">
         <div className="flex items-center">
           <div className="bg-primary-green/10 p-2 rounded-full mr-3">
-            <TeamOutlined className="text-primary-green" />
+            <UserOutlined className="text-primary-green" />
           </div>
           <div>
             <p className="text-gray-500 text-sm mb-0">Facilitator</p>
@@ -260,8 +296,8 @@ const ProgramDetailContent = ({ program, user }) => {
         </div>
       </div>
 
-      {/* Online Meeting Link - Fixed to prevent nested anchors */}
-      {program.type === "Online" && program.meetingLink && (
+      {/* Online Meeting Link */}
+      {program.type === "ONLINE" && program.meetingLink && (
         <div className="bg-blue-50 p-3 rounded-lg">
           <p className="text-gray-500 text-sm mb-1">Meeting Link</p>
           <div className="flex items-center gap-2">
@@ -278,9 +314,25 @@ const ProgramDetailContent = ({ program, user }) => {
         </div>
       )}
 
+      {/* Status */}
+      <div className="bg-gray-50 p-3 rounded-lg">
+        <p className="text-gray-500 text-sm mb-1">Program Status</p>
+        <Tag
+          className={`mt-1 ${
+            program.status === "ACTIVE"
+              ? "bg-green-50 text-green-700 border-green-200"
+              : program.status === "FULL"
+              ? "bg-orange-50 text-orange-700 border-orange-200"
+              : "bg-red-50 text-red-700 border-red-200"
+          }`}>
+          {program.status.charAt(0) + program.status.slice(1).toLowerCase()}
+        </Tag>
+      </div>
+
       {/* Tags */}
       {program.tags && program.tags.length > 0 && (
         <div className="pt-2">
+          <p className="text-gray-500 text-sm mb-2">Program Tags</p>
           <Space wrap size={[0, 8]}>
             {program.tags.map((tag) => (
               <Tag
@@ -415,24 +467,6 @@ const AppointmentDetailContent = ({ appointment, date, user, fetchData }) => {
       clearAppointmentStatus();
     };
   }, [clearAppointmentStatus]);
-
-  const scores = [
-    {
-      title: "Anxiety Level",
-      score: appointment.studentResponse.anxietyScore,
-      type: "anxiety",
-    },
-    {
-      title: "Stress Level",
-      score: appointment.studentResponse.stressScore,
-      type: "stress",
-    },
-    {
-      title: "Depression Level",
-      score: appointment.studentResponse.depressionScore,
-      type: "depression",
-    },
-  ];
 
   const getIndicatorColor = (score, type) => {
     switch (type) {
