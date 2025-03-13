@@ -97,12 +97,11 @@ const PsychologistSelect = memo(
         <Select
           id="psychologist"
           name="psychologist"
-          value={selectedPsychologist}
           onChange={(value) =>
             onChange({ target: { name: "psychologist", value } })
           }
           disabled={disabled}
-          placeholder="Select a psychologist"
+          placeholder="---Select a Psychologist---"
           className={`w-full ${error ? "ant-select-status-error" : ""}`}
           size="large"
           optionFilterProp="children"

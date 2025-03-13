@@ -23,6 +23,8 @@ import {
   UserOutlined,
   CheckOutlined,
   BarChartOutlined,
+  ClockCircleOutlined,
+  HeartOutlined,
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { message } from "antd";
@@ -359,7 +361,7 @@ const AppointmentDetailContent = ({ appointment, date, user, fetchData }) => {
 
     try {
       setIsLoading(true);
-      await checkOutAppointment(appointment.appointmentID, notes);
+      await checkOutAppointment(appointment.appointmentID, notes || "No note");
       message.success("Appointment completed successfully!");
       fetchData();
       clearAppointmentStatus();
@@ -414,26 +416,136 @@ const AppointmentDetailContent = ({ appointment, date, user, fetchData }) => {
     };
   }, [clearAppointmentStatus]);
 
-  const calculatePercentage = (score) => (score / 10) * 100;
   const scores = [
     {
-      title: "Depression Level",
-      score: appointment.studentResponse.depressionScore,
+      title: "Anxiety Level",
+      score: appointment.studentResponse.anxietyScore,
+      type: "anxiety",
     },
     {
       title: "Stress Level",
       score: appointment.studentResponse.stressScore,
+      type: "stress",
     },
     {
-      title: "Anxiety Level",
-      score: appointment.studentResponse.anxietyScore,
+      title: "Depression Level",
+      score: appointment.studentResponse.depressionScore,
+      type: "depression",
     },
   ];
 
-  const getScoreColor = (score) => {
-    if (score <= 3) return "#4a7c59";
-    if (score <= 6) return "#fbbf24";
-    return "#ef4444";
+  const getIndicatorColor = (score, type) => {
+    switch (type) {
+      case "anxiety":
+        // Anxiety (max 21): 0-7 low, 8-14 moderate, 15-21 high
+        if (score <= 7) return "#4a7c59"; // Green - Low
+        if (score <= 14) return "#fbbf24"; // Yellow - Moderate
+        return "#ef4444"; // Red - High
+
+      case "depression":
+        // Depression (max 28): 0-9 low, 10-18 moderate, 19-28 high
+        if (score <= 9) return "#4a7c59"; // Green - Low
+        if (score <= 18) return "#fbbf24"; // Yellow - Moderate
+        return "#ef4444"; // Red - High
+
+      case "stress":
+        // Stress (max 40): 0-14 low, 15-25 moderate, 26-40 high
+        if (score <= 14) return "#4a7c59"; // Green - Low
+        if (score <= 25) return "#fbbf24"; // Yellow - Moderate
+        return "#ef4444"; // Red - High
+
+      default:
+        // Default fallback
+        if (score <= 30) return "#4a7c59";
+        if (score <= 60) return "#fbbf24";
+        return "#ef4444";
+    }
+  };
+
+  const getIndicatorText = (score, type) => {
+    switch (type) {
+      case "anxiety":
+        if (score <= 7) return "Low";
+        if (score <= 14) return "Moderate";
+        return "High";
+
+      case "depression":
+        if (score <= 9) return "Low";
+        if (score <= 18) return "Moderate";
+        return "High";
+
+      case "stress":
+        if (score <= 14) return "Low";
+        if (score <= 25) return "Moderate";
+        return "High";
+
+      default:
+        if (score <= 30) return "Low";
+        if (score <= 60) return "Moderate";
+        return "High";
+    }
+  };
+
+  const renderAssessmentCard = (title, score, icon, type, maxScore) => {
+    // Determine max score based on type if not provided
+    if (!maxScore) {
+      switch (type) {
+        case "anxiety":
+          maxScore = 21;
+          break;
+        case "depression":
+          maxScore = 28;
+          break;
+        case "stress":
+          maxScore = 40;
+          break;
+        default:
+          maxScore = 10;
+      }
+    }
+
+    return (
+      <Card className="assessment-card bg-white rounded-xl shadow-sm hover:shadow-md transition-all">
+        <div className="flex items-center mb-4">
+          <div className="bg-custom-green/10 p-2 rounded-full mr-3">{icon}</div>
+          <h3 className="text-lg font-semibold text-gray-900 m-0">{title}</h3>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Progress
+            type="circle"
+            percent={(score / maxScore) * 100}
+            strokeColor={getIndicatorColor(score, type)}
+            strokeWidth={10}
+            size={80}
+            format={() => <span className="text-lg">{score}</span>}
+          />
+          <div className="text-right">
+            <span className="text-sm text-gray-500">Level</span>
+            <div
+              className={`mt-1 px-3 py-1 rounded-full text-sm font-medium inline-block
+                ${
+                  getIndicatorText(score, type) === "Low"
+                    ? "bg-green-50 text-green-700"
+                    : getIndicatorText(score, type) === "Moderate"
+                    ? "bg-yellow-50 text-yellow-700"
+                    : "bg-red-50 text-red-700"
+                }`}>
+              {getIndicatorText(score, type)}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center mt-4">
+          <p className="text-xs text-gray-500 mb-0">
+            Last updated: {new Date().toLocaleDateString()}
+          </p>
+          <p className="text-xs text-gray-500 mb-0">
+            Score: {score}/{maxScore}
+          </p>
+        </div>
+      </Card>
+    );
   };
 
   // Check if appointment date is valid for checking-in student
@@ -610,43 +722,33 @@ const AppointmentDetailContent = ({ appointment, date, user, fetchData }) => {
                 </div>
               </div>
             </div>
+            {/* Scores Card */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {renderAssessmentCard(
+                "Anxiety Level",
+                appointment.studentResponse.anxietyScore,
+                <BarChartOutlined className="text-custom-green" />,
+                "anxiety",
+                21
+              )}
+              {renderAssessmentCard(
+                "Stress Level",
+                appointment.studentResponse.stressScore,
+                <ClockCircleOutlined className="text-custom-green" />,
+                "stress",
+                40
+              )}
+              {renderAssessmentCard(
+                "Depression Level",
+                appointment.studentResponse.depressionScore,
+                <HeartOutlined className="text-custom-green" />,
+                "depression",
+                28
+              )}
+            </div>
           </Card>
         )}
       </div>
-
-      {/* Scores Card */}
-      <Card
-        title={
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BarChartOutlined className="text-primary-green text-lg" />
-              <span>Assessment Scores</span>
-            </div>
-          </div>
-        }
-        className="bg-white shadow-sm hover:shadow-md transition-shadow duration-200 h-full">
-        <div className="grid grid-cols-3 gap-4">
-          {scores.map((score, index) => (
-            <div key={index} className="flex flex-col items-center gap-2">
-              <h3 className="text-base font-medium text-gray-700">
-                {score.title}
-              </h3>
-              <Progress
-                type="circle"
-                percent={calculatePercentage(score.score)}
-                strokeColor={getScoreColor(score.score)}
-                strokeWidth={10}
-                size={120}
-                format={(percent) => (
-                  <span className="text-lg font-medium">
-                    {Math.round(percent)}%
-                  </span>
-                )}
-              />
-            </div>
-          ))}
-        </div>
-      </Card>
 
       {/* Session Notes - Only visible when checked in */}
       {user.role === "psychologist" && isInProgress && (
