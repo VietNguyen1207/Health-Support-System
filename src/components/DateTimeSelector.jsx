@@ -27,6 +27,8 @@ const TimeSlotCard = memo(({ slot, isSelected, onSelect }) => {
   // Determine if slot is available
   const isAvailable = slot.status === "AVAILABLE";
 
+  const isBooked = slot.booked;
+
   // Calculate availability for visual indicator
   const availabilityText = `${slot.currentBookings}/${slot.maxCapacity}`;
 
@@ -48,12 +50,12 @@ const TimeSlotCard = memo(({ slot, isSelected, onSelect }) => {
           ${
             isSelected
               ? "bg-[#5C8C6B] text-white"
-              : isAvailable
+              : isAvailable && !isBooked
               ? "bg-gray-100 hover:bg-gray-200 cursor-pointer"
               : "bg-gray-200 opacity-60 cursor-not-allowed"
           }
         `}
-        onClick={() => isAvailable && onSelect(slot.timeSlotId)}>
+        onClick={() => isAvailable && !isBooked && onSelect(slot.timeSlotId)}>
         <div className="text-center py-2">
           <div className={`font-medium ${isSelected ? "text-white" : ""}`}>
             {formatTimeDisplay(slot.startTime)}
@@ -67,6 +69,11 @@ const TimeSlotCard = memo(({ slot, isSelected, onSelect }) => {
           {!isAvailable && (
             <Tag className="mt-1" color="default">
               Unavailable
+            </Tag>
+          )}
+          {isBooked && (
+            <Tag className="mt-1" color="error">
+              Booked
             </Tag>
           )}
         </div>
