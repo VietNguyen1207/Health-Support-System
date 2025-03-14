@@ -33,37 +33,98 @@ const { Title, Text } = Typography;
 // const { TabPane } = Tabs;
 
 // Memoized component for time slot item in selection modal
-const TimeSlotItem = memo(({ slot, isSelected, onToggle, isDisabled }) => {
-  return (
-    <div
-      className={`
+const TimeSlotItem = memo(
+  ({ slot, isSelected, onToggle, isDisabled, date }) => {
+    const isOver = useMemo(() => {
+      // Get current date and time
+      const now = dayjs();
+
+      // Parse the selected date
+      const selectedDate = dayjs(date);
+
+      // Check if the selected date is in the past
+      if (selectedDate.isBefore(now, "day")) {
+        // If the selected date is before today, all slots are in the past
+        return true;
+      }
+
+      // Check if the selected date is today
+      if (selectedDate.isSame(now, "day")) {
+        // Extract hours and minutes from startTime
+        let slotHour = 0,
+          slotMinute = 0;
+
+        try {
+          // Handle different time formats (with or without seconds/milliseconds)
+          const timeStr = slot.startTime.split(".")[0]; // Remove milliseconds if present
+          const timeParts = timeStr.split(":");
+          slotHour = parseInt(timeParts[0], 10);
+          slotMinute = parseInt(timeParts[1], 10);
+
+          if (isNaN(slotHour) || isNaN(slotMinute)) {
+            console.warn("Invalid time format:", slot.startTime);
+            return false;
+          }
+        } catch (error) {
+          console.error("Error parsing time:", slot.startTime, error);
+          return false;
+        }
+
+        // Compare with current time
+        const currentHour = now.hour();
+        const currentMinute = now.minute();
+
+        // Check if the slot time is in the past
+        if (slotHour < currentHour) {
+          return true;
+        } else if (slotHour === currentHour && slotMinute <= currentMinute) {
+          return true;
+        }
+      }
+
+      // If the selected date is in the future or the slot time is in the future today
+      return false;
+    }, [date, slot.startTime]);
+
+    return (
+      <div
+        className={`
         p-3 rounded-md border mb-2 flex justify-between items-center
-        ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+        ${
+          isDisabled || isOver
+            ? "opacity-50 cursor-not-allowed"
+            : "cursor-pointer"
+        }
         ${
           isSelected
             ? "border-primary bg-primary-light"
             : "border-gray-200 hover:border-primary"
         }
       `}
-      onClick={() => !isDisabled && onToggle(slot.slotId)}>
-      <div>
-        <div className="font-medium">
-          {dayjs(slot.startTime, "HH:mm:ss").format("HH:mm")} -{" "}
-          {dayjs(slot.endTime, "HH:mm:ss").format("HH:mm")}
+        onClick={() => (!isDisabled || !isOver) && onToggle(slot.slotId)}>
+        {/* Add an indicator for past slots */}
+        <div>
+          <div className="font-medium">
+            {dayjs(slot.startTime, "HH:mm:ss").format("HH:mm")} -{" "}
+            {dayjs(slot.endTime, "HH:mm:ss").format("HH:mm")}
+          </div>
+          <div className="text-xs text-gray-500">
+            {slot.period}
+            {isDisabled ? (
+              <span className="text-red-500 ml-2">(Already created)</span>
+            ) : (
+              isOver && <span className="text-red-500 ml-2">(Expired)</span>
+            )}
+          </div>
         </div>
-        <div className="text-xs text-gray-500">
-          {slot.period}
-          {isDisabled && (
-            <span className="text-red-500 ml-2">(Already created)</span>
-          )}
-        </div>
+        <Checkbox checked={isSelected} disabled={isDisabled || isOver} />
       </div>
-      <Checkbox checked={isSelected} disabled={isDisabled} />
-    </div>
-  );
-});
+    );
+  }
+);
 
 TimeSlotItem.propTypes = {
+  date: PropTypes.string.isRequired,
   slot: PropTypes.shape({
     slotId: PropTypes.string.isRequired,
     startTime: PropTypes.string.isRequired,
@@ -188,22 +249,23 @@ const WorkSchedule = () => {
   );
 
   // Handler for date change in modal
-  const handleDateChange = useCallback(
-    (date) => {
-      setSelectedDate(date);
-      setSelectedSlots([]); // Reset selected slots when date changes
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    setSelectedSlots([]); // Reset selected slots when date changes
 
-      // Kiểm tra các slot đã tồn tại cho ngày được chọn
-      if (date) {
-        const formattedDate = date.format("YYYY-MM-DD");
+    // Kiểm tra các slot đã tồn tại cho ngày được chọn
+    if (date) {
+      const formattedDate = date.format("YYYY-MM-DD");
 
-        // Lấy các slot đã tạo cho ngày được chọn từ createdTimeSlots
-        const existingSlots = createdTimeSlots[formattedDate] || [];
+      // Sử dụng dữ liệu từ state timeSlots thay vì gọi API
+      if (timeSlots && Array.isArray(timeSlots)) {
+        // Lọc các slot theo ngày được chọn
+        const existingSlots = timeSlots.filter(
+          (slot) => slot.slotDate === formattedDate
+        );
 
         // Tạo Set chứa ID của các slot đã tồn tại
         const existingIds = new Set();
-
-        // Duyệt qua các slot đã tạo và lấy timeSlotId
         existingSlots.forEach((slot) => {
           if (slot.timeSlotId) {
             existingIds.add(slot.timeSlotId);
@@ -213,22 +275,16 @@ const WorkSchedule = () => {
         // Cập nhật state để vô hiệu hóa các slot đã tồn tại
         setExistingSlotIds(existingIds);
 
+        // Log để debug
         console.log(
           `Found ${existingIds.size} existing slots for ${formattedDate}`
         );
-
-        {
-          /* console.log("====================================");
-        console.log(createdTimeSlots[formattedDate]);
-        console.log("===================================="); */
-        }
-      } else {
-        // Reset nếu không có ngày được chọn
-        setExistingSlotIds(new Set());
       }
-    },
-    [createdTimeSlots] // Thay đổi dependency từ timeSlots sang createdTimeSlots
-  );
+    } else {
+      // Reset nếu không có ngày được chọn
+      setExistingSlotIds(new Set());
+    }
+  };
 
   // Toggle slot selection
   const toggleSlot = useCallback((slotId) => {
@@ -641,6 +697,7 @@ const WorkSchedule = () => {
                               <TimeSlotItem
                                 key={slot.slotId}
                                 slot={slot}
+                                date={selectedDate.format("YYYY-MM-DD")}
                                 isSelected={selectedSlots.includes(slot.slotId)}
                                 onToggle={toggleSlot}
                                 isDisabled={isDisabled}

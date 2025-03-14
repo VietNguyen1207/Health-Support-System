@@ -149,7 +149,7 @@ export const useAppointmentStore = create((set) => ({
       const { data } = await api.post(
         `/appointments/${appointmentId}/check-out`,
         {
-          psychologistNotes: notes,
+          psychologistNote: notes,
         }
       );
       set({
