@@ -186,4 +186,28 @@ export const useProgramStore = create((set) => ({
       throw new Error(errorMessage);
     }
   },
+
+  // Cancel program participation
+  cancelProgramParticipation: async (programId) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.post(
+        `/programs/cancel-request?programId=${programId}`
+      );
+      set({ loading: false });
+      return data;
+    } catch (error) {
+      console.error("Error cancelling program participation:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to cancel program participation";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
 }));

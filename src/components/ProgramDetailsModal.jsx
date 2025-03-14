@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Tag, Space, Skeleton, message } from "antd";
+import { Modal, Button, Tag, Space, Skeleton, message, Popconfirm } from "antd";
 import {
   CalendarOutlined,
   TeamOutlined,
   FieldTimeOutlined,
   LinkOutlined,
   UserOutlined,
+  CloseCircleOutlined,
 } from "@ant-design/icons";
 import { useProgramStore } from "../stores/programStore";
 import { useAuthStore } from "../stores/authStore";
@@ -17,9 +18,11 @@ const ProgramDetailsModal = ({
   loading,
   onJoinProgram,
 }) => {
-  const { registerProgram, fetchProgramDetails } = useProgramStore();
+  const { registerProgram, fetchProgramDetails, cancelProgramParticipation } =
+    useProgramStore();
   const { user } = useAuthStore();
   const [registering, setRegistering] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [registered, setRegistered] = useState(
     program?.studentStatus === "JOINED"
   );
@@ -99,6 +102,56 @@ const ProgramDetailsModal = ({
     }
   };
 
+  const handleCancelParticipation = async () => {
+    if (!program) return;
+
+    try {
+      setCancelling(true);
+
+      // Call the API to cancel program participation
+      await cancelProgramParticipation(program.programID);
+
+      // Update local state
+      setRegistered(false);
+
+      // Optimistically update the participant count and status in the local state
+      setUpdatedProgram({
+        ...program,
+        currentParticipants: Math.max(0, program.currentParticipants - 1),
+        status: "ACTIVE", // Reset to active since a spot opened up
+        studentStatus: undefined, // Remove joined status
+      });
+
+      // Show success message
+      message.success("Successfully cancelled program participation");
+
+      // Call the callback if provided to update the parent component
+      if (onJoinProgram) {
+        onJoinProgram(program.programID, {
+          ...program,
+          currentParticipants: Math.max(0, program.currentParticipants - 1),
+          status: "ACTIVE",
+          studentStatus: undefined,
+        });
+      }
+
+      // Fetch the updated program details in the background
+      try {
+        const updatedData = await fetchProgramDetails(program.programID);
+        setUpdatedProgram(updatedData);
+      } catch (error) {
+        console.error("Failed to fetch updated program details:", error);
+      }
+    } catch (error) {
+      console.error("Cancellation error:", error);
+      message.error(
+        `Failed to cancel participation: ${error.message || "Please try again"}`
+      );
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   return (
     <Modal
       title={
@@ -124,7 +177,7 @@ const ProgramDetailsModal = ({
       destroyOnClose={true}
       footer={
         <div className="flex justify-end gap-3">
-          <Button onClick={onClose}>{registered ? "Close" : "Back"}</Button>
+          <Button onClick={onClose}>Close</Button>
           {!registered ? (
             <Button
               type="primary"
@@ -146,14 +199,37 @@ const ProgramDetailsModal = ({
                 : "Join Program"}
             </Button>
           ) : (
-            <Button
-              type="primary"
-              className="bg-primary-green hover:bg-primary-green/90"
-              icon={<LinkOutlined />}
-              onClick={onClose}
-            >
-              Done
-            </Button>
+            <div className="flex gap-2">
+              {program.type === "ONLINE" && program.meetingLink && (
+                <Button
+                  type="primary"
+                  className="bg-primary-green hover:bg-primary-green/90"
+                  icon={<LinkOutlined />}
+                  onClick={() => window.open(program.meetingLink, "_blank")}
+                >
+                  Join Meeting
+                </Button>
+              )}
+              <Popconfirm
+                title="Cancel Program Participation"
+                description="Are you sure you want to cancel your participation in this program?"
+                onConfirm={handleCancelParticipation}
+                okText="Yes, Cancel"
+                cancelText="No"
+                okButtonProps={{
+                  danger: true,
+                  loading: cancelling,
+                }}
+              >
+                <Button
+                  danger
+                  icon={<CloseCircleOutlined />}
+                  loading={cancelling}
+                >
+                  Cancel Participation
+                </Button>
+              </Popconfirm>
+            </div>
           )}
         </div>
       }
@@ -215,8 +291,8 @@ const ModalContent = React.memo(({ program, loading, registered }) => {
               <span className="mr-2">•</span>
               <span>
                 Weekly on {program.weeklySchedule.weeklyAt}s from{" "}
-                {program.weeklySchedule.startTime} to{" "}
-                {program.weeklySchedule.endTime}
+                {program.weeklySchedule.startTime.substring(0, 5)} to{" "}
+                {program.weeklySchedule.endTime.substring(0, 5)}
               </span>
             </li>
             <li className="flex items-start">
