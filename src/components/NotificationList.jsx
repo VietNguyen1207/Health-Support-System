@@ -156,6 +156,16 @@ const NotificationList = ({ onClose }) => {
         cancelText: "Cancel",
       });
     }
+
+    if (noti.type === "APPOINTMENT") {
+      if (noti.title.includes("Check-out") || noti.title.includes("Canceled")) {
+        navigate("/appointment-record");
+      } else navigate("/calendar");
+    } else {
+      if (user.role === "student") {
+        navigate("/student-profile");
+      } else navigate("/psychologist-profile");
+    }
   };
 
   const handleNotificationHover = (notification) => {

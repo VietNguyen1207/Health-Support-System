@@ -30,7 +30,10 @@ export function checkRole(currRole, role) {
   return currRole.toLowerCase() === role.toLowerCase();
 }
 
-export function mergeNestedObject(arr, nestedKey) {
+export function mergeNestedArr(arr, nestedKey) {
+  if (!arr || !Array.isArray(arr)) {
+    return [];
+  }
   return arr.map((object) => {
     // Destructure the nested object using the provided key
     const { [nestedKey]: nestedInfo, ...otherAttributes } = object;
@@ -43,33 +46,54 @@ export function mergeNestedObject(arr, nestedKey) {
   });
 }
 
-export function splitParentArrays(parentArray) {
-  // Initialize two arrays to hold the results
-  const parentsWithoutChildren = [];
+export function mergeNestedObject(obj, nestedKey) {
+  // Check if obj is null, undefined, or not an object
+  if (!obj || typeof obj !== "object") {
+    return [];
+  }
+
+  // If obj is an array, map through it
+  if (Array.isArray(obj)) {
+    return obj.map((item) => {
+      // Check if the nested key exists in the item
+      const nestedInfo = item[nestedKey] || {};
+
+      // Return merged object
+      return {
+        ...item,
+        ...nestedInfo,
+      };
+    });
+  }
+
+  // If obj is a single object (not an array)
+  // Extract the nested object using the provided key
+  const nestedInfo = obj[nestedKey] || {};
+
+  // Return the merged object
+  return {
+    ...obj,
+    ...nestedInfo,
+  };
+}
+
+export function splitParentArrays(parentData) {
+  // Check if parentData is null, undefined, or not an array
+  if (!parentData) {
+    return { parentsWithoutChildren: [], childrenInfoArray: [] };
+  }
+
+  // If it's a single object, convert to array
+  const dataArray = Array.isArray(parentData) ? parentData : [parentData];
+
+  // Process the array safely
   const childrenInfoArray = [];
 
-  parentArray.forEach((parent) => {
-    // Create an object without the children attribute
-    const { children, ...parentWithoutChildren } = parent;
-
-    // Create an object containing userId and the children array
-    const childrenObject = {
-      userId: parent.userId,
-      children: children,
-    };
-
-    // Create an object containing parentWithoutChildren and the number of child
-    const parentObject = {
-      ...parentWithoutChildren,
-      numOfChildren: children.length || 0,
-    };
-
-    // Push the objects into their respective arrays
-    parentsWithoutChildren.push(parentObject);
-    childrenInfoArray.push(childrenObject);
-  });
-
-  return { parentsWithoutChildren, childrenInfoArray };
+  // Return the processed data
+  return {
+    parentsWithoutChildren: dataArray,
+    childrenInfoArray,
+  };
 }
 
 // Lọc menu dựa trên role, mặc định cho phép truy cập nếu không có roles
