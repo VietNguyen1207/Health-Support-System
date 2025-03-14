@@ -99,11 +99,7 @@ function DetailCalendar({ user, date, events, visible, onClose, fetchData }) {
               label: `${program.title} - ${program.type}`,
               icon: <CarryOutOutlined />,
               children: (
-                <ProgramDetailContent
-                  program={data}
-                  key={program.programID}
-                  user={user}
-                />
+                <ProgramDetailContent program={data} key={program.programID} />
               ),
             };
         })
@@ -186,9 +182,7 @@ DetailCalendar.propTypes = {
   fetchData: PropTypes.func.isRequired,
 };
 
-const ProgramDetailContent = ({ program, user }) => {
-  console.log(user);
-
+const ProgramDetailContent = ({ program }) => {
   return (
     <div className="space-y-4 animate-fadeIn max-h-[69vh] overflow-auto pr-5">
       {/* Program Header */}
