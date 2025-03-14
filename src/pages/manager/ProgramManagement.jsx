@@ -100,7 +100,12 @@ const formatTime = (timeString) => {
 };
 
 function ProgramManagement() {
-  const { programs = [], loading, fetchPrograms } = useProgramStore();
+  const {
+    programs = [],
+    loading,
+    fetchPrograms,
+    updateProgram,
+  } = useProgramStore();
   const [filteredPrograms, setFilteredPrograms] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [selectedProgram, setSelectedProgram] = useState(null);
@@ -280,7 +285,7 @@ function ProgramManagement() {
   // };
 
   // Xử lý submit form
-  const handleFormSubmit = (values) => {
+  const handleFormSubmit = async (values) => {
     // Chuẩn bị dữ liệu để gửi lên server
     const formData = {
       ...values,
@@ -295,6 +300,7 @@ function ProgramManagement() {
     // Nếu là chỉnh sửa
     if (selectedProgram) {
       // Gọi API cập nhật chương trình
+      await updateProgram(selectedProgram.programID, formData);
       message.success(
         `Program ${selectedProgram.programID} updated successfully`
       );

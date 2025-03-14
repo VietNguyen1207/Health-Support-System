@@ -186,4 +186,42 @@ export const useProgramStore = create((set) => ({
       throw new Error(errorMessage);
     }
   },
+
+  // Update an existing program
+  updateProgram: async (programId, programData) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.put(
+        `/programs/edit?programId=${programId}`,
+        programData
+      );
+
+      // Update the programs list with the updated program
+      set((state) => ({
+        programs: state.programs.map((program) =>
+          program.programID === programId ? data : program
+        ),
+        loading: false,
+        // If the updated program is currently selected, update it too
+        selectedProgram:
+          state.selectedProgram?.programID === programId
+            ? data
+            : state.selectedProgram,
+      }));
+
+      return data;
+    } catch (error) {
+      console.error("Error updating program:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        fullError: error,
+      });
+
+      const errorMessage =
+        error.response?.data?.message || "Failed to update program";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
 }));
