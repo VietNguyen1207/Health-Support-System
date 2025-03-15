@@ -191,7 +191,7 @@ export const useProgramStore = create((set) => ({
   cancelProgramParticipation: async (programId) => {
     set({ loading: true, error: null });
     try {
-      const { data } = await api.post(
+      const { data } = await api.put(
         `/programs/cancel-request?programId=${programId}`
       );
       set({ loading: false });
@@ -203,9 +203,14 @@ export const useProgramStore = create((set) => ({
         message: error.message,
       });
 
-      const errorMessage =
-        error.response?.data?.message ||
-        "Failed to cancel program participation";
+      let errorMessage = "Failed to cancel program participation";
+      if (error.response?.status === 403) {
+        errorMessage =
+          "You don't have permission to cancel this program registration";
+      } else if (error.response?.status === 404) {
+        errorMessage = "Program registration not found";
+      }
+
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }

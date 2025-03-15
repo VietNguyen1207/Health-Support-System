@@ -105,6 +105,12 @@ const ProgramDetailsModal = ({
   const handleCancelParticipation = async () => {
     if (!program) return;
 
+    // Check if the student is actually registered
+    if (program.studentStatus !== "JOINED") {
+      message.error("You are not registered for this program");
+      return;
+    }
+
     try {
       setCancelling(true);
 
@@ -144,9 +150,7 @@ const ProgramDetailsModal = ({
       }
     } catch (error) {
       console.error("Cancellation error:", error);
-      message.error(
-        `Failed to cancel participation: ${error.message || "Please try again"}`
-      );
+      message.error(error.message || "Failed to cancel participation");
     } finally {
       setCancelling(false);
     }
