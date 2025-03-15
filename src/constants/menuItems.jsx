@@ -32,6 +32,12 @@ export const menuItems = [
         path: "/add-program",
         roles: ["psychologist", "manager"],
       },
+      {
+        key: "/update-program",
+        label: "Update Program",
+        path: "/update-program",
+        roles: ["psychologist", "manager"],
+      },
     ],
   },
   {
