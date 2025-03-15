@@ -186,4 +186,33 @@ export const useProgramStore = create((set) => ({
       throw new Error(errorMessage);
     }
   },
+
+  // Cancel program participation
+  cancelProgramParticipation: async (programId) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.put(
+        `/programs/cancel-request?programId=${programId}`
+      );
+      set({ loading: false });
+      return data;
+    } catch (error) {
+      console.error("Error cancelling program participation:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      let errorMessage = "Failed to cancel program participation";
+      if (error.response?.status === 403) {
+        errorMessage =
+          "You don't have permission to cancel this program registration";
+      } else if (error.response?.status === 404) {
+        errorMessage = "Program registration not found";
+      }
+
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
 }));
