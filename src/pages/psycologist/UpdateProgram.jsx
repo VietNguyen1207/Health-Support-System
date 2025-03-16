@@ -20,12 +20,15 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import { useProgramStore } from "../../stores/programStore";
+import UpdateProgramModal from "../../components/UpdateProgramModal";
 
 const UpdateProgram = () => {
   const { fetchPrograms, loading } = useProgramStore();
   const [programs, setPrograms] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState(null);
 
   // Fetch programs on component mount
   useEffect(() => {
@@ -64,8 +67,20 @@ const UpdateProgram = () => {
 
   // Handle program update
   const handleUpdate = (program) => {
-    message.info("Update functionality will be implemented");
-    // TODO: Implement update logic
+    console.log("Selected program for update:", program); // Debug log
+    if (!program || !program.programID) {
+      message.error("Invalid program selected");
+      return;
+    }
+    setSelectedProgram(program);
+    setUpdateModalVisible(true);
+  };
+
+  // Add this function to handle successful updates
+  const handleUpdateSuccess = () => {
+    setUpdateModalVisible(false);
+    setSelectedProgram(null);
+    fetchProgramsList(); // Refresh the programs list
   };
 
   const filteredPrograms = programs.filter(
@@ -263,6 +278,16 @@ const UpdateProgram = () => {
           className="programs-table"
         />
       </Card>
+
+      <UpdateProgramModal
+        visible={updateModalVisible}
+        program={selectedProgram}
+        onCancel={() => {
+          setUpdateModalVisible(false);
+          setSelectedProgram(null);
+        }}
+        onSuccess={handleUpdateSuccess}
+      />
 
       {/* Add some custom styles */}
       <style jsx global>{`
