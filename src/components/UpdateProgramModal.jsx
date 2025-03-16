@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Modal,
   Form,
@@ -10,6 +10,9 @@ import {
   Button,
   message,
   Divider,
+  Tag,
+  Alert,
+  Tooltip,
 } from "antd";
 import {
   CalendarOutlined,
@@ -17,6 +20,9 @@ import {
   TeamOutlined,
   LinkOutlined,
   TagsOutlined,
+  BankOutlined,
+  UserOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 import { useProgramStore } from "../stores/programStore";
 import { usePsychologistStore } from "../stores/psychologistStore";
@@ -33,9 +39,14 @@ const UpdateProgramModal = ({ visible, program, onCancel, onSuccess }) => {
   const [programType, setProgramType] = useState(program?.type || "OFFLINE");
   const [psychologists, setPsychologists] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [formChanged, setFormChanged] = useState(false);
+  const initialValues = useRef(null);
 
   useEffect(() => {
     if (visible && program) {
+      // Reset form change state when modal opens
+      setFormChanged(false);
+
       // Fetch all necessary data when modal opens
       const fetchData = async () => {
         try {
@@ -58,12 +69,86 @@ const UpdateProgramModal = ({ visible, program, onCancel, onSuccess }) => {
             }))
           );
 
-          // Log the tags for debugging
+          console.log("Program data:", program);
           console.log("Program tags:", program.tags);
           console.log("Available tags:", tagsList);
 
-          // Set initial form values
-          form.setFieldsValue({
+          // Find the matching department ID based on name
+          const departmentId =
+            deptsData.find(
+              (dept) => dept.departmentName === program.departmentName
+            )?.departmentId || program.departmentId;
+
+          // Find the matching facilitator ID based on name
+          const facilitatorId =
+            psychsData.find(
+              (psych) => psych.info.fullName === program.facilitatorName
+            )?.psychologistId || program.facilitatorId;
+
+          // Format tags to match the expected format
+          let formattedTags = [];
+
+          // Check if program.tags is an array
+          if (Array.isArray(program.tags)) {
+            formattedTags = program.tags
+              .map((tag) => {
+                // If tag is already a string ID (like "TAG001"), use it directly
+                if (typeof tag === "string" && /^TAG\d+$/.test(tag)) {
+                  return tag;
+                }
+
+                // If tag has a tagId property, use that
+                if (tag.tagId) {
+                  return tag.tagId;
+                }
+
+                // If tag has a value property that looks like a tag ID, use that
+                if (
+                  tag.value &&
+                  typeof tag.value === "string" &&
+                  /^TAG\d+$/.test(tag.value)
+                ) {
+                  return tag.value;
+                }
+
+                // If tag has a tagName property, find the matching tag in tagsList
+                if (tag.tagName) {
+                  const matchingTag = tagsList.find(
+                    (t) => t.label === tag.tagName
+                  );
+                  if (matchingTag) {
+                    return matchingTag.value;
+                  }
+                }
+
+                // If tag is an object with a name/label property, find the matching tag
+                if (tag.name || tag.label) {
+                  const tagName = tag.name || tag.label;
+                  const matchingTag = tagsList.find((t) => t.label === tagName);
+                  if (matchingTag) {
+                    return matchingTag.value;
+                  }
+                }
+
+                // If tag is a string but not an ID (like "RELATIONSHIP STRESS"), find the matching tag
+                if (typeof tag === "string") {
+                  const matchingTag = tagsList.find((t) => t.label === tag);
+                  if (matchingTag) {
+                    return matchingTag.value;
+                  }
+                }
+
+                // If we can't determine the tag ID, log a warning and return null
+                console.warn("Could not determine tag ID for:", tag);
+                return null;
+              })
+              .filter(Boolean); // Remove any null values
+          }
+
+          console.log("Formatted tags:", formattedTags);
+
+          // Prepare initial form values
+          const formValues = {
             title: program.title,
             description: program.description,
             maxParticipants: program.maxParticipants,
@@ -73,12 +158,21 @@ const UpdateProgramModal = ({ visible, program, onCancel, onSuccess }) => {
             startTime: dayjs(program.weeklySchedule.startTime, "HH:mm"),
             endTime: dayjs(program.weeklySchedule.endTime, "HH:mm"),
             status: program.status,
-            tags: program.tags,
+            tags: formattedTags,
             type: program.type,
             meetingLink: program.meetingLink,
-            facilitatorId: program.facilitatorId,
-            departmentId: program.departmentId,
-          });
+            // Use the IDs instead of names
+            facilitatorId: facilitatorId,
+            departmentId: departmentId,
+          };
+
+          console.log("Setting form values:", formValues);
+
+          // Store initial values for comparison
+          initialValues.current = formValues;
+
+          // Set form values
+          form.setFieldsValue(formValues);
         } catch (error) {
           console.error("Error fetching data:", error);
           message.error("Failed to load necessary data");
@@ -90,13 +184,76 @@ const UpdateProgramModal = ({ visible, program, onCancel, onSuccess }) => {
     }
   }, [visible, program, form]);
 
+  // Track form changes
+  const handleFormChange = () => {
+    setFormChanged(true);
+  };
+
+  // Compare form values to detect changes
+  const hasFormChanged = () => {
+    if (!initialValues.current) return false;
+
+    const currentValues = form.getFieldsValue();
+
+    // Compare each field
+    const changedFields = Object.keys(currentValues).filter((key) => {
+      // Special handling for date and time objects
+      if (key === "startDate") {
+        return !currentValues[key]?.isSame(initialValues.current[key]);
+      }
+      if (key === "startTime" || key === "endTime") {
+        return !currentValues[key]?.isSame(initialValues.current[key]);
+      }
+      // Special handling for arrays (tags)
+      if (key === "tags") {
+        // If lengths differ, there's a change
+        if (currentValues[key]?.length !== initialValues.current[key]?.length) {
+          return true;
+        }
+        // Check if all elements are the same
+        if (currentValues[key] && initialValues.current[key]) {
+          const currentTags = new Set(
+            currentValues[key].map((t) =>
+              typeof t === "object" ? t.tagId || t.value : t
+            )
+          );
+          const initialTags = new Set(
+            initialValues.current[key].map((t) =>
+              typeof t === "object" ? t.tagId || t.value : t
+            )
+          );
+          return (
+            currentTags.size !== initialTags.size ||
+            [...currentTags].some((tag) => !initialTags.has(tag))
+          );
+        }
+      }
+      // Default comparison
+      return (
+        JSON.stringify(currentValues[key]) !==
+        JSON.stringify(initialValues.current[key])
+      );
+    });
+
+    return changedFields.length > 0;
+  };
+
   const handleSubmit = async (values) => {
     try {
+      // Check if form has changed
+      if (!hasFormChanged() && !formChanged) {
+        message.info("No changes detected. Update skipped.");
+        return;
+      }
+
       setSubmitting(true);
 
       if (!program || !program.programID) {
         throw new Error("Program ID is missing");
       }
+
+      // Log the form values for debugging
+      console.log("Form values before submission:", values);
 
       // Format the values before sending to updateProgram
       const formattedValues = {
@@ -112,11 +269,15 @@ const UpdateProgramModal = ({ visible, program, onCancel, onSuccess }) => {
         meetingLink: values.type === "ONLINE" ? values.meetingLink : null,
         facilitatorId: values.facilitatorId,
         departmentId: values.departmentId,
-        tags: values.tags,
+        // Ensure tags are just the tag IDs
+        tags: Array.isArray(values.tags)
+          ? values.tags.map((tag) =>
+              typeof tag === "object" ? tag.value || tag.tagId : tag
+            )
+          : values.tags,
       };
 
-      console.log("Updating program with ID:", program.programID);
-      console.log("Update payload:", formattedValues);
+      console.log("Formatted values for submission:", formattedValues);
 
       await updateProgram(program.programID, formattedValues);
       message.success("Program updated successfully");
@@ -138,6 +299,15 @@ const UpdateProgramModal = ({ visible, program, onCancel, onSuccess }) => {
     if (value === "OFFLINE") {
       form.setFieldValue("meetingLink", undefined);
     }
+  };
+
+  // Add this inside the component, before the return statement
+  const validateEndTime = (_, value) => {
+    const startTime = form.getFieldValue("startTime");
+    if (startTime && value && value.isBefore(startTime)) {
+      return Promise.reject(new Error("End time must be after start time"));
+    }
+    return Promise.resolve();
   };
 
   return (
@@ -168,6 +338,7 @@ const UpdateProgramModal = ({ visible, program, onCancel, onSuccess }) => {
         layout="vertical"
         onFinish={handleSubmit}
         className="mt-6"
+        onValuesChange={handleFormChange}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Basic Information */}
@@ -251,14 +422,28 @@ const UpdateProgramModal = ({ visible, program, onCancel, onSuccess }) => {
               className="flex-1"
               rules={[{ required: true, message: "Please select start time" }]}
             >
-              <TimePicker format="HH:mm" className="w-full" />
+              <TimePicker
+                format="HH:mm"
+                className="w-full"
+                onChange={() => {
+                  // When start time changes, validate end time again
+                  const endTime = form.getFieldValue("endTime");
+                  if (endTime) {
+                    form.validateFields(["endTime"]);
+                  }
+                }}
+              />
             </Form.Item>
 
             <Form.Item
               name="endTime"
               label="End Time"
               className="flex-1"
-              rules={[{ required: true, message: "Please select end time" }]}
+              rules={[
+                { required: true, message: "Please select end time" },
+                { validator: validateEndTime },
+              ]}
+              dependencies={["startTime"]} // This ensures validation runs when startTime changes
             >
               <TimePicker format="HH:mm" className="w-full" />
             </Form.Item>
@@ -307,9 +492,122 @@ const UpdateProgramModal = ({ visible, program, onCancel, onSuccess }) => {
             </Form.Item>
           )}
 
+          <Divider className="md:col-span-2 my-2" />
+
+          {/* Program Assignment Section */}
+          <div className="md:col-span-2">
+            <h4 className="text-sm font-medium text-gray-700 mb-4">
+              Program Assignment
+            </h4>
+          </div>
+
+          <Form.Item
+            name="departmentId"
+            label={
+              <div className="flex items-center">
+                <span>Department</span>
+                <Tooltip title="Department cannot be changed">
+                  <span className="ml-1 text-gray-400">
+                    <LockOutlined />
+                  </span>
+                </Tooltip>
+              </div>
+            }
+            rules={[{ required: true, message: "Please select a department" }]}
+          >
+            <Select
+              placeholder="Select department"
+              options={departments}
+              loading={loading}
+              suffixIcon={<BankOutlined className="text-gray-400" />}
+              className="rounded-lg"
+              dropdownClassName="department-dropdown"
+              optionLabelProp="label"
+              showSearch
+              disabled={true}
+              filterOption={(input, option) =>
+                option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+              notFoundContent={
+                loading ? (
+                  <div className="text-center py-2">
+                    <span className="text-gray-500">
+                      Loading departments...
+                    </span>
+                  </div>
+                ) : (
+                  <div className="text-center py-2">
+                    <span className="text-gray-500">No departments found</span>
+                  </div>
+                )
+              }
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="facilitatorId"
+            label={
+              <div className="flex items-center">
+                <span>Facilitator</span>
+                <Tooltip title="Facilitator cannot be changed">
+                  <span className="ml-1 text-gray-400">
+                    <LockOutlined />
+                  </span>
+                </Tooltip>
+              </div>
+            }
+            rules={[{ required: true, message: "Please select a facilitator" }]}
+          >
+            <Select
+              placeholder="Select facilitator"
+              options={psychologists}
+              loading={loading}
+              suffixIcon={<UserOutlined className="text-gray-400" />}
+              className="rounded-lg"
+              dropdownClassName="facilitator-dropdown"
+              optionLabelProp="label"
+              showSearch
+              disabled={true}
+              filterOption={(input, option) =>
+                option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+              notFoundContent={
+                loading ? (
+                  <div className="text-center py-2">
+                    <span className="text-gray-500">
+                      Loading facilitators...
+                    </span>
+                  </div>
+                ) : (
+                  <div className="text-center py-2">
+                    <span className="text-gray-500">No facilitators found</span>
+                  </div>
+                )
+              }
+              optionRender={(option) => (
+                <div className="flex items-center py-1">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                    <UserOutlined className="text-blue-500" />
+                  </div>
+                  <div>
+                    <div className="font-medium">{option.data.label}</div>
+                  </div>
+                </div>
+              )}
+            />
+          </Form.Item>
+
+          {/* Tags Section */}
+          <div className="md:col-span-2">
+            <h4 className="text-sm font-medium text-gray-700 mb-4">
+              Program Tags
+            </h4>
+          </div>
+
           <Form.Item
             name="tags"
             label="Tags"
+            className="md:col-span-2"
             rules={[
               { required: true, message: "Please select at least one tag" },
             ]}
@@ -320,37 +618,31 @@ const UpdateProgramModal = ({ visible, program, onCancel, onSuccess }) => {
               maxCount={3}
               loading={loading}
               optionLabelProp="label"
+              className="rounded-lg"
+              suffixIcon={<TagsOutlined className="text-gray-400" />}
+              tagRender={(props) => {
+                const { label, closable, onClose } = props;
+                return (
+                  <Tag
+                    color="blue"
+                    closable={closable}
+                    onClose={onClose}
+                    className="mr-2 mb-2 py-1"
+                  >
+                    {label}
+                  </Tag>
+                );
+              }}
             >
               {tags.map((tag) => (
                 <Option key={tag.value} value={tag.value} label={tag.label}>
-                  {tag.label}
+                  <div className="flex items-center py-1">
+                    <TagsOutlined className="mr-2 text-blue-500" />
+                    <span>{tag.label}</span>
+                  </div>
                 </Option>
               ))}
             </Select>
-          </Form.Item>
-
-          <Form.Item
-            name="departmentId"
-            label="Department"
-            rules={[{ required: true, message: "Please select a department" }]}
-          >
-            <Select
-              placeholder="Select department"
-              options={departments}
-              loading={loading}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="facilitatorId"
-            label="Facilitator"
-            rules={[{ required: true, message: "Please select a facilitator" }]}
-          >
-            <Select
-              placeholder="Select facilitator"
-              options={psychologists}
-              loading={loading}
-            />
           </Form.Item>
         </div>
 
@@ -361,11 +653,26 @@ const UpdateProgramModal = ({ visible, program, onCancel, onSuccess }) => {
             htmlType="submit"
             loading={submitting}
             className="bg-primary-green hover:bg-primary-green/90"
+            disabled={!formChanged && !hasFormChanged()}
           >
             Update Program
           </Button>
         </div>
       </Form>
+
+      {/* Add some custom styles */}
+      <style jsx global>{`
+        .department-dropdown .ant-select-item-option-selected {
+          background-color: #f0f9ff;
+        }
+        .facilitator-dropdown .ant-select-item-option-selected {
+          background-color: #f0f9ff;
+        }
+        .ant-select-selection-item-content {
+          display: flex;
+          align-items: center;
+        }
+      `}</style>
     </Modal>
   );
 };
