@@ -32,10 +32,10 @@ import TestResult from "../pages/TestResult";
 import Blog from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetail";
 import Application from "../pages/psycologist/Application";
-import ApplicationManagement from "../pages/manager/ApplicationManagement ";
 import NotificationDetail from "../pages/NotificationDetail";
 import PsychologistProfile from "../pages/psycologist/PsychologistProfile";
 import WorkSchedule from "../pages/psycologist/WorkSchedule";
+import ProgramManagement from "../pages/manager/ProgramManagement";
 
 const Appointment = lazy(() => import("../pages/psycologist/Appointment"));
 
@@ -146,7 +146,7 @@ export const routes = [
         element: <UserManagement />,
       },
       { path: "surveys", element: <SurveyManagement /> },
-      { path: "applications", element: <ApplicationManagement /> },
+      { path: "programs", element: <ProgramManagement /> },
     ],
   },
   {
