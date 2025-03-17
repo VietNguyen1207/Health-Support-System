@@ -19,6 +19,7 @@ import AddProgram from "../pages/psycologist/AddProgram";
 import UpdateProgram from "../pages/psycologist/UpdateProgram";
 import CreateTest from "../pages/psycologist/CreateTest";
 import StudentProfile from "../pages/student/StudentProfile";
+import ParentProfile from "../pages/parent/ParentProfile";
 import { Outlet } from "react-router-dom";
 // import Appointment from "../pages/psycologist/Appointment";
 import ChildrenRecord from "../pages/parent/ChildrenRecord";
@@ -128,6 +129,15 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [{ path: "children-record", element: <ChildrenRecord /> }],
+      },
+      {
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["parent"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [{ path: "parent-profile", element: <ParentProfile /> }],
       },
       { path: "unauthorized", element: <Unauthorized /> },
     ],
