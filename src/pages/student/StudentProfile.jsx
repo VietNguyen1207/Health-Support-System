@@ -588,7 +588,10 @@ const StudentProfile = () => {
             <div className="w-32 h-32 bg-gradient-to-br from-custom-green/80 to-custom-green rounded-full flex items-center justify-center shadow-md">
               <span
                 className="text-4xl text-custom-green font-bold tracking-wider"
-                style={{ textShadow: "0 1px 2px rgba(0,0,0,0.2)" }}
+                style={{
+                  color: "#3a6a49",
+                  textShadow: "0 1px 2px rgba(0,0,0,0.2)",
+                }}
               >
                 {userData.fullName
                   .split(" ")
