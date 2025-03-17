@@ -605,28 +605,25 @@ const PsychologistProfile = () => {
               <div className="flex-1 text-center md:text-left">
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center">
                   <div>
-                    <h1 className="text-3xl font-bold mb-2">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center md:text-left">
                       {userData.fullName}
                     </h1>
-                    <p className="text-green-100 text-lg mb-4">
-                      {psychologistInfo.departmentName}
-                    </p>
+
                     <div className="flex flex-wrap gap-2 mb-4 justify-center md:justify-start">
-                      <Badge
+                      {/* <Badge
                         status={getStatusColor(psychologistInfo.status)}
                         text={
-                          <span className="text-white bg-white/20 px-3 py-1 rounded-full text-sm">
+                          <span className="text-sm text-gray-500 m-0">
                             {psychologistInfo.status}
                           </span>
                         }
-                      />
-                      <span className="text-white bg-white/20 px-3 py-1 rounded-full text-sm">
+                      /> */}
+                      <Tag color="blue">{psychologistInfo.departmentName}</Tag>
+                      <Tag color="green">
                         {userData.gender.charAt(0) +
                           userData.gender.slice(1).toLowerCase()}
-                      </span>
-                      <span className="text-white bg-white/20 px-3 py-1 rounded-full text-sm">
-                        ID: {psychologistInfo.psychologistId}
-                      </span>
+                      </Tag>
+                      <Tag color="cyan">{psychologistInfo.status}</Tag>
                     </div>
                   </div>
 
@@ -752,9 +749,11 @@ const PsychologistProfile = () => {
                       <BookOutlined className="text-custom-green" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 m-0">Department</p>
+                      <p className="text-sm text-gray-500 m-0">
+                        Psychologist ID
+                      </p>
                       <p className="font-medium text-gray-900 m-0">
-                        {psychologistInfo.departmentName}
+                        {psychologistInfo.psychologistId}
                       </p>
                     </div>
                   </div>
@@ -810,84 +809,6 @@ const PsychologistProfile = () => {
               {renderAppointmentsTab()}
             </div>
           </TabPane>
-
-          {/* <TabPane
-            tab={
-              <span className="flex items-center gap-2">
-                <TeamOutlined />
-                <span>Students</span>
-              </span>
-            }
-            key="2"
-          >
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Assigned Students
-                </h2>
-                <Button
-                  type="primary"
-                  className="bg-custom-green hover:bg-custom-green/90"
-                  icon={<TeamOutlined />}
-                >
-                  View All Students
-                </Button>
-              </div>
-
-              <div className="min-h-[300px] flex items-center justify-center">
-                <Empty
-                  description="No students assigned yet"
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                >
-                  <Button
-                    type="primary"
-                    className="bg-custom-green hover:bg-custom-green/90 mt-4"
-                  >
-                    Browse Students
-                  </Button>
-                </Empty>
-              </div>
-            </div>
-          </TabPane> */}
-
-          {/* <TabPane
-            tab={
-              <span className="flex items-center gap-2">
-                <FileTextOutlined />
-                <span>Reports</span>
-              </span>
-            }
-            key="3"
-          >
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Recent Reports
-                </h2>
-                <Button
-                  type="primary"
-                  className="bg-custom-green hover:bg-custom-green/90"
-                  icon={<FileTextOutlined />}
-                >
-                  Create New Report
-                </Button>
-              </div>
-
-              <div className="min-h-[300px] flex items-center justify-center">
-                <Empty
-                  description="No reports available"
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                >
-                  <Button
-                    type="primary"
-                    className="bg-custom-green hover:bg-custom-green/90 mt-4"
-                  >
-                    Create First Report
-                  </Button>
-                </Empty>
-              </div>
-            </div>
-          </TabPane> */}
 
           <TabPane
             tab={

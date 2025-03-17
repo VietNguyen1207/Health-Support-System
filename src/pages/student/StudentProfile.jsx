@@ -612,7 +612,7 @@ const StudentProfile = () => {
                       {userData.gender.charAt(0) +
                         userData.gender.slice(1).toLowerCase()}
                     </Tag>
-                    {userData.verified && <Tag color="cyan">Verified</Tag>}
+                    {/* {userData.verified && <Tag color="cyan">Verified</Tag>} */}
                   </div>
                 </div>
 
