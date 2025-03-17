@@ -16,6 +16,7 @@ import Program from "../pages/Program";
 import Test from "../pages/Test";
 import TestQuestion from "../pages/TestQuestion";
 import AddProgram from "../pages/psycologist/AddProgram";
+import UpdateProgram from "../pages/psycologist/UpdateProgram";
 import CreateTest from "../pages/psycologist/CreateTest";
 import StudentProfile from "../pages/student/StudentProfile";
 import { Outlet } from "react-router-dom";
@@ -99,6 +100,7 @@ export const routes = [
           { path: "psychologist-profile", element: <PsychologistProfile /> },
           { path: "application", element: <Application /> },
           { path: "add-program", element: <AddProgram /> },
+          { path: "update-program", element: <UpdateProgram /> },
           { path: "patient-record", element: <PatientRecord /> },
           { path: "create-test", element: <CreateTest /> },
         ],

@@ -39,6 +39,16 @@ const ProgramDetailsModal = ({
     }
   }, [program]);
 
+  // Add a cleanup effect to handle modal closing properly
+  useEffect(() => {
+    return () => {
+      // Clean up state when modal closes
+      if (!isOpen) {
+        setUpdatedProgram(null);
+      }
+    };
+  }, [isOpen]);
+
   const handleJoinProgram = async () => {
     if (!program || !user) return;
 
@@ -58,8 +68,8 @@ const ProgramDetailsModal = ({
       // Update local state to show success
       setRegistered(true);
 
-      // Optimistically update the participant count and status in the local state
-      setUpdatedProgram({
+      // Create a safe copy of the program with updated values
+      const updatedProgramData = {
         ...program,
         currentParticipants: program.currentParticipants + 1,
         status:
@@ -67,30 +77,28 @@ const ProgramDetailsModal = ({
             ? "FULL"
             : program.status,
         studentStatus: "JOINED",
-      });
+      };
+
+      // Update the local state
+      setUpdatedProgram(updatedProgramData);
 
       // Show success message
       message.success("Successfully registered for the program!");
 
       // Call the callback if provided to update the parent component
       if (onJoinProgram) {
-        onJoinProgram(program.programID, {
-          ...program,
-          currentParticipants: program.currentParticipants + 1,
-          status:
-            program.currentParticipants + 1 >= program.maxParticipants
-              ? "FULL"
-              : program.status,
-          studentStatus: "JOINED",
-        });
+        onJoinProgram(program.programID, updatedProgramData);
       }
 
       // Fetch the updated program details in the background
       try {
         const updatedData = await fetchProgramDetails(program.programID);
-        setUpdatedProgram(updatedData);
+        if (updatedData) {
+          setUpdatedProgram(updatedData);
+        }
       } catch (error) {
         console.error("Failed to fetch updated program details:", error);
+        // Keep the optimistic update if fetch fails
       }
     } catch (error) {
       console.error("Registration error in component:", error);
@@ -120,33 +128,34 @@ const ProgramDetailsModal = ({
       // Update local state
       setRegistered(false);
 
-      // Optimistically update the participant count and status in the local state
-      setUpdatedProgram({
+      // Create a safe copy of the program with updated values
+      const updatedProgramData = {
         ...program,
         currentParticipants: Math.max(0, program.currentParticipants - 1),
         status: "ACTIVE", // Reset to active since a spot opened up
         studentStatus: undefined, // Remove joined status
-      });
+      };
+
+      // Update the local state
+      setUpdatedProgram(updatedProgramData);
 
       // Show success message
       message.success("Successfully cancelled program participation");
 
       // Call the callback if provided to update the parent component
       if (onJoinProgram) {
-        onJoinProgram(program.programID, {
-          ...program,
-          currentParticipants: Math.max(0, program.currentParticipants - 1),
-          status: "ACTIVE",
-          studentStatus: undefined,
-        });
+        onJoinProgram(program.programID, updatedProgramData);
       }
 
       // Fetch the updated program details in the background
       try {
         const updatedData = await fetchProgramDetails(program.programID);
-        setUpdatedProgram(updatedData);
+        if (updatedData) {
+          setUpdatedProgram(updatedData);
+        }
       } catch (error) {
         console.error("Failed to fetch updated program details:", error);
+        // Keep the optimistic update if fetch fails
       }
     } catch (error) {
       console.error("Cancellation error:", error);
@@ -192,28 +201,32 @@ const ProgramDetailsModal = ({
                 !user ||
                 !(user.studentId || user.studentInfo?.studentId) ||
                 registering ||
-                displayProgram?.status === "FULL" ||
-                displayProgram?.studentStatus === "JOINED"
+                (displayProgram && displayProgram.status === "FULL") ||
+                (displayProgram && displayProgram.studentStatus === "JOINED")
               }
             >
-              {displayProgram?.status === "FULL"
+              {displayProgram && displayProgram.status === "FULL"
                 ? "Program Full"
-                : displayProgram?.studentStatus === "JOINED"
+                : displayProgram && displayProgram.studentStatus === "JOINED"
                 ? "Already Registered"
                 : "Join Program"}
             </Button>
           ) : (
             <div className="flex gap-2">
-              {program.type === "ONLINE" && program.meetingLink && (
-                <Button
-                  type="primary"
-                  className="bg-primary-green hover:bg-primary-green/90"
-                  icon={<LinkOutlined />}
-                  onClick={() => window.open(program.meetingLink, "_blank")}
-                >
-                  Join Meeting
-                </Button>
-              )}
+              {displayProgram &&
+                displayProgram.type === "ONLINE" &&
+                displayProgram.meetingLink && (
+                  <Button
+                    type="primary"
+                    className="bg-primary-green hover:bg-primary-green/90"
+                    icon={<LinkOutlined />}
+                    onClick={() =>
+                      window.open(displayProgram.meetingLink, "_blank")
+                    }
+                  >
+                    Join Meeting
+                  </Button>
+                )}
               <Popconfirm
                 title="Cancel Program Participation"
                 description="Are you sure you want to cancel your participation in this program?"
@@ -252,7 +265,13 @@ const ModalContent = React.memo(({ program, loading, registered }) => {
     return <LoadingSkeleton />;
   }
 
-  if (!program) return null;
+  if (!program) {
+    return (
+      <div className="py-8 text-center">
+        <p>No program data available</p>
+      </div>
+    );
+  }
 
   // Show success message if registered
   if (registered) {

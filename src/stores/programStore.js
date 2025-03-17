@@ -117,7 +117,6 @@ export const useProgramStore = create((set) => ({
     try {
       console.log("Registering for program:", { programId, studentId });
 
-      // Updated endpoint to use query parameter instead of path parameter
       const { data } = await api.post(
         `/programs/register?programId=${programId}`,
         {
@@ -220,11 +219,11 @@ export const useProgramStore = create((set) => ({
 
       const errorMessage =
         error.response?.data?.message || "Failed to update program";
-       set({ error: errorMessage, loading: false });
+      set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
   },
-      
+
   // Cancel program participation
   cancelProgramParticipation: async (programId) => {
     set({ loading: true, error: null });
@@ -252,5 +251,91 @@ export const useProgramStore = create((set) => ({
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
+  },
+
+  updateProgram: async (programId, programData) => {
+    set({ loading: true, error: null });
+    try {
+      if (!programId) {
+        console.error("Missing programId:", { programId, programData });
+        throw new Error("The given id must not be null");
+      }
+
+      // Format time to 12-hour format
+      const formatTimeTo12Hour = (time) => {
+        const [hours, minutes] = time.split(":");
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? "PM" : "AM";
+        const hour12 = hour % 12 || 12;
+        return `${hour12}:${minutes} ${ampm}`;
+      };
+
+      // Format the request body to exactly match the API's expected format
+      const requestBody = {
+        name: programData.title,
+        description: programData.description,
+        numberParticipants: parseInt(programData.maxParticipants),
+        duration: parseInt(programData.duration),
+        startDate: programData.startDate,
+        weeklyScheduleRequest: {
+          weeklyAt: programData.weeklyAt,
+          startTime: formatTimeTo12Hour(programData.startTime.format("HH:mm")),
+          endTime: formatTimeTo12Hour(programData.endTime.format("HH:mm")),
+        },
+        status: "Active",
+        tags: programData.tags,
+        facilitatorId: programData.facilitatorId,
+        departmentId: programData.departmentId,
+        type:
+          programData.type.charAt(0) + programData.type.slice(1).toLowerCase(),
+        meetingLink:
+          programData.type === "ONLINE" ? programData.meetingLink : null,
+      };
+
+      console.log("Making API call to update program:", {
+        url: `/programs/edit?programId=${programId}`,
+        body: requestBody,
+      });
+
+      const { data } = await api.put(
+        `/programs/edit?programId=${programId}`,
+        requestBody
+      );
+
+      // Update programs list with updated program
+      set((state) => ({
+        programs: state.programs.map((p) =>
+          p.programID === programId ? { ...p, ...data } : p
+        ),
+        loading: false,
+      }));
+
+      return data;
+    } catch (error) {
+      console.error("Update program error details:", {
+        programId,
+        error: error.response?.data || error.message,
+        status: error.response?.status,
+      });
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update program";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
+  // Helper functions
+  convertTo12Hour: (time24) => {
+    const [hours, minutes] = time24.split(":");
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  },
+
+  capitalizeFirstLetter: (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   },
 }));
