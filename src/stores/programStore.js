@@ -219,11 +219,11 @@ export const useProgramStore = create((set) => ({
 
       const errorMessage =
         error.response?.data?.message || "Failed to update program";
-       set({ error: errorMessage, loading: false });
+      set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
     }
   },
-      
+
   // Cancel program participation
   cancelProgramParticipation: async (programId) => {
     set({ loading: true, error: null });
