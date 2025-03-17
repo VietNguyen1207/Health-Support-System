@@ -479,7 +479,7 @@ const StudentProfile = () => {
                   </div>
                 </div>
 
-                {/* Add Weekly Schedule */}
+                {/* Add Weekly Schedule for program */}
                 {program.weeklySchedule && (
                   <div className="bg-gray-50 p-3 rounded-lg mb-4">
                     <div className="flex justify-between items-center mb-1">
@@ -616,7 +616,7 @@ const StudentProfile = () => {
                   </div>
                 </div>
 
-                <Tooltip title="Edit Profile">
+                {/* <Tooltip title="Edit Profile">
                   <Button
                     type="primary"
                     shape="round"
@@ -625,7 +625,7 @@ const StudentProfile = () => {
                   >
                     Edit Profile
                   </Button>
-                </Tooltip>
+                </Tooltip> */}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -714,9 +714,9 @@ const StudentProfile = () => {
                 <h2 className="text-xl font-semibold text-gray-900">
                   Mental Health Overview
                 </h2>
-                <Button type="link" icon={<FileTextOutlined />}>
+                {/* <Button type="link" icon={<FileTextOutlined />}>
                   View Full Report
-                </Button>
+                </Button> */}
               </div>
 
               {/* Stats summary */}
@@ -731,7 +731,7 @@ const StudentProfile = () => {
                           10 +
                           (Math.max(0, 40 - studentInfo.stressScore) / 40) *
                             10 +
-                          (Math.max(0, 28 - studentInfo.depressionScore) / 28) *
+                          (Math.max(0, 27 - studentInfo.depressionScore) / 27) *
                             10) /
                           3) *
                           10
@@ -805,7 +805,7 @@ const StudentProfile = () => {
                   studentInfo.depressionScore,
                   <HeartOutlined className="text-custom-green" />,
                   "depression",
-                  28
+                  27
                 )}
               </div>
 
