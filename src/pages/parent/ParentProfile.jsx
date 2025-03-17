@@ -20,6 +20,7 @@ import {
   Typography,
   Alert,
   Space,
+  Collapse,
 } from "antd";
 import {
   UserOutlined,
@@ -43,6 +44,9 @@ import {
   BulbOutlined,
   ScheduleOutlined,
   SolutionOutlined,
+  SafetyOutlined,
+  StarOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import { useParentStore } from "../../stores/parentStore";
 import { useAuthStore } from "../../stores/authStore";
@@ -50,6 +54,7 @@ import dayjs from "dayjs";
 
 const { TabPane } = Tabs;
 const { Title, Text, Paragraph } = Typography;
+const { Panel } = Collapse;
 
 const ParentProfile = () => {
   const { user: authUser } = useAuthStore();
@@ -84,10 +89,10 @@ const ParentProfile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
         <div className="text-center">
           <div className="mb-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 p-4">
               <Spin size="large" />
             </div>
           </div>
@@ -95,7 +100,7 @@ const ParentProfile = () => {
             Loading Profile
           </Title>
           <Text type="secondary">
-            Please wait while we fetch your information...
+            Please wait while we fetch your family's information...
           </Text>
         </div>
       </div>
@@ -104,26 +109,47 @@ const ParentProfile = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Alert
-          message="Error Loading Profile"
-          description={error}
-          type="error"
-          showIcon
-          action={
-            <Button onClick={() => fetchParentDetails(authUser?.userId)}>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-gray-50 to-white">
+        <Card className="w-full max-w-lg shadow-lg rounded-xl overflow-hidden">
+          <Alert
+            message="Error Loading Profile"
+            description={error}
+            type="error"
+            showIcon
+            className="mb-4"
+          />
+          <div className="flex justify-center">
+            <Button
+              onClick={() => fetchParentDetails(authUser?.userId)}
+              type="primary"
+              className="bg-blue-500 hover:bg-blue-600"
+            >
               Try Again
             </Button>
-          }
-        />
+          </div>
+        </Card>
       </div>
     );
   }
 
   if (!parentData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Empty description="No parent data available" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+        <Card className="w-full max-w-lg shadow-lg rounded-xl overflow-hidden">
+          <Empty
+            description="No parent data available"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
+          <div className="flex justify-center mt-4">
+            <Button
+              onClick={() => navigate("/")}
+              type="primary"
+              className="bg-blue-500 hover:bg-blue-600"
+            >
+              Go to Home
+            </Button>
+          </div>
+        </Card>
       </div>
     );
   }
@@ -190,29 +216,32 @@ const ParentProfile = () => {
   // Function to render the children selector
   const renderChildrenSelector = () => {
     return (
-      <div className="mb-6">
-        <div className="flex items-center mb-4">
-          <TeamOutlined className="text-custom-green mr-2" />
-          <Title level={4} className="m-0">
+      <div className="mb-8">
+        <div className="flex items-center mb-6">
+          <div className="bg-blue-500/10 p-2 rounded-full mr-3">
+            <TeamOutlined className="text-blue-500 text-xl" />
+          </div>
+          <Title level={3} className="m-0">
             Your Children
           </Title>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {parentData.childrenRecord.map((child) => (
             <Card
               key={child.userId}
               hoverable
               className={`border rounded-xl transition-all ${
                 selectedChild?.userId === child.userId
-                  ? "border-custom-green shadow-md"
-                  : "border-gray-200"
+                  ? "border-custom-green shadow-lg"
+                  : "border-gray-200 hover:border-custom-green/50"
               }`}
               onClick={() => setSelectedChild(child)}
+              bodyStyle={{ padding: "20px" }}
             >
               <div className="flex items-center">
                 <Avatar
-                  size={50}
+                  size={64}
                   icon={<UserOutlined />}
                   className={`${
                     selectedChild?.userId === child.userId
@@ -221,21 +250,37 @@ const ParentProfile = () => {
                   }`}
                 />
                 <div className="ml-4">
-                  <Text strong className="block">
+                  <Text strong className="block text-lg">
                     {child.fullName}
                   </Text>
-                  <Text type="secondary" className="block text-sm">
+                  <Text type="secondary" className="block text-sm mb-2">
                     ID: {child.studentInfo.studentId}
                   </Text>
-                  <div className="mt-1">
-                    <Tag color={child.gender === "MALE" ? "blue" : "magenta"}>
+                  <div className="flex flex-wrap gap-2">
+                    <Tag
+                      color={child.gender === "MALE" ? "blue" : "magenta"}
+                      className="rounded-full"
+                    >
                       {child.gender.charAt(0) +
                         child.gender.slice(1).toLowerCase()}
                     </Tag>
-                    <Tag color="orange">Grade {child.studentInfo.grade}</Tag>
+                    <Tag color="orange" className="rounded-full">
+                      Grade {child.studentInfo.grade}
+                    </Tag>
+                    <Tag color="cyan" className="rounded-full">
+                      Class {child.studentInfo.className}
+                    </Tag>
                   </div>
                 </div>
               </div>
+
+              {selectedChild?.userId === child.userId && (
+                <div className="mt-3 pt-3 border-t border-gray-100 text-center">
+                  <Text type="secondary" className="text-xs">
+                    Currently Selected
+                  </Text>
+                </div>
+              )}
             </Card>
           ))}
         </div>
@@ -249,9 +294,9 @@ const ParentProfile = () => {
 
     return (
       <div>
-        <Card className="rounded-xl shadow-md mb-6 overflow-hidden">
+        <Card className="rounded-xl shadow-lg mb-8 overflow-hidden border-0">
           <div
-            className="bg-gradient-to-r from-custom-green to-custom-green/80 p-6 text-white"
+            className="bg-gradient-to-r from-custom-green to-custom-green/80 p-8 text-white"
             style={{ position: "relative", overflow: "hidden" }}
           >
             {/* Decorative circles */}
@@ -265,9 +310,9 @@ const ParentProfile = () => {
             ></div>
 
             <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6">
-              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md border-4 border-white">
+              <div className="w-28 h-28 bg-white rounded-full flex items-center justify-center shadow-md border-4 border-white">
                 <span
-                  className="text-3xl font-bold tracking-wider"
+                  className="text-4xl font-bold tracking-wider"
                   style={{
                     color: "#3a6a49",
                     textShadow: "0 1px 2px rgba(255,255,255,0.2)",
@@ -283,10 +328,10 @@ const ParentProfile = () => {
               <div className="flex-1 text-center md:text-left">
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center">
                   <div>
-                    <h1 className="text-2xl font-bold mb-2">
+                    <h1 className="text-3xl font-bold mb-2">
                       {selectedChild.fullName}
                     </h1>
-                    <p className="text-green-100 mb-4">
+                    <p className="text-green-100 mb-4 text-lg">
                       {selectedChild.studentInfo.schoolName} - Class{" "}
                       {selectedChild.studentInfo.className}
                     </p>
@@ -309,11 +354,19 @@ const ParentProfile = () => {
           </div>
 
           <div className="p-6">
-            <Row gutter={[16, 16]}>
+            <Row gutter={[24, 24]}>
               <Col xs={24} md={8}>
-                <Card bordered={false} className="bg-gray-50 rounded-xl">
+                <Card
+                  bordered={false}
+                  className="bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-all"
+                >
                   <Statistic
-                    title="Depression Score"
+                    title={
+                      <div className="flex items-center">
+                        <HeartOutlined className="text-red-500 mr-2" />
+                        <span>Depression Score</span>
+                      </div>
+                    }
                     value={selectedChild.studentInfo.depressionScore || 0}
                     valueStyle={{ color: "#4a7c59" }}
                     prefix={<HeartOutlined />}
@@ -321,18 +374,43 @@ const ParentProfile = () => {
                       selectedChild.studentInfo.depressionScore > 0 ? "/27" : ""
                     }
                   />
-                  {selectedChild.studentInfo.depressionScore === 0 && (
+                  {selectedChild.studentInfo.depressionScore === 0 ? (
                     <Text type="secondary" className="block mt-2 text-xs">
                       No assessment taken yet
                     </Text>
+                  ) : (
+                    <Progress
+                      percent={Math.round(
+                        (selectedChild.studentInfo.depressionScore / 27) * 100
+                      )}
+                      showInfo={false}
+                      strokeColor={
+                        selectedChild.studentInfo.depressionScore > 20
+                          ? "red"
+                          : selectedChild.studentInfo.depressionScore > 15
+                          ? "orange"
+                          : selectedChild.studentInfo.depressionScore > 10
+                          ? "gold"
+                          : "green"
+                      }
+                      className="mt-2"
+                    />
                   )}
                 </Card>
               </Col>
 
               <Col xs={24} md={8}>
-                <Card bordered={false} className="bg-gray-50 rounded-xl">
+                <Card
+                  bordered={false}
+                  className="bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-all"
+                >
                   <Statistic
-                    title="Anxiety Score"
+                    title={
+                      <div className="flex items-center">
+                        <HeartOutlined className="text-blue-500 mr-2" />
+                        <span>Anxiety Score</span>
+                      </div>
+                    }
                     value={selectedChild.studentInfo.anxietyScore || 0}
                     valueStyle={{ color: "#4a7c59" }}
                     prefix={<HeartOutlined />}
@@ -340,18 +418,43 @@ const ParentProfile = () => {
                       selectedChild.studentInfo.anxietyScore > 0 ? "/21" : ""
                     }
                   />
-                  {selectedChild.studentInfo.anxietyScore === 0 && (
+                  {selectedChild.studentInfo.anxietyScore === 0 ? (
                     <Text type="secondary" className="block mt-2 text-xs">
                       No assessment taken yet
                     </Text>
+                  ) : (
+                    <Progress
+                      percent={Math.round(
+                        (selectedChild.studentInfo.anxietyScore / 21) * 100
+                      )}
+                      showInfo={false}
+                      strokeColor={
+                        selectedChild.studentInfo.anxietyScore > 15
+                          ? "red"
+                          : selectedChild.studentInfo.anxietyScore > 10
+                          ? "orange"
+                          : selectedChild.studentInfo.anxietyScore > 5
+                          ? "gold"
+                          : "green"
+                      }
+                      className="mt-2"
+                    />
                   )}
                 </Card>
               </Col>
 
               <Col xs={24} md={8}>
-                <Card bordered={false} className="bg-gray-50 rounded-xl">
+                <Card
+                  bordered={false}
+                  className="bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-all"
+                >
                   <Statistic
-                    title="Stress Score"
+                    title={
+                      <div className="flex items-center">
+                        <HeartOutlined className="text-yellow-500 mr-2" />
+                        <span>Stress Score</span>
+                      </div>
+                    }
                     value={selectedChild.studentInfo.stressScore || 0}
                     valueStyle={{ color: "#4a7c59" }}
                     prefix={<HeartOutlined />}
@@ -359,10 +462,25 @@ const ParentProfile = () => {
                       selectedChild.studentInfo.stressScore > 0 ? "/40" : ""
                     }
                   />
-                  {selectedChild.studentInfo.stressScore === 0 && (
+                  {selectedChild.studentInfo.stressScore === 0 ? (
                     <Text type="secondary" className="block mt-2 text-xs">
                       No assessment taken yet
                     </Text>
+                  ) : (
+                    <Progress
+                      percent={Math.round(
+                        (selectedChild.studentInfo.stressScore / 40) * 100
+                      )}
+                      showInfo={false}
+                      strokeColor={
+                        selectedChild.studentInfo.stressScore > 27
+                          ? "red"
+                          : selectedChild.studentInfo.stressScore > 14
+                          ? "gold"
+                          : "green"
+                      }
+                      className="mt-2"
+                    />
                   )}
                 </Card>
               </Col>
@@ -370,10 +488,11 @@ const ParentProfile = () => {
 
             <Divider />
 
-            <Row gutter={[16, 16]}>
+            <Row gutter={[24, 24]}>
               <Col xs={24} md={12}>
                 <div>
-                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                  <h3 className="text-lg font-medium text-gray-700 mb-4 flex items-center">
+                    <MailOutlined className="text-custom-green mr-2" />
                     Contact Information
                   </h3>
                   <div className="space-y-4">
@@ -418,7 +537,8 @@ const ParentProfile = () => {
 
               <Col xs={24} md={12}>
                 <div>
-                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                  <h3 className="text-lg font-medium text-gray-700 mb-4 flex items-center">
+                    <BookOutlined className="text-custom-green mr-2" />
                     School Information
                   </h3>
                   <div className="space-y-4">
@@ -953,9 +1073,9 @@ const ParentProfile = () => {
   // Render parent profile information
   const renderParentInfo = () => {
     return (
-      <Card className="rounded-xl shadow-md mb-6 overflow-hidden">
+      <Card className="rounded-xl shadow-lg mb-8 overflow-hidden border-0">
         <div
-          className="bg-gradient-to-r from-blue-600 to-blue-500 p-6 text-white"
+          className="bg-gradient-to-r from-blue-600 to-blue-500 p-8 text-white"
           style={{ position: "relative", overflow: "hidden" }}
         >
           {/* Decorative circles */}
@@ -969,9 +1089,9 @@ const ParentProfile = () => {
           ></div>
 
           <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6">
-            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md border-4 border-white">
+            <div className="w-28 h-28 bg-white rounded-full flex items-center justify-center shadow-md border-4 border-white">
               <span
-                className="text-3xl font-bold tracking-wider"
+                className="text-4xl font-bold tracking-wider"
                 style={{
                   color: "#3b82f6",
                   textShadow: "0 1px 2px rgba(255,255,255,0.2)",
@@ -987,10 +1107,10 @@ const ParentProfile = () => {
             <div className="flex-1 text-center md:text-left">
               <div className="flex flex-col md:flex-row md:justify-between md:items-center">
                 <div>
-                  <h1 className="text-2xl font-bold mb-2">
+                  <h1 className="text-3xl font-bold mb-2">
                     {parentData.fullName}
                   </h1>
-                  <p className="text-blue-100 mb-4">
+                  <p className="text-blue-100 mb-4 text-lg">
                     Parent of {parentData.childrenRecord.length}{" "}
                     {parentData.childrenRecord.length === 1
                       ? "child"
@@ -1028,10 +1148,11 @@ const ParentProfile = () => {
         </div>
 
         <div className="p-6">
-          <Row gutter={[16, 16]}>
+          <Row gutter={[24, 24]}>
             <Col xs={24} md={12}>
               <div>
-                <h3 className="text-lg font-medium text-gray-700 mb-4">
+                <h3 className="text-lg font-medium text-gray-700 mb-4 flex items-center">
+                  <MailOutlined className="text-blue-500 mr-2" />
                   Contact Information
                 </h3>
                 <div className="space-y-4">
@@ -1076,7 +1197,8 @@ const ParentProfile = () => {
 
             <Col xs={24} md={12}>
               <div>
-                <h3 className="text-lg font-medium text-gray-700 mb-4">
+                <h3 className="text-lg font-medium text-gray-700 mb-4 flex items-center">
+                  <UserOutlined className="text-blue-500 mr-2" />
                   Account Information
                 </h3>
                 <div className="space-y-4">
