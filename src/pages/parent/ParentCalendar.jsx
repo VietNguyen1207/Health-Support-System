@@ -205,7 +205,7 @@ const ParentCalendar = () => {
             </div>
           </Card>
 
-          <Row className="mt-4" gutter={[16, 16]} justify="end">
+          {/* <Row className="mt-4" gutter={[16, 16]} justify="end">
             <Col>
               <Button
                 type="primary"
@@ -217,7 +217,7 @@ const ParentCalendar = () => {
                 View Full Details
               </Button>
             </Col>
-          </Row>
+          </Row> */}
         </div>
       </div>
     );
@@ -294,7 +294,7 @@ const ParentCalendar = () => {
             </div>
           </Card>
 
-          <Row className="mt-4" gutter={[16, 16]} justify="end">
+          {/* <Row className="mt-4" gutter={[16, 16]} justify="end">
             <Col>
               <Button
                 type="primary"
@@ -306,7 +306,7 @@ const ParentCalendar = () => {
                 View Full Details
               </Button>
             </Col>
-          </Row>
+          </Row> */}
         </div>
       </div>
     );
@@ -370,19 +370,22 @@ const ParentCalendar = () => {
                         With: {appointment.psychologistResponse?.name}
                       </div>
                     </div>
-                    <Tag
-                      color={
-                        appointment.status === "SCHEDULED"
-                          ? "blue"
-                          : appointment.status === "COMPLETED"
-                          ? "green"
-                          : appointment.status === "CANCELLED"
-                          ? "red"
-                          : "default"
-                      }
-                    >
-                      {appointment.status}
-                    </Tag>
+                    <div className="flex flex-col items-end">
+                      <Tag
+                        color={
+                          appointment.status === "SCHEDULED"
+                            ? "blue"
+                            : appointment.status === "COMPLETED"
+                            ? "green"
+                            : appointment.status === "CANCELLED"
+                            ? "red"
+                            : "default"
+                        }
+                        className="text-xs px-2 py-0.5"
+                      >
+                        {appointment.status}
+                      </Tag>
+                    </div>
                   </div>
                 </Card>
               ))}
@@ -415,7 +418,9 @@ const ParentCalendar = () => {
                       </div>
                     </div>
                     <div className="flex flex-col items-end">
-                      <Tag color="blue">{program.type}</Tag>
+                      <Tag color="blue" className="text-xs px-2 py-0.5">
+                        {program.type}
+                      </Tag>
                       {program.type === "ONLINE" && program.meetingLink && (
                         <Button
                           type="link"
@@ -500,15 +505,7 @@ const ParentCalendar = () => {
             <div className="events-list mb-4 max-h-96 overflow-y-auto">
               {renderSelectedDateEvents()}
             </div>
-            <div className="flex justify-end mt-4">
-              <Button
-                type="primary"
-                onClick={() => navigate("/book-appointment")}
-                className="bg-custom-green hover:bg-custom-green/90"
-              >
-                Book New Appointment
-              </Button>
-            </div>
+            <div className="flex justify-end mt-4"></div>
           </Card>
         </Col>
       </Row>
