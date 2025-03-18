@@ -75,28 +75,69 @@ const ParentCalendar = () => {
     const totalItems = appointments.length + programs.length;
     if (totalItems === 0) return null;
 
+    // Get unique student names from both appointments and programs
+    const studentSet = new Set();
+
+    appointments.forEach((appointment) => {
+      if (appointment.studentResponse?.fullName) {
+        studentSet.add(appointment.studentResponse.fullName);
+      }
+    });
+
+    programs.forEach((program) => {
+      if (program.studentName) {
+        studentSet.add(program.studentName);
+      }
+    });
+
+    const studentNames = Array.from(studentSet);
+
     return (
-      <div className="event-badges">
-        {appointments.length > 0 && (
-          <Badge
-            count={appointments.length}
-            style={{
-              backgroundColor: "#4a7c59",
-              marginRight: "4px",
-            }}
-            overflowCount={99}
-            title={`${appointments.length} appointment(s)`}
-          />
-        )}
-        {programs.length > 0 && (
-          <Badge
-            count={programs.length}
-            style={{
-              backgroundColor: "#1890ff",
-            }}
-            overflowCount={99}
-            title={`${programs.length} program(s)`}
-          />
+      <div className="event-container">
+        <div className="event-badges flex flex-wrap gap-1">
+          {appointments.length > 0 && (
+            <Badge
+              count={appointments.length}
+              style={{
+                backgroundColor: "#4a7c59",
+                marginRight: "2px",
+              }}
+              overflowCount={99}
+              title={`${appointments.length} appointment(s)`}
+            />
+          )}
+          {programs.length > 0 && (
+            <Badge
+              count={programs.length}
+              style={{
+                backgroundColor: "#1890ff",
+              }}
+              overflowCount={99}
+              title={`${programs.length} program(s)`}
+            />
+          )}
+        </div>
+
+        {studentNames.length > 0 && (
+          <div className="student-names text-xs mt-1 truncate">
+            {studentNames.map((name, index) => (
+              <span
+                key={index}
+                className="student-badge px-1 mr-1 rounded-sm text-white bg-opacity-90"
+                style={{
+                  backgroundColor: "rgba(245, 158, 11, 0.85)", // Amber/orange color that complements green and blue
+                  display: "inline-block",
+                  maxWidth: "100%",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+                title={name}
+              >
+                {name.split(" ")[0]}
+              </span>
+            ))}
+          </div>
         )}
       </div>
     );
@@ -491,6 +532,8 @@ const ParentCalendar = () => {
               onSelect={onDateSelect}
               dateCellRender={dateCellRender}
               className="parent-calendar"
+              fullscreen={true}
+              mode="month"
             />
           </Card>
         </Col>
@@ -526,13 +569,39 @@ const ParentCalendar = () => {
 
       <style jsx="true">{`
         .ant-picker-calendar-date-content {
-          height: 40px;
-          overflow: hidden;
+          height: auto !important;
+          min-height: 40px;
+          overflow: visible;
+          display: flex;
+          flex-direction: column;
+        }
+        .event-container {
+          position: absolute;
+          bottom: 2px;
+          left: 2px;
+          right: 2px;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
         }
         .event-badges {
-          position: absolute;
-          bottom: 4px;
-          left: 4px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 2px;
+        }
+        .student-names {
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          font-size: 10px;
+        }
+        .student-badge {
+          max-width: 100%;
+          display: inline-block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-size: 9px;
         }
         .calendar-card .ant-picker-calendar {
           padding: 0;
