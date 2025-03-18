@@ -659,14 +659,6 @@ const ParentProfile = () => {
           <h2 className="text-xl font-semibold text-gray-900">
             Appointment History
           </h2>
-          <Button
-            type="primary"
-            className="bg-custom-green hover:bg-custom-green/90"
-            icon={<CalendarOutlined />}
-            onClick={() => navigate("/book-appointment")}
-          >
-            Book New Appointment
-          </Button>
         </div>
 
         <List
@@ -1131,7 +1123,7 @@ const ParentProfile = () => {
                 </div>
 
                 <div className="mt-4 md:mt-0">
-                  <Tooltip title="Edit Profile">
+                  {/* <Tooltip title="Edit Profile">
                     <Button
                       type="default"
                       shape="round"
@@ -1140,7 +1132,7 @@ const ParentProfile = () => {
                     >
                       Edit Profile
                     </Button>
-                  </Tooltip>
+                  </Tooltip> */}
                 </div>
               </div>
             </div>
