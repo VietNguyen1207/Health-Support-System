@@ -5,6 +5,9 @@ export const useParentStore = create((set, get) => ({
   parentData: null,
   loading: false,
   error: null,
+  events: {},
+  eventsLoading: false,
+  eventsError: null,
 
   // Fetch parent details including children information
   fetchParentDetails: async (userId) => {
@@ -24,8 +27,32 @@ export const useParentStore = create((set, get) => ({
     }
   },
 
+  // Fetch parent events (appointments and programs of their children)
+  fetchParentEvents: async () => {
+    set({ eventsLoading: true, eventsError: null });
+    try {
+      const response = await api.get("/parents/events");
+      console.log("Parent events fetched:", response.data);
+      set({ events: response.data.event || {}, eventsLoading: false });
+      return response.data.event || {};
+    } catch (error) {
+      console.error("Error fetching parent events:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch parent events";
+      set({ eventsError: errorMessage, eventsLoading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
   // Reset store state
   resetParentStore: () => {
-    set({ parentData: null, loading: false, error: null });
+    set({
+      parentData: null,
+      loading: false,
+      error: null,
+      events: {},
+      eventsLoading: false,
+      eventsError: null,
+    });
   },
 }));

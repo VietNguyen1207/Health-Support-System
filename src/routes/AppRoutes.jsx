@@ -20,6 +20,7 @@ import UpdateProgram from "../pages/psycologist/UpdateProgram";
 import CreateTest from "../pages/psycologist/CreateTest";
 import StudentProfile from "../pages/student/StudentProfile";
 import ParentProfile from "../pages/parent/ParentProfile";
+import ParentCalendar from "../pages/parent/ParentCalendar";
 import { Outlet } from "react-router-dom";
 // import Appointment from "../pages/psycologist/Appointment";
 import ChildrenRecord from "../pages/parent/ChildrenRecord";
@@ -137,7 +138,10 @@ export const routes = [
             <Outlet />
           </PrivateRoute>
         ),
-        children: [{ path: "parent-profile", element: <ParentProfile /> }],
+        children: [
+          { path: "parent-profile", element: <ParentProfile /> },
+          { path: "parent-calendar", element: <ParentCalendar /> },
+        ],
       },
       { path: "unauthorized", element: <Unauthorized /> },
     ],
