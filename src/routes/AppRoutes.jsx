@@ -24,14 +24,14 @@ import { Outlet } from "react-router-dom";
 import ChildrenRecord from "../pages/parent/ChildrenRecord";
 import AppointmentRecord from "../pages/student/AppointmentRecord";
 import TestRecord from "../pages/student/TestRecord";
-import PatientRecord from "../pages/psycologist/PatientRecord";
+// import PatientRecord from "../pages/psycologist/PatientRecord";
 import UserManagement from "../pages/manager/UserManagement";
 import SurveyManagement from "../pages/manager/SurveyManagement";
 import NotFound from "../pages/error/NotFound";
 import TestResult from "../pages/TestResult";
 import Blog from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetail";
-import Application from "../pages/psycologist/Application";
+// import Application from "../pages/psycologist/Application";
 import NotificationDetail from "../pages/NotificationDetail";
 import PsychologistProfile from "../pages/psycologist/PsychologistProfile";
 import WorkSchedule from "../pages/psycologist/WorkSchedule";
@@ -98,17 +98,14 @@ export const routes = [
         ),
         children: [
           { path: "psychologist-profile", element: <PsychologistProfile /> },
-          { path: "application", element: <Application /> },
-          { path: "add-program", element: <AddProgram /> },
-          { path: "update-program", element: <UpdateProgram /> },
-          { path: "patient-record", element: <PatientRecord /> },
+          // { path: "application", element: <Application /> },
           { path: "create-test", element: <CreateTest /> },
         ],
       },
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={["psychologist", "manager", "student"]}>
+          <PrivateRoute allowedRoles={["psychologist", "student", "manager"]}>
             <Outlet />
           </PrivateRoute>
         ),
@@ -128,6 +125,18 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [{ path: "children-record", element: <ChildrenRecord /> }],
+      },
+      {
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["manager"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [
+          { path: "add-program", element: <AddProgram /> },
+          { path: "update-program", element: <UpdateProgram /> },
+        ],
       },
       { path: "unauthorized", element: <Unauthorized /> },
     ],
