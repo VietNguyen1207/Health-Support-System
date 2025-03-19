@@ -46,7 +46,7 @@ export const routes = [
     path: "/",
     element: <StandardLayout />,
     children: [
-      { index: "", element: <Home /> },
+      { index: true, element: <Home /> },
       { path: "contact", element: <Contact /> },
       { path: "about", element: <About /> },
       { path: "services", element: <Service /> },
