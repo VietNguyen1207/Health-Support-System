@@ -172,7 +172,7 @@ export const useSurveyStore = create((set, get) => ({
       const token = localStorage.getItem("token");
 
       const response = await api.post(
-        `/surveys/options/scoreResult?surveyId=${surveyId}&studentId=${studentId}`,
+        `/surveys/submit?surveyId=${surveyId}&studentId=${studentId}`,
         answerIDs, // Send the array of answer IDs directly as the request body
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
