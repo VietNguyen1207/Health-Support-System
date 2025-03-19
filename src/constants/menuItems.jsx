@@ -58,6 +58,12 @@ export const menuItems = [
         path: "/create-test",
         roles: ["psychologist", "manager"],
       },
+      // {
+      //   key: "/update-survey",
+      //   label: "Update Survey",
+      //   path: "/update-survey",
+      //   roles: ["psychologist", "manager"],
+      // },
     ],
   },
   {

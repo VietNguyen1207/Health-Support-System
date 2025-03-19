@@ -214,4 +214,42 @@ export const useSurveyStore = create((set, get) => ({
       throw new Error(errorMessage);
     }
   },
+
+  // Update survey
+  updateSurvey: async (surveyId, surveyData) => {
+    set({ loading: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await api.put(
+        `/surveys/update?surveyId=${surveyId}`,
+        surveyData,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+
+      // If successful, update the surveys list
+      if (response.status === 200) {
+        const surveys = get().surveys;
+        const updatedSurveys = surveys.map((survey) =>
+          survey.id === surveyId || survey.surveyId === surveyId
+            ? { ...survey, ...surveyData }
+            : survey
+        );
+        set({ surveys: updatedSurveys });
+      }
+
+      set({ loading: false });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating survey:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to update survey. Please try again.";
+
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
 }));
