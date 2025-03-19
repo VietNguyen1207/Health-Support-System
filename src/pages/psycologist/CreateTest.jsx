@@ -4,13 +4,15 @@ import {
   Input,
   Button,
   Select,
-  InputNumber,
   Card,
   Space,
   message,
+  DatePicker,
+  InputNumber,
 } from "antd";
-import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, DeleteOutlined, SaveOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { useSurveyStore } from "../../stores/surveyStore";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -18,50 +20,47 @@ const { Option } = Select;
 const CreateTest = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  const { createSurvey, loading } = useSurveyStore();
   const [questions, setQuestions] = useState([]);
 
-  const onFinish = (values) => {
-    const newTest = {
-      // Basic test information
-      title: values.title,
-      category: values.category,
-      description: values.description,
-      duration: values.duration,
+  // Survey Standard Types
+  const standardTypes = [
+    { value: "GAD_7", label: "GAD-7 (Anxiety)" },
+    { value: "PHQ_9", label: "PHQ-9 (Depression)" },
+    { value: "PSS_10", label: "PSS-10 (Stress)" },
+  ];
 
-      // Questions array with their options and scores
-      questions: questions.map((q, index) => ({
-        id: index + 1,
-        question: q.question,
-        options: q.options.map((opt) => ({
-          label: opt.label,
-          value: opt.value,
-        })),
+  const onFinish = async (values) => {
+    // Format the questions to match the API structure
+    const formattedQuestions = questions.map((q) => ({
+      questionText: q.question,
+      questionOptions: q.options.map((opt) => ({
+        value: parseInt(opt.value), // Convert to integer as required by API
+        label: opt.label,
       })),
+    }));
 
-      // Metadata
-      createdAt: new Date().toISOString(),
-      status: "active",
+    // Format date to YYYY-MM-DD
+    const formattedDate = values.startDate.format("YYYY-MM-DD");
+
+    // Create the survey data object to match API requirements
+    const surveyData = {
+      title: values.title,
+      description: values.description,
+      standardType: values.standardType,
+      startDate: formattedDate,
+      periodic: values.periodic || 1,
+      question: formattedQuestions,
+      // You can add more fields if needed
     };
 
-    // Log the complete test object
-    console.log("=== New Test Data ===");
-    console.log("Basic Information:");
-    console.log("Title:", newTest.title);
-    console.log("Category:", newTest.category);
-    console.log("Description:", newTest.description);
-    console.log("Duration:", newTest.duration, "minutes");
-    console.log("\nQuestions:");
-    newTest.questions.forEach((q, index) => {
-      console.log(`\nQuestion ${index + 1}:`, q.question);
-      console.log("Options:");
-      q.options.forEach((opt, i) => {
-        console.log(`  ${i + 1}. ${opt.label} (Score: ${opt.value})`);
-      });
-    });
-    console.log("\nComplete test object:", newTest);
-
-    message.success("Test created successfully!");
-    // navigate("/test");
+    try {
+      await createSurvey(surveyData);
+      message.success("Survey created successfully!");
+      navigate("/test");
+    } catch (error) {
+      message.error("Failed to create survey: " + error.message);
+    }
   };
 
   const handleAddQuestion = () => {
@@ -126,6 +125,9 @@ const CreateTest = () => {
             layout="vertical"
             onFinish={onFinish}
             requiredMark={false}
+            initialValues={{
+              periodic: 1, // Default periodic value
+            }}
           >
             {/* Basic Survey Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -140,28 +142,40 @@ const CreateTest = () => {
               </Form.Item>
 
               <Form.Item
-                name="category"
-                label="Category"
-                rules={[{ required: true, message: "Please select category" }]}
+                name="standardType"
+                label="Standard Type"
+                rules={[
+                  { required: true, message: "Please select standard type" },
+                ]}
               >
-                <Select placeholder="Select category">
-                  <Option value="Depression">Depression</Option>
-                  <Option value="Anxiety">Anxiety</Option>
-                  <Option value="Stress">Stress</Option>
+                <Select placeholder="Select standard type">
+                  {standardTypes.map((type) => (
+                    <Option key={type.value} value={type.value}>
+                      {type.label}
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
 
               <Form.Item
-                name="duration"
-                label="Estimated Duration (minutes)"
-                rules={[{ required: true, message: "Please enter duration" }]}
+                name="startDate"
+                label="Start Date"
+                rules={[
+                  { required: true, message: "Please select start date" },
+                ]}
               >
-                <InputNumber
-                  min={1}
-                  max={60}
-                  placeholder="15"
-                  className="w-full"
-                />
+                <DatePicker className="w-full" />
+              </Form.Item>
+
+              <Form.Item
+                name="periodic"
+                label="Periodic"
+                tooltip="Period number for this survey"
+                rules={[
+                  { required: true, message: "Please enter periodic number" },
+                ]}
+              >
+                <InputNumber min={1} placeholder="1" className="w-full" />
               </Form.Item>
             </div>
 
@@ -230,7 +244,6 @@ const CreateTest = () => {
                           />
                           <InputNumber
                             min={0}
-                            max={3}
                             value={option.value}
                             onChange={(value) =>
                               handleOptionChange(
@@ -266,6 +279,14 @@ const CreateTest = () => {
                   </Card>
                 ))}
               </Space>
+
+              {questions.length === 0 && (
+                <div className="text-center p-8 border border-dashed border-gray-300 rounded-lg">
+                  <p className="text-gray-500">
+                    Add questions to your survey using the button above
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Submit Buttons */}
@@ -274,7 +295,9 @@ const CreateTest = () => {
               <Button
                 type="primary"
                 htmlType="submit"
-                className="bg-custom-green"
+                icon={<SaveOutlined />}
+                loading={loading}
+                className="bg-custom-green hover:bg-custom-green/90"
                 disabled={questions.length === 0}
               >
                 Create Survey

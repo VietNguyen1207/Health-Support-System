@@ -38,6 +38,7 @@ import NotificationDetail from "../pages/NotificationDetail";
 import PsychologistProfile from "../pages/psycologist/PsychologistProfile";
 import WorkSchedule from "../pages/psycologist/WorkSchedule";
 import ProgramManagement from "../pages/manager/ProgramManagement";
+import UpdateSurvey from "../pages/psycologist/UpdateSurvey";
 
 const Appointment = lazy(() => import("../pages/psycologist/Appointment"));
 
@@ -112,9 +113,9 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [
-          { path: "psychologist-profile", element: <PsychologistProfile /> },
+          { path: "update-survey", element: <UpdateSurvey /> },
           { path: "create-test", element: <CreateTest /> },
-          // { path: "application", element: <Application /> },
+          // { path: "patient-record", element: <PatientRecord /> },
         ],
       },
       {
@@ -155,6 +156,15 @@ export const routes = [
           { path: "add-program", element: <AddProgram /> },
           { path: "update-program", element: <UpdateProgram /> },
         ],
+      },
+      {
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["parent", "manager"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [{ path: "children-record", element: <ChildrenRecord /> }],
       },
       { path: "unauthorized", element: <Unauthorized /> },
     ],

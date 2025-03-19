@@ -62,14 +62,16 @@ export const useSurveyStore = create((set, get) => ({
     if (!surveys || !studentId) return [];
 
     return surveys.map((survey) => {
-      const studentStatus = survey.statusStudent?.find(
+      const studentResponse = survey.statusStudentResponse?.find(
         (status) => status.studentId === studentId
-      ) || { status: "Not Started", score: "0" };
+      ) || { score: "0/0" };
 
       return {
         ...survey,
-        studentStatus: studentStatus.status,
-        studentScore: studentStatus.score,
+        studentStatus: studentResponse.lastCompleteDate
+          ? "COMPLETED"
+          : "NOT COMPLETED",
+        studentScore: studentResponse.score,
       };
     });
   },
@@ -170,7 +172,7 @@ export const useSurveyStore = create((set, get) => ({
       const token = localStorage.getItem("token");
 
       const response = await api.post(
-        `/surveys/options/scoreResult?surveyId=${surveyId}&studentId=${studentId}`,
+        `/surveys/submit?surveyId=${surveyId}&studentId=${studentId}`,
         answerIDs, // Send the array of answer IDs directly as the request body
         {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -184,6 +186,67 @@ export const useSurveyStore = create((set, get) => ({
       const errorMessage =
         error.response?.data?.message ||
         "Failed to submit survey answers. Please try again.";
+
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
+  // Create new survey
+  createSurvey: async (surveyData) => {
+    set({ loading: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await api.post(`/surveys/create`, surveyData, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      set({ loading: false });
+      return response.data;
+    } catch (error) {
+      console.error("Error creating survey:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to create survey. Please try again.";
+
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
+  // Update survey
+  updateSurvey: async (surveyId, surveyData) => {
+    set({ loading: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await api.put(
+        `/surveys/update?surveyId=${surveyId}`,
+        surveyData,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+
+      // If successful, update the surveys list
+      if (response.status === 200) {
+        const surveys = get().surveys;
+        const updatedSurveys = surveys.map((survey) =>
+          survey.id === surveyId || survey.surveyId === surveyId
+            ? { ...survey, ...surveyData }
+            : survey
+        );
+        set({ surveys: updatedSurveys });
+      }
+
+      set({ loading: false });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating survey:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to update survey. Please try again.";
 
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
