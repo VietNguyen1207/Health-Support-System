@@ -191,4 +191,27 @@ export const useSurveyStore = create((set, get) => ({
       throw new Error(errorMessage);
     }
   },
+
+  // Create new survey
+  createSurvey: async (surveyData) => {
+    set({ loading: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await api.post(`/surveys/create`, surveyData, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      set({ loading: false });
+      return response.data;
+    } catch (error) {
+      console.error("Error creating survey:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to create survey. Please try again.";
+
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
 }));
