@@ -2,17 +2,12 @@ import { useState, useMemo, useEffect } from "react";
 import {
   DownOutlined,
   SearchOutlined,
-  MenuOutlined,
-  DeleteOutlined,
-  EditOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
-  PlusOutlined,
   FileTextOutlined,
   QuestionCircleOutlined,
-  RightOutlined,
-  UserOutlined,
   CalendarOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 import {
   Input,
@@ -27,6 +22,7 @@ import {
   Tooltip,
   Badge,
   Tag,
+  Modal,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useSurveyStore } from "../stores/surveyStore";
@@ -90,7 +86,7 @@ const Test = () => {
   );
 
   const categories = useMemo(() => {
-    return [...new Set(surveys.map((survey) => survey.categoryName))].filter(
+    return [...new Set(surveys.map((survey) => survey.category))].filter(
       Boolean
     );
   }, [surveys]);
@@ -105,7 +101,7 @@ const Test = () => {
       const matchesStatus =
         !selectedStatus || survey.completeStatus === selectedStatus;
       const matchesCategory =
-        !selectedCategory || survey.categoryName === selectedCategory;
+        !selectedCategory || survey.category === selectedCategory;
 
       return matchesSearch && matchesStatus && matchesCategory;
     });
@@ -178,20 +174,20 @@ const Test = () => {
     </div>
   );
 
-  // Map categories to specific colors
+  // Function to get category color
   const getCategoryColor = (category) => {
     const colorMap = {
-      anxiety: {
+      ANXIETY: {
         bg: "bg-blue-50",
         text: "text-blue-600",
         border: "border-blue-400",
       },
-      depression: {
+      DEPRESSION: {
         bg: "bg-purple-50",
         text: "text-purple-600",
         border: "border-purple-400",
       },
-      stress: {
+      STRESS: {
         bg: "bg-amber-50",
         text: "text-amber-600",
         border: "border-amber-400",
@@ -205,17 +201,7 @@ const Test = () => {
       border: "border-custom-green",
     };
 
-    // Check if category exists and convert to lowercase for case-insensitive matching
-    const categoryLower = category ? category.toLowerCase() : "";
-
-    // Find the matching color or use default
-    for (const [key, value] of Object.entries(colorMap)) {
-      if (categoryLower.includes(key)) {
-        return value;
-      }
-    }
-
-    return defaultColor;
+    return colorMap[category] || defaultColor;
   };
 
   return (
@@ -379,7 +365,7 @@ const Test = () => {
           <div className="max-w-4xl mx-auto px-6 mb-12 space-y-6">
             {filteredTests.length > 0 ? (
               currentTests.map((test) => {
-                const categoryColor = getCategoryColor(test.categoryName);
+                const categoryColor = getCategoryColor(test.category);
 
                 return (
                   <div
@@ -445,7 +431,7 @@ const Test = () => {
                           </span>
                         </Tooltip>
 
-                        {/* Enhanced Category Tag */}
+                        {/* Updated Category Tag */}
                         <span
                           className={`flex items-center ${categoryColor.bg} ${
                             categoryColor.text
@@ -454,31 +440,8 @@ const Test = () => {
                           }-200 group-hover:shadow transition-all`}
                         >
                           <FileTextOutlined className="mr-2" />
-                          <span className="font-medium">
-                            {test.categoryName}
-                          </span>
+                          <span className="font-medium">{test.category}</span>
                         </span>
-
-                        {/* <Button
-                          type="primary"
-                          className={`flex items-center bg-custom-green hover:bg-custom-green/90 text-white font-bold rounded-lg shadow-sm hover:shadow-md transition-all transform hover:scale-105 px-4 py-1 h-auto border-0`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStartTest(test);
-                          }}
-                        >
-                          <span className="flex items-center">
-                            {test.completeStatus === "COMPLETED" ? (
-                              <>
-                                <span className="mr-1">Retake</span>
-                              </>
-                            ) : (
-                              <>
-                                <span className="mr-1">Start</span>
-                              </>
-                            )}
-                          </span>
-                        </Button> */}
                       </div>
 
                       {/* Status indicator dot */}
@@ -540,167 +503,208 @@ const Test = () => {
 
       {/* Modal for Test Details  */}
       {isModalOpen && selectedTest && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 backdrop-blur-sm z-[100]"
-          onClick={() => setIsModalOpen(false)}
+        <Modal
+          title={
+            <div className="flex items-center gap-3 border-b pb-3">
+              <div className="bg-custom-green/10 p-2 rounded-lg">
+                <FileTextOutlined className="text-xl text-custom-green" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 m-0">
+                  {selectedTest.title}
+                </h3>
+                <p className="text-sm text-gray-500 m-0">Assessment Details</p>
+              </div>
+            </div>
+          }
+          open={isModalOpen}
+          onCancel={() => setIsModalOpen(false)}
+          width={700}
+          className="test-details-modal"
+          centered
+          destroyOnClose={true}
+          footer={
+            <div className="flex justify-end gap-3">
+              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button
+                type="primary"
+                className="bg-custom-green hover:bg-custom-green/90"
+                onClick={() => handleStartTest(selectedTest)}
+                disabled={selectedTest.status === "INACTIVE"}
+                size="large"
+              >
+                {selectedTest.completeStatus === "COMPLETED"
+                  ? "Retake Assessment"
+                  : "Start Assessment"}
+              </Button>
+            </div>
+          }
         >
-          <div
-            className="bg-white rounded-xl shadow-xl p-0 max-w-2xl w-full max-h-[90vh] overflow-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="bg-custom-green text-white p-6 rounded-t-xl">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">
-                    {selectedTest.title}
-                  </h2>
-                  <div className="flex items-center space-x-2">
-                    <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
-                      {selectedTest.categoryName}
+          <div className="space-y-4 animate-fadeIn">
+            {/* Category and Status Badges */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              <Tag className="bg-custom-green/10 text-custom-green border-custom-green px-3 py-1 rounded-lg">
+                {selectedTest.category}
+              </Tag>
+              {selectedTest.completeStatus === "COMPLETED" ? (
+                <Tag className="bg-green-50 text-green-600 border-green-200 px-3 py-1 rounded-lg flex items-center">
+                  <CheckCircleOutlined className="mr-1" />
+                  Completed
+                </Tag>
+              ) : (
+                <Tag className="bg-blue-50 text-blue-600 border-blue-200 px-3 py-1 rounded-lg flex items-center">
+                  <ClockCircleOutlined className="mr-1" />
+                  Not Completed
+                </Tag>
+              )}
+              <Tag
+                color={selectedTest.status === "ACTIVE" ? "green" : "red"}
+                className="px-3 py-1 rounded-lg"
+              >
+                {selectedTest.status}
+              </Tag>
+            </div>
+
+            {/* Description */}
+            <div className="border-b pb-3">
+              <p className="text-gray-600">{selectedTest.description}</p>
+            </div>
+
+            {/* Assessment Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+              <div className="bg-gray-50 p-5 rounded-xl">
+                <h3 className="font-semibold text-gray-800 mb-4 flex items-center">
+                  <FileTextOutlined className="mr-2 text-custom-green" />
+                  Assessment Details
+                </h3>
+                <ul className="space-y-3">
+                  <li className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="text-gray-500">Questions:</span>
+                    <span className="font-medium text-gray-800">
+                      {selectedTest.numberOfQuestions}
                     </span>
-                    {selectedTest.completeStatus === "COMPLETED" ? (
-                      <span className="bg-white/20 px-3 py-1 rounded-full text-sm flex items-center">
-                        <CheckCircleOutlined className="mr-1" />
-                        Completed
-                      </span>
-                    ) : (
-                      <span className="bg-white/20 px-3 py-1 rounded-full text-sm flex items-center">
-                        <ClockCircleOutlined className="mr-1" />
-                        Not Completed
-                      </span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="text-gray-500">Estimated Time:</span>
+                    <span className="font-medium text-gray-800">
+                      {selectedTest.numberOfQuestions * 3} minutes
+                    </span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="text-gray-500">Category:</span>
+                    <span className="font-medium text-gray-800">
+                      {selectedTest.category}
+                    </span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="text-gray-500">Survey Code:</span>
+                    <span className="font-medium text-gray-800">
+                      {selectedTest.standardType}
+                    </span>
+                  </li>
+                  <li className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="text-gray-500">Created By:</span>
+                    <span className="font-medium text-gray-800">
+                      {selectedTest.createBy}
+                    </span>
+                  </li>
+                  <li className="flex justify-between items-center">
+                    <span className="text-gray-500">Created On:</span>
+                    <span className="font-medium text-gray-800">
+                      {formatDate(selectedTest.createdAt)}
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-gray-50 p-5 rounded-xl">
+                <h3 className="font-semibold text-gray-800 mb-4 flex items-center">
+                  <QuestionCircleOutlined className="mr-2 text-custom-green" />
+                  Instructions
+                </h3>
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-start">
+                    <div className="bg-custom-green/10 rounded-full p-1 mr-3 mt-0.5">
+                      <CheckCircleOutlined className="text-custom-green text-sm" />
+                    </div>
+                    <span>
+                      Answer all questions honestly for accurate results
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-custom-green/10 rounded-full p-1 mr-3 mt-0.5">
+                      <CheckCircleOutlined className="text-custom-green text-sm" />
+                    </div>
+                    <span>There are no right or wrong answers</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-custom-green/10 rounded-full p-1 mr-3 mt-0.5">
+                      <CheckCircleOutlined className="text-custom-green text-sm" />
+                    </div>
+                    <span>
+                      Take your time to consider each question carefully
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-custom-green/10 rounded-full p-1 mr-3 mt-0.5">
+                      <CheckCircleOutlined className="text-custom-green text-sm" />
+                    </div>
+                    <span>
+                      Your responses will help us provide personalized support
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Results Section (Only if completed) */}
+            {selectedTest.statusStudentResponse &&
+              selectedTest.statusStudentResponse.length > 0 && (
+                <div className="bg-gray-50 p-5 rounded-xl">
+                  <h3 className="font-semibold text-gray-800 mb-4 flex items-center">
+                    <BarChartOutlined className="mr-2 text-custom-green" />
+                    Your Results
+                  </h3>
+                  <div className="space-y-3">
+                    {selectedTest.statusStudentResponse.map(
+                      (response, index) => {
+                        // Only show the latest or highest score attempt if there are multiple
+                        if (
+                          index ===
+                          selectedTest.statusStudentResponse.length - 1
+                        ) {
+                          return (
+                            <div
+                              key={index}
+                              className="bg-white p-4 rounded-lg border border-gray-100"
+                            >
+                              <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                                <span className="text-gray-500">
+                                  Last Completed:
+                                </span>
+                                <span className="font-medium text-gray-800">
+                                  {response.lastCompleteDate
+                                    ? formatDate(response.lastCompleteDate)
+                                    : "Not completed yet"}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center pt-2">
+                                <span className="text-gray-500">Score:</span>
+                                <span className="font-medium text-gray-800">
+                                  {response.score}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }
                     )}
                   </div>
                 </div>
-                <Button
-                  type="text"
-                  className="text-white hover:text-white/80 hover:bg-white/10"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  ✕
-                </Button>
-              </div>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6">
-              <p className="text-gray-600 mb-6">{selectedTest.description}</p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div className="bg-gray-50 p-5 rounded-xl">
-                  <h3 className="font-semibold text-gray-800 mb-4 flex items-center">
-                    <FileTextOutlined className="mr-2 text-custom-green" />
-                    Assessment Details
-                  </h3>
-                  <ul className="space-y-3">
-                    <li className="flex justify-between items-center pb-2 border-b border-gray-100">
-                      <span className="text-gray-500">Questions:</span>
-                      <span className="font-medium text-gray-800">
-                        {selectedTest.numberOfQuestions}
-                      </span>
-                    </li>
-                    <li className="flex justify-between items-center pb-2 border-b border-gray-100">
-                      <span className="text-gray-500">Estimated Time:</span>
-                      <span className="font-medium text-gray-800">
-                        {selectedTest.numberOfQuestions * 3} minutes
-                      </span>
-                    </li>
-                    <li className="flex justify-between items-center pb-2 border-b border-gray-100">
-                      <span className="text-gray-500">Category:</span>
-                      <span className="font-medium text-gray-800">
-                        {selectedTest.categoryName}
-                      </span>
-                    </li>
-                    <li className="flex justify-between items-center pb-2 border-b border-gray-100">
-                      <span className="text-gray-500">Created By:</span>
-                      <span className="font-medium text-gray-800">
-                        {selectedTest.createBy}
-                      </span>
-                    </li>
-                    <li className="flex justify-between items-center">
-                      <span className="text-gray-500">Created On:</span>
-                      <span className="font-medium text-gray-800">
-                        {formatDate(selectedTest.createdAt)}
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="bg-gray-50 p-5 rounded-xl">
-                  <h3 className="font-semibold text-gray-800 mb-4 flex items-center">
-                    <QuestionCircleOutlined className="mr-2 text-custom-green" />
-                    Instructions
-                  </h3>
-                  <ul className="space-y-2 text-gray-600">
-                    <li className="flex items-start">
-                      <div className="bg-custom-green/10 rounded-full p-1 mr-3 mt-0.5">
-                        <CheckCircleOutlined className="text-custom-green text-sm" />
-                      </div>
-                      <span>
-                        Answer all questions honestly for accurate results
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="bg-custom-green/10 rounded-full p-1 mr-3 mt-0.5">
-                        <CheckCircleOutlined className="text-custom-green text-sm" />
-                      </div>
-                      <span>There are no right or wrong answers</span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="bg-custom-green/10 rounded-full p-1 mr-3 mt-0.5">
-                        <CheckCircleOutlined className="text-custom-green text-sm" />
-                      </div>
-                      <span>
-                        Take your time to consider each question carefully
-                      </span>
-                    </li>
-                    <li className="flex items-start">
-                      <div className="bg-custom-green/10 rounded-full p-1 mr-3 mt-0.5">
-                        <CheckCircleOutlined className="text-custom-green text-sm" />
-                      </div>
-                      <span>
-                        Your responses will help us provide personalized support
-                      </span>
-                    </li>
-                  </ul>
-
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="flex items-center">
-                      <Tag
-                        color={
-                          selectedTest.status === "ACTIVE" ? "green" : "red"
-                        }
-                        className="mr-2"
-                      >
-                        {selectedTest.status}
-                      </Tag>
-                      {selectedTest.status === "INACTIVE" && (
-                        <span className="text-sm text-red-500">
-                          This assessment is currently inactive
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-3 mt-6">
-                <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-                <Button
-                  type="primary"
-                  className="bg-custom-green hover:bg-custom-green/90"
-                  onClick={() => handleStartTest(selectedTest)}
-                  disabled={selectedTest.status === "INACTIVE"}
-                  size="large"
-                >
-                  {selectedTest.completeStatus === "COMPLETED"
-                    ? "Retake Assessment"
-                    : "Start Assessment"}
-                </Button>
-              </div>
-            </div>
+              )}
           </div>
-        </div>
+        </Modal>
       )}
     </div>
   );

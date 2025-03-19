@@ -62,14 +62,16 @@ export const useSurveyStore = create((set, get) => ({
     if (!surveys || !studentId) return [];
 
     return surveys.map((survey) => {
-      const studentStatus = survey.statusStudent?.find(
+      const studentResponse = survey.statusStudentResponse?.find(
         (status) => status.studentId === studentId
-      ) || { status: "Not Started", score: "0" };
+      ) || { score: "0/0" };
 
       return {
         ...survey,
-        studentStatus: studentStatus.status,
-        studentScore: studentStatus.score,
+        studentStatus: studentResponse.lastCompleteDate
+          ? "COMPLETED"
+          : "NOT COMPLETED",
+        studentScore: studentResponse.score,
       };
     });
   },
