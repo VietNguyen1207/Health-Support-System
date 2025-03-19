@@ -19,14 +19,14 @@ const Header = () => {
   const navigate = useNavigate();
   const startPolling = useNotificationStore((state) => state.startPolling);
   const stopPolling = useNotificationStore((state) => state.stopPolling);
-  const { getNotifications } = useNotificationStore();
+  const { getNotifications, clearNotifications } = useNotificationStore();
 
   useEffect(() => {
     const fetchData = async () => {
       if (user?.userId) await getNotifications(user?.userId);
     };
     fetchData();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (user?.userId) {
@@ -36,6 +36,7 @@ const Header = () => {
       return () => {
         console.log("Cleanup: stopping polling...");
         stopPolling();
+        clearNotifications();
       };
     }
   }, [user]);
@@ -97,8 +98,7 @@ const Header = () => {
             onClick={handleDropdownButton}
             className={`flex items-center gap-2 px-3 py-1 rounded-l-md border${
               user?.role === "manager" && `w-full pointer-events-none`
-            }`}
-          >
+            }`}>
             {user.fullName}
           </Button>,
           rightButton,
@@ -152,8 +152,7 @@ const Header = () => {
             subMenuTitleColor: "#4a7c59",
           },
         },
-      }}
-    >
+      }}>
       <header className="header">
         <div className="header-container">
           <div className="logo">
@@ -181,8 +180,7 @@ const Header = () => {
                 <Button
                   type="primary"
                   className="rounded-full"
-                  onClick={() => navigate(navItems.specialItem.key)}
-                >
+                  onClick={() => navigate(navItems.specialItem.key)}>
                   <p className="text-white w-full">
                     {navItems.specialItem.label}
                   </p>
@@ -202,8 +200,7 @@ const Header = () => {
                       } else {
                         navigate("/calendar");
                       }
-                    }}
-                  >
+                    }}>
                     <CalendarFilled className="text-lg" />
                   </div>
                 </span>

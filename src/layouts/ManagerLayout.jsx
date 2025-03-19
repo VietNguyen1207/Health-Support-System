@@ -24,14 +24,14 @@ export const ManagerLayout = () => {
   } = theme.useToken();
   const startPolling = useNotificationStore((state) => state.startPolling);
   const stopPolling = useNotificationStore((state) => state.stopPolling);
-  const { getNotifications } = useNotificationStore();
+  const { getNotifications, clearNotifications } = useNotificationStore();
 
   useEffect(() => {
     const fetchData = async () => {
       if (user?.userId) await getNotifications(user?.userId);
     };
     fetchData();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (user?.userId) {
@@ -40,6 +40,7 @@ export const ManagerLayout = () => {
 
       return () => {
         console.log("Cleanup: stopping polling...");
+        clearNotifications();
         stopPolling();
       };
     }
