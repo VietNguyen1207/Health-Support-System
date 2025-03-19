@@ -8,9 +8,12 @@ export default {
     extend: {
       colors: {
         "primary-green": "#4a7c59",
+        "emerald-700": "#047857",
+        "emerald-900": "#064e3b",
       },
       backgroundImage: {
         "custom-gradient": "linear-gradient(135deg, #4a7c59, #9ec5ab)",
+        "emerald-gradient": "linear-gradient(135deg, #047857, #064e3b)",
       },
       backgroundColor: {
         primary: "#4a7c59",

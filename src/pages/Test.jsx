@@ -2,41 +2,31 @@ import { useState, useMemo, useEffect } from "react";
 import {
   DownOutlined,
   SearchOutlined,
-  MenuOutlined,
-  DeleteOutlined,
-  EditOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
-  PlusOutlined,
   FileTextOutlined,
   QuestionCircleOutlined,
-  RightOutlined,
-  UserOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
 import {
   Input,
   Select,
   Pagination,
-  Dropdown,
   Button,
-  Spin,
   Empty,
   notification,
-  Progress,
   Tooltip,
-  Badge,
   Tag,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useSurveyStore } from "../stores/surveyStore";
-import { useAuthStore } from "../stores/authStore";
+// import { useAuthStore } from "../stores/authStore";
 
 const { Option } = Select;
 
 const Test = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  // const { user, logout } = useAuthStore();
   const { surveys, loading, fetchSurveys } = useSurveyStore();
   const [selectedTest, setSelectedTest] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -158,8 +148,7 @@ const Test = () => {
       {[1, 2, 3].map((i) => (
         <div
           key={i}
-          className="bg-white rounded-xl shadow-md border border-gray-100 p-6"
-        >
+          className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
           <div className="animate-pulse">
             <div className="flex justify-between items-center mb-4">
               <div className="h-6 bg-gray-200 rounded w-1/3"></div>
@@ -221,7 +210,7 @@ const Test = () => {
   return (
     <div className="general-wrapper ">
       {/* Hero section */}
-      <div className="hero-section">
+      <div className="hero-section bg-emerald-gradient">
         <div className="hero-content">
           <h1 className="hero-title">Mental Health Assessments</h1>
           <p className="hero-subtitle">
@@ -259,8 +248,7 @@ const Test = () => {
               <Button
                 type="text"
                 className="text-gray-400 hover:text-gray-600"
-                onClick={() => setSearchQuery("")}
-              >
+                onClick={() => setSearchQuery("")}>
                 ✕
               </Button>
             )}
@@ -269,7 +257,7 @@ const Test = () => {
           {/* Filters - Enhanced with visual cues */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="transition-all duration-300 hover:transform hover:scale-[1.01]">
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+              <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
                 <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                 Status
               </label>
@@ -282,8 +270,7 @@ const Test = () => {
                 className="w-full"
                 size="large"
                 suffixIcon={<DownOutlined className="text-gray-400" />}
-                dropdownStyle={{ borderRadius: "0.75rem" }}
-              >
+                dropdownStyle={{ borderRadius: "0.75rem" }}>
                 {statuses.map((status) => (
                   <Option key={status} value={status}>
                     {status === "COMPLETED" ? (
@@ -303,7 +290,7 @@ const Test = () => {
             </div>
 
             <div className="flex-1 transition-all duration-300 hover:transform hover:scale-[1.01]">
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+              <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
                 <span className="inline-block w-2 h-2 bg-custom-green rounded-full mr-2"></span>
                 Category
               </label>
@@ -316,8 +303,7 @@ const Test = () => {
                 className="w-full"
                 size="large"
                 suffixIcon={<DownOutlined className="text-gray-400" />}
-                dropdownStyle={{ borderRadius: "0.75rem" }}
-              >
+                dropdownStyle={{ borderRadius: "0.75rem" }}>
                 {categories.map((category) => (
                   <Option key={category} value={category}>
                     <span className="capitalize">{category.toLowerCase()}</span>
@@ -336,8 +322,7 @@ const Test = () => {
                   <Tag
                     closable
                     onClose={() => setSearchQuery("")}
-                    className="bg-gray-100 text-gray-700 rounded-lg px-3 py-1"
-                  >
+                    className="bg-gray-100 text-gray-700 rounded-lg px-3 py-1">
                     Search:{" "}
                     {searchQuery.length > 15
                       ? searchQuery.substring(0, 15) + "..."
@@ -348,8 +333,7 @@ const Test = () => {
                   <Tag
                     closable
                     onClose={() => setSelectedStatus(undefined)}
-                    className="bg-blue-50 text-blue-600 rounded-lg px-3 py-1"
-                  >
+                    className="bg-blue-50 text-blue-600 rounded-lg px-3 py-1">
                     Status:{" "}
                     {selectedStatus === "COMPLETED"
                       ? "Completed"
@@ -360,8 +344,7 @@ const Test = () => {
                   <Tag
                     closable
                     onClose={() => setSelectedCategory(undefined)}
-                    className="bg-custom-green/10 text-custom-green rounded-lg px-3 py-1"
-                  >
+                    className="bg-custom-green/10 text-custom-green rounded-lg px-3 py-1">
                     Category: {selectedCategory}
                   </Tag>
                 )}
@@ -385,21 +368,17 @@ const Test = () => {
                   <div
                     key={test.id}
                     onClick={() => handleTestClick(test)}
-                    className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 cursor-pointer transform hover:-translate-y-1 overflow-hidden group"
-                  >
+                    className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 cursor-pointer transform hover:-translate-y-1 overflow-hidden group">
                     <div
-                      className={`border-l-4 ${categoryColor.border} h-full p-6 relative`}
-                    >
+                      className={`border-l-4 ${categoryColor.border} h-full p-6 relative`}>
                       {/* Decorative elements */}
                       <div
-                        className={`absolute top-0 right-0 w-32 h-32 ${categoryColor.bg} rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-30 transition-all duration-500`}
-                      ></div>
+                        className={`absolute top-0 right-0 w-32 h-32 ${categoryColor.bg} rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-30 transition-all duration-500`}></div>
                       <div className="absolute bottom-0 left-1/2 w-16 h-16 bg-gray-50 rounded-full -mb-8 -ml-8 opacity-0 group-hover:opacity-50 transition-all duration-700 delay-100"></div>
 
                       <div className="flex items-center justify-between mb-3 relative z-10">
                         <h3
-                          className={`text-xl font-semibold text-gray-800 group-hover:${categoryColor.text} transition-colors`}
-                        >
+                          className={`text-xl font-semibold text-gray-800 group-hover:${categoryColor.text} transition-colors`}>
                           {test.title}
                         </h3>
                         <div className="flex items-center">
@@ -425,8 +404,7 @@ const Test = () => {
                       <div className="flex flex-wrap gap-3 relative z-10">
                         <Tooltip title="Estimated time to complete">
                           <span
-                            className={`flex items-center bg-gray-50 px-3 py-1.5 rounded-lg text-gray-700 hover:${categoryColor.bg} transition-colors`}
-                          >
+                            className={`flex items-center bg-gray-50 px-3 py-1.5 rounded-lg text-gray-700 hover:${categoryColor.bg} transition-colors`}>
                             <CalendarOutlined
                               className={`mr-2 ${categoryColor.text}`}
                             />
@@ -436,8 +414,7 @@ const Test = () => {
 
                         <Tooltip title="Number of questions">
                           <span
-                            className={`flex items-center bg-gray-50 px-3 py-1.5 rounded-lg text-gray-700 hover:${categoryColor.bg} transition-colors`}
-                          >
+                            className={`flex items-center bg-gray-50 px-3 py-1.5 rounded-lg text-gray-700 hover:${categoryColor.bg} transition-colors`}>
                             <QuestionCircleOutlined
                               className={`mr-2 ${categoryColor.text}`}
                             />
@@ -451,8 +428,7 @@ const Test = () => {
                             categoryColor.text
                           } px-3 py-1.5 rounded-lg ml-auto shadow-sm border border-${
                             categoryColor.border.split("-")[1]
-                          }-200 group-hover:shadow transition-all`}
-                        >
+                          }-200 group-hover:shadow transition-all`}>
                           <FileTextOutlined className="mr-2" />
                           <span className="font-medium">
                             {test.categoryName}
@@ -508,8 +484,7 @@ const Test = () => {
                     setSearchQuery("");
                     setSelectedStatus(undefined);
                     setSelectedCategory(undefined);
-                  }}
-                >
+                  }}>
                   Clear Filters
                 </Button>
               </div>
@@ -542,12 +517,10 @@ const Test = () => {
       {isModalOpen && selectedTest && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 backdrop-blur-sm z-[100]"
-          onClick={() => setIsModalOpen(false)}
-        >
+          onClick={() => setIsModalOpen(false)}>
           <div
             className="bg-white rounded-xl shadow-xl p-0 max-w-2xl w-full max-h-[90vh] overflow-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
+            onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
             <div className="bg-custom-green text-white p-6 rounded-t-xl">
               <div className="flex justify-between items-start">
@@ -575,8 +548,7 @@ const Test = () => {
                 <Button
                   type="text"
                   className="text-white hover:text-white/80 hover:bg-white/10"
-                  onClick={() => setIsModalOpen(false)}
-                >
+                  onClick={() => setIsModalOpen(false)}>
                   ✕
                 </Button>
               </div>
@@ -670,8 +642,7 @@ const Test = () => {
                         color={
                           selectedTest.status === "ACTIVE" ? "green" : "red"
                         }
-                        className="mr-2"
-                      >
+                        className="mr-2">
                         {selectedTest.status}
                       </Tag>
                       {selectedTest.status === "INACTIVE" && (
@@ -691,8 +662,7 @@ const Test = () => {
                   className="bg-custom-green hover:bg-custom-green/90"
                   onClick={() => handleStartTest(selectedTest)}
                   disabled={selectedTest.status === "INACTIVE"}
-                  size="large"
-                >
+                  size="large">
                   {selectedTest.completeStatus === "COMPLETED"
                     ? "Retake Assessment"
                     : "Start Assessment"}

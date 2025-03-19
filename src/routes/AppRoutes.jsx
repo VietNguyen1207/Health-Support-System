@@ -8,7 +8,7 @@ import Dashboard from "../pages/manager/Dashboard";
 import About from "../pages/About";
 import Register from "../pages/Register";
 import ForgotPassword from "../pages/ForgotPassword";
-import Service from "../pages/Service";
+// import Service from "../pages/Service";
 import Login from "../pages/Login";
 import { Unauthorized } from "../pages/error/Unauthorized";
 import Booking from "../pages/Booking";
@@ -49,7 +49,7 @@ export const routes = [
       { index: true, element: <Home /> },
       { path: "contact", element: <Contact /> },
       { path: "about", element: <About /> },
-      { path: "services", element: <Service /> },
+      // { path: "services", element: <Service /> },
       { path: "program", element: <Program /> },
       { path: "blog", element: <Blog /> },
       { path: "blog/:id", element: <BlogDetail /> },

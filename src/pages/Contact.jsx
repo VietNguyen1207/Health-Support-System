@@ -23,7 +23,7 @@ export default function Contact() {
 
   return (
     <div className="general-wrapper">
-      <div className="hero-section">
+      <div className="hero-section bg-emerald-gradient">
         <div className="hero-content">
           <h1 className="hero-title">Contact Us</h1>
           <p className="hero-subtitle">
