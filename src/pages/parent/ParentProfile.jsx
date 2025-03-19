@@ -298,12 +298,12 @@ const ParentProfile = () => {
               </div>
 
               <div className="flex-1 text-center md:text-left">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center text-black">
                   <div>
                     <h1 className="text-3xl font-bold mb-2">
                       {selectedChild.fullName}
                     </h1>
-                    <p className="text-green-100 mb-4 text-lg">
+                    <p className="text-gray-600 mb-4 text-lg">
                       {selectedChild.studentInfo.schoolName} - Class{" "}
                       {selectedChild.studentInfo.className}
                     </p>
