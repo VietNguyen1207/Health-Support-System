@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   Progress,
   Tag,
   Spin,
   Empty,
-  Modal,
   Tabs,
   Button,
-  Tooltip,
   Statistic,
   List,
   Avatar,
   Badge,
+  Typography,
 } from "antd";
 import {
   CalendarOutlined,
@@ -27,15 +26,11 @@ import {
   HeartOutlined,
   BarChartOutlined,
   ClockCircleOutlined,
-  FileTextOutlined,
-  EditOutlined,
   EnvironmentOutlined,
   BulbOutlined,
   VideoCameraOutlined,
-  RightOutlined,
 } from "@ant-design/icons";
 import { useUserStore } from "../../stores/userStore";
-import { useAuthStore } from "../../stores/authStore";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
@@ -43,12 +38,12 @@ import ProgramDetailsModal from "../../components/ProgramDetailsModal";
 import { useSurveyStore } from "../../stores/surveyStore";
 
 const { TabPane } = Tabs;
+const { Title, Text } = Typography;
 
 const StudentProfile = () => {
-  const { user: authUser } = useAuthStore();
-  const { getUserDetails, loading: userLoading } = useUserStore();
-  const { fetchUpcomingAppointments, loading: appointmentLoading } =
-    useAppointmentStore();
+  const { getUserDetails } = useUserStore();
+  const [userLoading, setUserLoading] = useState(true);
+  const { fetchUpcomingAppointments } = useAppointmentStore();
   const { surveys, fetchSurveys } = useSurveyStore();
   const [userData, setUserData] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
@@ -61,18 +56,18 @@ const StudentProfile = () => {
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      if (authUser?.userId) {
-        try {
-          const data = await getUserDetails(authUser.userId);
-          setUserData(data);
-        } catch (error) {
-          console.error("Failed to fetch user details:", error);
-        }
+      try {
+        const data = await getUserDetails();
+        setUserData(data);
+      } catch (error) {
+        console.error("Failed to fetch user details:", error);
+      } finally {
+        setUserLoading(false);
       }
     };
 
     fetchUserDetails();
-  }, [getUserDetails, authUser]);
+  }, [getUserDetails]);
 
   useEffect(() => {
     // Fetch upcoming appointments when the appointments tab is selected
@@ -310,7 +305,7 @@ const StudentProfile = () => {
           renderItem={(appointment) => {
             const appointmentDate = dayjs(appointment.slotDate);
             const isToday = appointmentDate.isSame(dayjs(), "day");
-            const isPast = appointmentDate.isBefore(dayjs(), "day");
+            // const isPast = appointmentDate.isBefore(dayjs(), "day");
 
             return (
               <Card
@@ -550,8 +545,20 @@ const StudentProfile = () => {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spin size="large" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+        <div className="text-center">
+          <div className="mb-4">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 p-4">
+              <Spin size="large" />
+            </div>
+          </div>
+          <Title level={4} className="m-0 mb-2">
+            Loading Profile
+          </Title>
+          <Text type="secondary">
+            Please wait while we fetch your family&apos;s information...
+          </Text>
+        </div>
       </div>
     );
   }
@@ -565,6 +572,8 @@ const StudentProfile = () => {
   }
 
   const { studentInfo, programsRecord } = userData;
+
+  console.log(programsRecord);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-16 pb-12 px-4 sm:px-6 lg:px-8">
@@ -812,8 +821,8 @@ const StudentProfile = () => {
                   </p>
                   <ul className="list-disc pl-5 space-y-2 text-gray-600">
                     <li>
-                      Consider joining the "Stress Management" program to learn
-                      coping strategies
+                      Consider joining the &quot;Stress Management&quot; program
+                      to learn coping strategies
                     </li>
                     <li>Schedule regular check-ins with your counselor</li>
                     <li>Practice mindfulness exercises daily</li>

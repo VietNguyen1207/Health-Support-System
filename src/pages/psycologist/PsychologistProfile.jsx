@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -13,8 +13,8 @@ import {
   Divider,
   Badge,
   List,
-  Timeline,
   Progress,
+  Typography,
 } from "antd";
 import {
   UserOutlined,
@@ -22,18 +22,13 @@ import {
   PhoneOutlined,
   HomeOutlined,
   CalendarOutlined,
-  TeamOutlined,
   TrophyOutlined,
   BulbOutlined,
   EditOutlined,
-  EnvironmentOutlined,
   ClockCircleOutlined,
-  FileTextOutlined,
   CheckCircleOutlined,
   MedicineBoxOutlined,
   BookOutlined,
-  VideoCameraOutlined,
-  RightOutlined,
   LinkOutlined,
 } from "@ant-design/icons";
 import { useUserStore } from "../../stores/userStore";
@@ -41,14 +36,16 @@ import { useAuthStore } from "../../stores/authStore";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 import { useProgramStore } from "../../stores/programStore";
 import dayjs from "dayjs";
+import PropTypes from "prop-types";
 
 const { TabPane } = Tabs;
+const { Title, Text } = Typography;
 
 const PsychologistProfile = () => {
   const { user: authUser } = useAuthStore();
-  const { getUserDetails, loading: userLoading } = useUserStore();
-  const { fetchUpcomingAppointments, loading: appointmentLoading } =
-    useAppointmentStore();
+  const { getUserDetails } = useUserStore();
+  const [userLoading, setUserLoading] = useState(true);
+  const { fetchUpcomingAppointments } = useAppointmentStore();
   const { fetchFacilitatedPrograms } = useProgramStore();
   const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState("1");
@@ -67,6 +64,8 @@ const PsychologistProfile = () => {
         setUserData(data);
       } catch (error) {
         console.error("Failed to fetch psychologist details:", error);
+      } finally {
+        setUserLoading(false);
       }
     };
 
@@ -130,8 +129,20 @@ const PsychologistProfile = () => {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spin size="large" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+        <div className="text-center">
+          <div className="mb-4">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 p-4">
+              <Spin size="large" />
+            </div>
+          </div>
+          <Title level={4} className="m-0 mb-2">
+            Loading Profile
+          </Title>
+          <Text type="secondary">
+            Please wait while we fetch your family&apos;s information...
+          </Text>
+        </div>
       </div>
     );
   }
@@ -147,18 +158,18 @@ const PsychologistProfile = () => {
   const { psychologistInfo } = userData;
 
   // Function to get status color
-  const getStatusColor = (status) => {
-    switch (status?.toUpperCase()) {
-      case "ACTIVE":
-        return "green";
-      case "AWAY":
-        return "orange";
-      case "UNAVAILABLE":
-        return "red";
-      default:
-        return "default";
-    }
-  };
+  // const getStatusColor = (status) => {
+  //   switch (status?.toUpperCase()) {
+  //     case "ACTIVE":
+  //       return "green";
+  //     case "AWAY":
+  //       return "orange";
+  //     case "UNAVAILABLE":
+  //       return "red";
+  //     default:
+  //       return "default";
+  //   }
+  // };
 
   // Function to get program status color
   const getProgramStatusColor = (status) => {
@@ -259,8 +270,8 @@ const PsychologistProfile = () => {
   // Program Card Component
   const ProgramCard = ({ program }) => {
     const startDate = dayjs(program.startDate);
-    const endDate = startDate.add(program.duration, "week");
-    const isActive = program.status === "ACTIVE";
+    // const endDate = startDate.add(program.duration, "week");
+    // const isActive = program.status === "ACTIVE";
     const participantPercentage =
       (program.currentParticipants / program.maxParticipants) * 100;
 
@@ -366,6 +377,10 @@ const PsychologistProfile = () => {
         </div>
       </Card>
     );
+  };
+
+  ProgramCard.propTypes = {
+    program: PropTypes.object.isRequired,
   };
 
   // Render the appointments tab content
