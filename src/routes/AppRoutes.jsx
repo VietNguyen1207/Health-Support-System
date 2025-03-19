@@ -19,6 +19,8 @@ import AddProgram from "../pages/psycologist/AddProgram";
 import UpdateProgram from "../pages/psycologist/UpdateProgram";
 import CreateTest from "../pages/psycologist/CreateTest";
 import StudentProfile from "../pages/student/StudentProfile";
+import ParentProfile from "../pages/parent/ParentProfile";
+import ParentCalendar from "../pages/parent/ParentCalendar";
 import { Outlet } from "react-router-dom";
 // import Appointment from "../pages/psycologist/Appointment";
 import ChildrenRecord from "../pages/parent/ChildrenRecord";
@@ -44,7 +46,7 @@ export const routes = [
     path: "/",
     element: <StandardLayout />,
     children: [
-      { index: true, element: <Home /> },
+      { index: "", element: <Home /> },
       { path: "contact", element: <Contact /> },
       { path: "about", element: <About /> },
       { path: "services", element: <Service /> },
@@ -92,14 +94,27 @@ export const routes = [
       {
         path: "",
         element: (
+          <PrivateRoute allowedRoles={["psychologist"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [
+          { path: "psychologist-profile", element: <PsychologistProfile /> },
+          { path: "register-work-date", element: <WorkSchedule /> },
+          // { path: "application", element: <Application /> },
+        ],
+      },
+      {
+        path: "",
+        element: (
           <PrivateRoute allowedRoles={["psychologist", "manager"]}>
             <Outlet />
           </PrivateRoute>
         ),
         children: [
           { path: "psychologist-profile", element: <PsychologistProfile /> },
-          // { path: "application", element: <Application /> },
           { path: "create-test", element: <CreateTest /> },
+          // { path: "application", element: <Application /> },
         ],
       },
       {
@@ -114,17 +129,20 @@ export const routes = [
           { path: "calendar", element: <Appointment /> },
           { path: "appointment-record", element: <AppointmentRecord /> },
           { path: "notifications/:id", element: <NotificationDetail /> },
-          { path: "register-work-date", element: <WorkSchedule /> },
         ],
       },
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={["parent", "manager"]}>
+          <PrivateRoute allowedRoles={["parent"]}>
             <Outlet />
           </PrivateRoute>
         ),
-        children: [{ path: "children-record", element: <ChildrenRecord /> }],
+        children: [
+          { path: "children-record", element: <ChildrenRecord /> },
+          { path: "parent-calendar", element: <ParentCalendar /> },
+          { path: "parent-profile", element: <ParentProfile /> },
+        ],
       },
       {
         path: "",

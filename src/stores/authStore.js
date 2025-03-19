@@ -61,19 +61,18 @@ export const useAuthStore = create(
           localStorage.setItem("token", data.accessToken);
           localStorage.setItem("refreshToken", data.refreshToken);
 
+          const { accessToken, refreshToken, ...userData } = data;
           // Set user data directly from login response
-          const userData = {
-            ...data,
-            role: data.role.toLowerCase().replace("role_", ""),
-          };
+          userData.role = data.role.toLowerCase().replace("role_", "");
 
           set({
+            token: { accessToken, refreshToken },
             user: userData,
             isAuthenticated: true,
             loading: false,
           });
 
-          // return userData;
+          return userData;
         } catch (error) {
           console.error("Login error details:", {
             status: error.response?.status,

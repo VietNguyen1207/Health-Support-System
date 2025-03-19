@@ -197,7 +197,11 @@ const Header = () => {
                     className={`rounded-full border-[10px] text-[12px] flex justify-center items-center cursor-pointer 
                     transition-all duration-300`}
                     onClick={() => {
-                      navigate("/calendar");
+                      if (user.role.toLowerCase() === "parent") {
+                        navigate("/parent-calendar");
+                      } else {
+                        navigate("/calendar");
+                      }
                     }}
                   >
                     <CalendarFilled className="text-lg" />
