@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Calendar,
   Badge,
@@ -6,7 +6,6 @@ import {
   Typography,
   Card,
   Button,
-  Tooltip,
   Empty,
   Divider,
   Tag,
@@ -15,21 +14,24 @@ import {
   Row,
   Col,
   Alert,
+  Select,
+  Flex,
+  Skeleton,
 } from "antd";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
-  UserOutlined,
-  BookOutlined,
   TeamOutlined,
   InfoCircleOutlined,
   LinkOutlined,
   VideoCameraOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import { useParentStore } from "../../stores/parentStore";
 import { useAuthStore } from "../../stores/authStore";
 import dayjs from "dayjs";
-import { useNavigate } from "react-router-dom";
+import { months } from "../../constants/calendar";
+// import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
@@ -41,7 +43,8 @@ const ParentCalendar = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedEventType, setSelectedEventType] = useState(null); // "appointment" or "program"
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+  const today = useMemo(() => dayjs(), []);
 
   // Fetch events when the component mounts
   useEffect(() => {
@@ -132,8 +135,7 @@ const ParentCalendar = () => {
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                 }}
-                title={name}
-              >
+                title={name}>
                 {name.split(" ")[0]}
               </span>
             ))}
@@ -236,8 +238,7 @@ const ParentCalendar = () => {
                           : appointment.status === "CANCELLED"
                           ? "red"
                           : "default"
-                      }
-                    >
+                      }>
                       {appointment.status}
                     </Tag>
                   </div>
@@ -325,8 +326,7 @@ const ParentCalendar = () => {
                       type="primary"
                       icon={<LinkOutlined />}
                       onClick={() => window.open(program.meetingLink, "_blank")}
-                      className="bg-blue-500 hover:bg-blue-600 mt-1"
-                    >
+                      className="bg-blue-500 hover:bg-blue-600 mt-1">
                       Join Meeting
                     </Button>
                   </div>
@@ -353,10 +353,95 @@ const ParentCalendar = () => {
     );
   };
 
+  // Memoize the disabled date function
+  const disabledDate = useCallback(
+    (current) => {
+      return (
+        current.isBefore(today) ||
+        current.isAfter(today.add(1, "year").endOf("year"))
+      );
+    },
+    [today]
+  );
+
   // Function to handle date selection on calendar
   const onDateSelect = (date) => {
     setSelectedDate(date);
   };
+
+  // Memoize the header render function
+  const headerRender = useCallback(
+    ({ value, onChange }) => {
+      return (
+        <Flex justify="end" align="center" className="p-4">
+          <div className="flex flex-row gap-5">
+            <Select
+              value={value.month()}
+              options={months.map((month) => ({
+                ...month,
+                disabled:
+                  value.year() === today.year() && month.value < today.month(),
+              }))}
+              onChange={(newMonth) => {
+                const now = value.clone().month(newMonth);
+                onDateSelect(now);
+              }}
+              style={{ maxWidth: 120 }}
+            />
+            <Select
+              value={value.year()}
+              options={[today.year()].map((year) => ({
+                ...year,
+                disabled: year.value < today.year(),
+              }))}
+              onChange={(newYear) => {
+                const now = value.clone().year(newYear);
+                if (
+                  now.year() === today.year() &&
+                  now.month() < today.month()
+                ) {
+                  now.month(today.month());
+                }
+                onDateSelect(now);
+              }}
+              style={{ maxWidth: 120 }}
+            />
+            <Button
+              onClick={() => {
+                const newDate = selectedDate.subtract(1, "month");
+                if (!newDate.isBefore(today, "day")) {
+                  onChange(newDate);
+                } else onChange(today);
+              }}
+              disabled={selectedDate.isSame(today, "month")}>
+              Previous
+            </Button>
+            <Button
+              onClick={() => {
+                fetchParentEvents();
+                message.success("Calendar data refreshed");
+              }}
+              icon={<ReloadOutlined />}
+              title="Reload calendar data"
+            />
+            <Button
+              onClick={() => {
+                const newDate = selectedDate.add(1, "month");
+                setSelectedDate(newDate);
+                onChange(newDate);
+              }}
+              disabled={selectedDate.isSame(
+                today.add(1, "year").endOf("year"),
+                "month"
+              )}>
+              Next
+            </Button>
+          </div>
+        </Flex>
+      );
+    },
+    [selectedDate, today]
+  );
 
   // Render events for the selected date
   const renderSelectedDateEvents = () => {
@@ -397,8 +482,7 @@ const ParentCalendar = () => {
                 <Card
                   key={appointment.appointmentID}
                   className="hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => openEventDetails(appointment, "appointment")}
-                >
+                  onClick={() => openEventDetails(appointment, "appointment")}>
                   <div className="flex justify-between">
                     <div>
                       <div className="font-medium">
@@ -422,8 +506,7 @@ const ParentCalendar = () => {
                             ? "red"
                             : "default"
                         }
-                        className="text-xs px-2 py-0.5"
-                      >
+                        className="text-xs px-2 py-0.5">
                         {appointment.status}
                       </Tag>
                     </div>
@@ -445,8 +528,7 @@ const ParentCalendar = () => {
                 <Card
                   key={`${program.programID}-${index}-${program.studentName}`}
                   className="hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => openEventDetails(program, "program")}
-                >
+                  onClick={() => openEventDetails(program, "program")}>
                   <div className="flex justify-between">
                     <div>
                       <div className="font-medium">{program.title}</div>
@@ -471,8 +553,7 @@ const ParentCalendar = () => {
                           onClick={(e) => {
                             e.stopPropagation();
                             window.open(program.meetingLink, "_blank");
-                          }}
-                        >
+                          }}>
                           Join
                         </Button>
                       )}
@@ -487,13 +568,88 @@ const ParentCalendar = () => {
     );
   };
 
-  if (eventsLoading) {
+  // Render loading state
+  const renderLoading = (isCalendar = false) => {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spin size="large" />
+      <div
+        className={`${
+          isCalendar
+            ? "h-full w-full flex justify-center items-center p-8"
+            : "p-4"
+        }`}>
+        {isCalendar ? (
+          <Spin size="large" />
+        ) : (
+          <>
+            <div className="flex items-center mb-6">
+              <Skeleton.Avatar
+                active
+                size="default"
+                shape="circle"
+                className="mr-3"
+              />
+              <Skeleton.Input active style={{ width: 240, height: 28 }} />
+            </div>
+
+            <div className="mb-6 space-y-4">
+              {Array(3)
+                .fill(null)
+                .map((_, index) => (
+                  <div
+                    key={`event-skeleton-${index}`}
+                    className="p-4 border border-gray-200 rounded-lg shadow-sm">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="w-2/3">
+                        <Skeleton.Input
+                          active
+                          style={{ width: "90%", height: 22 }}
+                        />
+                      </div>
+                      <Skeleton.Button active size="small" shape="round" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center">
+                        <Skeleton.Avatar
+                          active
+                          size="small"
+                          shape="circle"
+                          className="mr-2"
+                        />
+                        <Skeleton.Input
+                          active
+                          style={{ width: "60%", height: 16 }}
+                        />
+                      </div>
+                      <div className="flex items-center">
+                        <Skeleton.Avatar
+                          active
+                          size="small"
+                          shape="circle"
+                          className="mr-2"
+                        />
+                        <Skeleton.Input
+                          active
+                          style={{ width: "50%", height: 16 }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+
+            <div className="flex justify-center mt-4">
+              <Skeleton.Button
+                active
+                size="default"
+                style={{ width: 120, borderRadius: "20px" }}
+              />
+            </div>
+          </>
+        )}
       </div>
     );
-  }
+  };
 
   if (eventsError) {
     return (
@@ -521,34 +677,46 @@ const ParentCalendar = () => {
           Family Calendar
         </Title>
         <Text className="text-gray-500">
-          Track your children's appointments and programs
+          Track your children&apos;s appointments and programs
         </Text>
       </div>
 
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={16}>
           <Card className="shadow-sm calendar-card">
-            <Calendar
-              onSelect={onDateSelect}
-              dateCellRender={dateCellRender}
-              className="parent-calendar"
-              fullscreen={true}
-              mode="month"
-            />
+            {eventsLoading ? (
+              renderLoading(true)
+            ) : (
+              <Calendar
+                onSelect={onDateSelect}
+                cellRender={dateCellRender}
+                headerRender={headerRender}
+                className="parent-calendar"
+                fullscreen={true}
+                mode="month"
+                disabledDate={disabledDate}
+              />
+            )}
           </Card>
         </Col>
         <Col xs={24} lg={8}>
           <Card className="shadow-sm h-full">
-            <div className="flex items-center mb-4">
-              <InfoCircleOutlined className="text-custom-green mr-2" />
-              <Title level={4} style={{ margin: 0 }}>
-                Events on {selectedDate.format("MMM DD, YYYY")}
-              </Title>
-            </div>
-            <div className="events-list mb-4 max-h-96 overflow-y-auto">
-              {renderSelectedDateEvents()}
-            </div>
-            <div className="flex justify-end mt-4"></div>
+            {eventsLoading ? (
+              renderLoading(false)
+            ) : (
+              <>
+                <div className="flex items-center mb-4">
+                  <InfoCircleOutlined className="text-custom-green mr-2" />
+                  <Title level={4} style={{ margin: 0 }}>
+                    Events on {selectedDate.format("MMM DD, YYYY")}
+                  </Title>
+                </div>
+                <div className="events-list mb-4 max-h-96 overflow-y-auto">
+                  {renderSelectedDateEvents()}
+                </div>
+                <div className="flex justify-end mt-4"></div>
+              </>
+            )}
           </Card>
         </Col>
       </Row>
@@ -560,14 +728,13 @@ const ParentCalendar = () => {
         onCancel={() => setModalVisible(false)}
         footer={null}
         width={700}
-        destroyOnClose
-      >
+        destroyOnClose>
         {selectedEventType === "appointment"
           ? renderAppointmentDetails()
           : renderProgramDetails()}
       </Modal>
 
-      <style jsx="true">{`
+      <style>{`
         .ant-picker-calendar-date-content {
           height: auto !important;
           min-height: 40px;
