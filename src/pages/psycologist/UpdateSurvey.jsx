@@ -246,7 +246,7 @@ const UpdateSurvey = () => {
               />
               <Button
                 type="primary"
-                onClick={() => navigate("/psychologist/create-test")}
+                onClick={() => navigate("/create-test")}
                 className="bg-custom-green hover:bg-custom-green/90"
               >
                 Create New Survey

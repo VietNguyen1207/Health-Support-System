@@ -85,13 +85,16 @@ const TestRecord = () => {
 
     setLoading(true);
     const allResults = [];
+    const processedSurveyIds = new Set(); // Track which surveys we've processed
 
     try {
       // Fetch results for each survey
       for (const surveyId of surveyIds) {
+        // Skip if we've already processed this survey
+        if (processedSurveyIds.has(surveyId)) continue;
+
         try {
-          // For each survey, we need to fetch all available periods
-          // First, let's fetch the latest result to know how many periods there are
+          // Fetch the latest result for this survey
           const latestResult = await api.get(
             `/surveys/results/student?surveyId=${surveyId}&studentId=${user.studentId}`
           );
@@ -99,28 +102,13 @@ const TestRecord = () => {
           if (latestResult.data) {
             // Add this result to our collection
             allResults.push(latestResult.data);
+            // Mark this survey as processed
+            processedSurveyIds.add(surveyId);
 
-            // If the periodic is > 1, fetch previous periods
-            const maxPeriodic = latestResult.data.periodic || 1;
-
-            // In a real implementation, you might need a specific API to fetch by period
-            // This is a placeholder assuming we could fetch by adding period parameter
-            for (let period = 1; period < maxPeriodic; period++) {
-              try {
-                // This is speculative - your API might not support this exact pattern
-                const historicalResult = await api.get(
-                  `/surveys/results/student?surveyId=${surveyId}&studentId=${user.studentId}&periodic=${period}`
-                );
-                if (historicalResult.data) {
-                  allResults.push(historicalResult.data);
-                }
-              } catch (err) {
-                console.log(
-                  `No data for period ${period} of survey ${surveyId}`
-                );
-                // Continue with next period
-              }
-            }
+            // Log for debugging
+            console.log(
+              `Added survey ${surveyId} with periodic ${latestResult.data.periodic}`
+            );
           }
         } catch (err) {
           console.log(`No results found for survey ${surveyId}`);
@@ -130,6 +118,7 @@ const TestRecord = () => {
 
       // Process and organize the results
       setTestRecords(allResults);
+      console.log("Final results count:", allResults.length);
     } catch (error) {
       console.error("Error fetching test results:", error);
     } finally {
