@@ -5,7 +5,7 @@ import {
   PoweroffOutlined,
   // ProfileOutlined,
   SwapOutlined,
-  UserOutlined,
+  // UserOutlined,
 } from "@ant-design/icons";
 
 // src/data/menuItems.ts
@@ -50,7 +50,7 @@ export const menuItems = [
         key: "/test",
         label: "Survey List",
         path: "/test",
-        roles: ["psychologist", "student", "manager"],
+        roles: ["student", "psychologist", "manager"],
       },
       {
         key: "/create-test",

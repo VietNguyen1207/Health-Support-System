@@ -11,13 +11,11 @@ import {
   Typography,
   Row,
   Col,
-  Space,
   Tooltip,
   List,
   Avatar,
 } from "antd";
 import {
-  CheckCircleOutlined,
   ArrowLeftOutlined,
   FileTextOutlined,
   CalendarOutlined,
@@ -345,8 +343,7 @@ const TestResult = () => {
               onClick={() => navigate("/test")}
               type="primary"
               danger
-              icon={<ArrowLeftOutlined />}
-            >
+              icon={<ArrowLeftOutlined />}>
               Back to Tests
             </Button>
           </div>
@@ -370,8 +367,7 @@ const TestResult = () => {
             <Button
               onClick={() => navigate("/test")}
               type="primary"
-              icon={<ArrowLeftOutlined />}
-            >
+              icon={<ArrowLeftOutlined />}>
               Back to Tests
             </Button>
           </div>
@@ -388,8 +384,7 @@ const TestResult = () => {
           <Button
             type="link"
             className="p-0 h-auto flex items-center text-gray-500 hover:text-primary-green"
-            onClick={() => navigate("/")}
-          >
+            onClick={() => navigate("/")}>
             <HomeOutlined className="mr-1" />
             <span>Home</span>
           </Button>
@@ -397,8 +392,7 @@ const TestResult = () => {
           <Button
             type="link"
             className="p-0 h-auto flex items-center text-gray-500 hover:text-primary-green"
-            onClick={() => navigate("/test")}
-          >
+            onClick={() => navigate("/test")}>
             <span>Tests</span>
           </Button>
           <RightOutlined className="mx-2 text-xs" />
@@ -410,8 +404,7 @@ const TestResult = () => {
         {/* Main Results Card */}
         <Card
           className="shadow-lg rounded-xl overflow-hidden border-0 mb-6"
-          bodyStyle={{ padding: 0 }}
-        >
+          bodyStyle={{ padding: 0 }}>
           {/* Header with gradient background */}
           <div
             className="text-white p-8"
@@ -431,17 +424,14 @@ const TestResult = () => {
                 : "linear-gradient(135deg, #4a7c59, #2e8b57)",
               position: "relative",
               overflow: "hidden",
-            }}
-          >
+            }}>
             {/* Decorative circles */}
             <div
               className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10 bg-white"
-              style={{ transform: "translate(30%, -30%)" }}
-            ></div>
+              style={{ transform: "translate(30%, -30%)" }}></div>
             <div
               className="absolute bottom-0 left-0 w-40 h-40 rounded-full opacity-10 bg-white"
-              style={{ transform: "translate(-30%, 30%)" }}
-            ></div>
+              style={{ transform: "translate(-30%, 30%)" }}></div>
 
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-6">
@@ -497,8 +487,7 @@ const TestResult = () => {
                             border: `2px solid ${
                               interpretation?.color || "green"
                             }`,
-                          }}
-                        >
+                          }}>
                           <Tooltip title="Your assessment score">
                             <InfoCircleOutlined
                               style={{
@@ -523,8 +512,7 @@ const TestResult = () => {
                         <Tag
                           color={interpretation?.color}
                           icon={interpretation?.icon}
-                          className="text-sm px-3 py-1 rounded-full"
-                        >
+                          className="text-sm px-3 py-1 rounded-full">
                           {interpretation?.level} Level
                         </Tag>
                       </div>
@@ -567,8 +555,7 @@ const TestResult = () => {
               <div className="mb-8">
                 <Card
                   className="border-0 shadow-md rounded-xl overflow-hidden"
-                  bodyStyle={{ padding: 0 }}
-                >
+                  bodyStyle={{ padding: 0 }}>
                   <div className="bg-orange-50 p-6">
                     <Row gutter={[16, 16]} align="middle">
                       <Col xs={24} md={16}>
@@ -581,8 +568,7 @@ const TestResult = () => {
                           <div>
                             <Title
                               level={4}
-                              className="m-0 mb-2 text-orange-700"
-                            >
+                              className="m-0 mb-2 text-orange-700">
                               Professional Support Recommended
                             </Title>
                             <Paragraph className="mb-0 text-orange-600">
@@ -597,15 +583,13 @@ const TestResult = () => {
                       <Col
                         xs={24}
                         md={8}
-                        className="flex justify-center md:justify-end"
-                      >
+                        className="flex justify-center md:justify-end">
                         <Button
                           type="primary"
                           size="large"
                           icon={<CalendarOutlined />}
                           onClick={() => navigate("/book-appointment")}
-                          className="bg-orange-500 hover:bg-orange-600 border-orange-500 hover:border-orange-600 rounded-lg"
-                        >
+                          className="bg-orange-500 hover:bg-orange-600 border-orange-500 hover:border-orange-600 rounded-lg">
                           Book Consultation
                         </Button>
                       </Col>
@@ -626,8 +610,7 @@ const TestResult = () => {
                   <Button
                     type="link"
                     onClick={() => setShowResponses(!showResponses)}
-                    className="text-primary-green hover:text-primary-green/80"
-                  >
+                    className="text-primary-green hover:text-primary-green/80">
                     {showResponses ? "Hide Responses" : "Show Responses"}
                   </Button>
                 </div>
@@ -651,8 +634,7 @@ const TestResult = () => {
                             index !== selectedSurvey.questionList.length - 1
                               ? "mb-3"
                               : ""
-                          }`}
-                        >
+                          }`}>
                           <div className="flex items-start">
                             <div className="w-8 h-8 rounded-full bg-primary-green/10 flex items-center justify-center mr-3 shrink-0">
                               <Text className="text-primary-green font-medium">
@@ -670,8 +652,7 @@ const TestResult = () => {
                                       ? "orange"
                                       : "blue"
                                   }
-                                  className="rounded-full"
-                                >
+                                  className="rounded-full">
                                   {selectedOption
                                     ? selectedOption.label
                                     : "No answer selected"}
@@ -679,8 +660,7 @@ const TestResult = () => {
                                 {selectedOption && (
                                   <Text
                                     type="secondary"
-                                    className="ml-2 text-xs"
-                                  >
+                                    className="ml-2 text-xs">
                                     Score: {selectedOption.value}
                                   </Text>
                                 )}
@@ -705,8 +685,7 @@ const TestResult = () => {
                     type="primary"
                     ghost
                     onClick={() => setShowResponses(true)}
-                    className="border-primary-green text-primary-green hover:border-primary-green/80 hover:text-primary-green/80"
-                  >
+                    className="border-primary-green text-primary-green hover:border-primary-green/80 hover:text-primary-green/80">
                     Show {selectedSurvey.questionList?.length || 0} Responses
                   </Button>
                 </div>
@@ -727,8 +706,7 @@ const TestResult = () => {
                   <Card
                     hoverable
                     className="text-center h-full border-0 shadow-sm hover:shadow-md transition-shadow"
-                    onClick={() => navigate("/test")}
-                  >
+                    onClick={() => navigate("/test")}>
                     <div className="mb-3">
                       <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-50">
                         <FileTextOutlined className="text-blue-500 text-xl" />
@@ -742,8 +720,7 @@ const TestResult = () => {
                     </Text>
                     <Button
                       type="primary"
-                      className="bg-blue-500 hover:bg-blue-600 border-blue-500"
-                    >
+                      className="bg-blue-500 hover:bg-blue-600 border-blue-500">
                       View Tests
                     </Button>
                   </Card>
@@ -753,8 +730,7 @@ const TestResult = () => {
                   <Card
                     hoverable
                     className="text-center h-full border-0 shadow-sm hover:shadow-md transition-shadow"
-                    onClick={() => navigate("/book-appointment")}
-                  >
+                    onClick={() => navigate("/book-appointment")}>
                     <div className="mb-3">
                       <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-50">
                         <CalendarOutlined className="text-green-500 text-xl" />
@@ -768,8 +744,7 @@ const TestResult = () => {
                     </Text>
                     <Button
                       type="primary"
-                      className="bg-primary-green hover:bg-primary-green/90 border-primary-green"
-                    >
+                      className="bg-primary-green hover:bg-primary-green/90 border-primary-green">
                       Book Now
                     </Button>
                   </Card>
@@ -779,8 +754,7 @@ const TestResult = () => {
                   <Card
                     hoverable
                     className="text-center h-full border-0 shadow-sm hover:shadow-md transition-shadow"
-                    onClick={() => navigate("/test-record")}
-                  >
+                    onClick={() => navigate("/test-record")}>
                     <div className="mb-3">
                       <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-50">
                         <BarChartOutlined className="text-purple-500 text-xl" />
@@ -794,8 +768,7 @@ const TestResult = () => {
                     </Text>
                     <Button
                       type="primary"
-                      className="bg-purple-500 hover:bg-purple-600 border-purple-500"
-                    >
+                      className="bg-purple-500 hover:bg-purple-600 border-purple-500">
                       See Records
                     </Button>
                   </Card>
@@ -810,15 +783,13 @@ const TestResult = () => {
           <Button
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate("/test")}
-            className="flex items-center"
-          >
+            className="flex items-center">
             Back to Tests
           </Button>
           <Button
             type="primary"
             onClick={() => navigate("/student-profile")}
-            className="bg-primary-green hover:bg-primary-green/90"
-          >
+            className="bg-primary-green hover:bg-primary-green/90">
             Go to Profile
           </Button>
         </div>
