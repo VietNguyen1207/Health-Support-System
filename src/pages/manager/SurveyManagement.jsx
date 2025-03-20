@@ -1,163 +1,222 @@
+import { useSurveyStore } from "../../stores/surveyStore";
 import { useEffect, useState } from "react";
-import TableComponent from "../../components/TableComponent";
+import {
+  Button,
+  Table,
+  Modal,
+  Form,
+  Input,
+  Spin,
+  Space,
+  Typography,
+  Popconfirm,
+  message,
+} from "antd";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
 
 export default function SurveyManagement() {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState([]);
+  const { surveys, loading, fetchSurveys } = useSurveyStore();
+  // State for modal and form
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalType, setModalType] = useState("create"); // "create" or "edit"
+  const [selectedSurvey, setSelectedSurvey] = useState(null);
+  const [form] = Form.useForm();
 
+  // Fetch surveys on component mount
+  useEffect(() => {
+    fetchSurveys();
+  }, [fetchSurveys]);
+
+  // Handle modal actions
+  const showCreateModal = () => {
+    setModalType("create");
+    setSelectedSurvey(null);
+    form.resetFields();
+    setIsModalVisible(true);
+  };
+
+  const showEditModal = (survey) => {
+    setModalType("edit");
+    setSelectedSurvey(survey);
+    form.setFieldsValue({
+      title: survey.title,
+      description: survey.description,
+    });
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleSubmit = async (values) => {
+    // Implement create/edit functionality based on modalType
+    if (modalType === "create") {
+      // Add create survey logic
+      message.success("Survey created successfully");
+    } else {
+      // Add edit survey logic
+      message.success("Survey updated successfully");
+    }
+    setIsModalVisible(false);
+    fetchSurveys(); // Refresh survey list
+  };
+
+  const handleDelete = async (surveyId) => {
+    // Add delete survey logic
+    message.success("Survey deleted successfully");
+    fetchSurveys(); // Refresh survey list
+  };
+
+  const handleViewSurvey = (survey) => {
+    // Navigate to survey details/results page
+    // e.g., navigate(`/manager/surveys/${survey.id}`);
+  };
+
+  // Table columns
   const columns = [
     {
-      title: "Name",
-      dataIndex: "name",
-      sorter: true,
-      width: "20%",
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
+      sorter: (a, b) => a.title.localeCompare(b.title),
     },
     {
-      title: "Gender",
-      dataIndex: "gender",
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      ellipsis: true,
+    },
+    {
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (text) => new Date(text).toLocaleDateString(),
+      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
       filters: [
-        {
-          text: "Male",
-          value: "male",
-        },
-        {
-          text: "Female",
-          value: "female",
-        },
+        { text: "Active", value: "active" },
+        { text: "Draft", value: "draft" },
+        { text: "Closed", value: "closed" },
       ],
-      width: "20%",
+      onFilter: (value, record) => record.status === value,
+      render: (status) => {
+        const statusColors = {
+          active: "green",
+          draft: "orange",
+          closed: "red",
+        };
+        return <span style={{ color: statusColors[status] }}>{status}</span>;
+      },
     },
     {
-      title: "Email",
-      dataIndex: "email",
+      title: "Responses",
+      dataIndex: "responseCount",
+      key: "responseCount",
+      sorter: (a, b) => a.responseCount - b.responseCount,
     },
     {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
-    },
-    {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <Space>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => handleViewSurvey(record)}
+            title="View Survey Details"
+          />
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => showEditModal(record)}
+            title="Edit Survey"
+          />
+          <Popconfirm
+            title="Are you sure you want to delete this survey?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Yes"
+            cancelText="No">
+            <Button icon={<DeleteOutlined />} danger title="Delete Survey" />
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 
-  const fetchData = async () => {
-    setData([
-      {
-        id: "1",
-        name: "John Brown",
-        gender: "Male",
-        email: "abc",
-        age: 32,
-        address: "New York No. 1 Lake Park",
-      },
-      {
-        id: "2",
-        name: "Jim Green",
-        gender: "Male",
-        email: "abc",
-        age: 42,
-        address: "London No. 1 Lake Park",
-      },
-      {
-        id: "3",
-        name: "Joe Black",
-        gender: "Male",
-        email: "abc",
-        age: 32,
-        address: "Sidney No. 1 Lake Park",
-      },
-      {
-        id: "4",
-        name: "Joe Black",
-        gender: "Male",
-        email: "abc",
-        age: 32,
-        address: "Sidney No. 1 Lake Park",
-      },
-      {
-        id: "5",
-        name: "Joe Black",
-        gender: "Male",
-        email: "abc",
-        age: 32,
-        address: "Sidney No. 1 Lake Park",
-      },
-      {
-        id: "6",
-        name: "Joe Black",
-        gender: "Male",
-        email: "abc",
-        age: 32,
-        address: "Sidney No. 1 Lake Park",
-      },
-      {
-        id: "7",
-        name: "Joe Black",
-        gender: "Male",
-        email: "abc",
-        age: 32,
-        address: "Sidney No. 1 Lake Park",
-      },
-      {
-        id: "8",
-        name: "Joe Black",
-        gender: "Female",
-        email: "abc",
-        age: 32,
-        address: "Sidney No. 1 Lake Park",
-      },
-      {
-        id: "9",
-        name: "Joe Black",
-        gender: "Female",
-        email: "abc",
-        age: 32,
-        address: "Sidney No. 1 Lake Park",
-      },
-      {
-        id: "10",
-        name: "Joe Black",
-        gender: "Female",
-        email: "abc",
-        age: 32,
-        address: "Sidney No. 1 Lake Park",
-      },
-      {
-        id: "11",
-        name: "Joe Black",
-        gender: "Female",
-        email: "abc",
-        age: 32,
-        address: "Sidney No. 1 Lake Park",
-      },
-      {
-        id: "12",
-        name: "Joe Black",
-        gender: "Male",
-        email: "abc",
-        age: 32,
-        address: "Sidney No. 1 Lake Park",
-      },
-    ]);
-    setLoading(false);
-  };
-
-  useEffect(() => fetchData, []);
-
   return (
-    <div>
-      <TableComponent
-        title="User Management"
-        columns={columns}
-        data={data}
-        loading={loading}
-        bordered={true}
-        setData={setData}
-        size="middle"
-      />
+    <div style={{ padding: "20px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "20px",
+        }}>
+        <Typography.Title level={2}>Survey Management</Typography.Title>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={showCreateModal}>
+          Create Survey
+        </Button>
+      </div>
+
+      {loading ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            padding: "50px",
+          }}>
+          <Spin size="large" />
+        </div>
+      ) : (
+        <Table
+          columns={columns}
+          dataSource={surveys}
+          rowKey="id"
+          pagination={{ pageSize: 10 }}
+        />
+      )}
+
+      <Modal
+        title={modalType === "create" ? "Create New Survey" : "Edit Survey"}
+        open={isModalVisible}
+        onCancel={handleCancel}
+        footer={null}>
+        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+          <Form.Item
+            name="title"
+            label="Survey Title"
+            rules={[
+              { required: true, message: "Please enter a survey title" },
+            ]}>
+            <Input placeholder="Enter survey title" />
+          </Form.Item>
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[{ required: true, message: "Please enter a description" }]}>
+            <Input.TextArea placeholder="Enter survey description" rows={4} />
+          </Form.Item>
+          <Form.Item>
+            <div
+              style={{ display: "flex", justifyContent: "end", gap: "10px" }}>
+              <Button onClick={handleCancel}>Cancel</Button>
+              <Button type="primary" htmlType="submit">
+                {modalType === "create" ? "Create" : "Update"}
+              </Button>
+            </div>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

@@ -3,12 +3,17 @@ import "../style/Register.css";
 import { useAuthStore } from "../stores/authStore";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
+import PropTypes from "prop-types";
 
 const RequiredLabel = ({ text }) => (
   <label className="form-label">
     {text} <span className="text-red-500">*</span>
   </label>
 );
+
+RequiredLabel.propTypes = {
+  text: PropTypes.string.isRequired,
+};
 
 export default function Register() {
   const [userType, setUserType] = useState("student");
@@ -31,8 +36,7 @@ export default function Register() {
             name="userType"
             value={userType}
             onChange={handleChange}
-            required
-          >
+            required>
             <option value="student">Student</option>
             <option value="parent">Parent</option>
           </select>
@@ -77,13 +81,56 @@ function StudentForm() {
 
     // Handle nested studentDetails fields
     if (["grade", "className", "schoolName"].includes(name)) {
-      setFormData({
-        ...formData,
-        studentDetails: {
-          ...formData.studentDetails,
-          [name]: name === "grade" ? parseInt(value, 10) || "" : value,
-        },
-      });
+      // Xử lý đặc biệt cho trường grade
+      if (name === "grade") {
+        let gradeValue = parseInt(value, 10) || "";
+
+        // Nếu người dùng đã nhập một số
+        if (gradeValue !== "") {
+          // Giới hạn giá trị trong khoảng từ 1 đến 12
+          if (gradeValue < 1) gradeValue = 1;
+          if (gradeValue > 12) gradeValue = 12;
+        }
+
+        setFormData({
+          ...formData,
+          studentDetails: {
+            ...formData.studentDetails,
+            grade: gradeValue,
+          },
+        });
+      }
+      // Xử lý đặc biệt cho trường className
+      else if (name === "className") {
+        // Lấy chữ cái đầu tiên từ input
+        let classLetter = "";
+        if (value) {
+          // Lấy chữ cái đầu tiên và chuyển đổi thành chữ hoa
+          const firstChar = value.charAt(0).toUpperCase();
+
+          // Kiểm tra xem ký tự đầu tiên có phải là chữ cái từ A-Z không
+          if (/^[A-Z]$/.test(firstChar)) {
+            classLetter = firstChar;
+          }
+        }
+
+        setFormData({
+          ...formData,
+          studentDetails: {
+            ...formData.studentDetails,
+            className: classLetter,
+          },
+        });
+      } else {
+        // Xử lý bình thường cho các trường khác
+        setFormData({
+          ...formData,
+          studentDetails: {
+            ...formData.studentDetails,
+            [name]: value,
+          },
+        });
+      }
     } else {
       setFormData({
         ...formData,
@@ -106,8 +153,8 @@ function StudentForm() {
     // Basic validation
     if (!formData.fullName.trim()) errors.fullName = "Full name is required";
     if (!formData.email.trim()) errors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      errors.email = "Email is invalid";
+    else if (!formData.email.endsWith("@cybriadev.com"))
+      errors.email = "Please use an email with @cybriadev.com domain";
 
     if (!formData.password) errors.password = "Password is required";
     else if (formData.password.length < 8)
@@ -117,10 +164,30 @@ function StudentForm() {
       errors.rePassword = "Passwords do not match";
 
     if (!formData.gender) errors.gender = "Gender is required";
-    if (!formData.phoneNumber) errors.phoneNumber = "Phone number is required";
+
+    // Phone number validation for Vietnam
+    if (!formData.phoneNumber) {
+      errors.phoneNumber = "Phone number is required";
+    } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
+      errors.phoneNumber = "Phone number must be exactly 10 digits";
+    } else if (!/^(03|05|07|08|09)\d{8}$/.test(formData.phoneNumber)) {
+      errors.phoneNumber = "Please enter a valid Vietnamese phone number";
+    }
+
     if (!formData.address) errors.address = "Address is required";
 
-    if (!formData.studentDetails.grade) errors.grade = "Grade is required";
+    // Grade validation
+    if (!formData.studentDetails.grade) {
+      errors.grade = "Grade is required";
+    } else {
+      const gradeValue = Number(formData.studentDetails.grade);
+      if (isNaN(gradeValue)) {
+        errors.grade = "Grade must be a number";
+      } else if (gradeValue < 1 || gradeValue > 12) {
+        errors.grade = "Grade must be between 1 and 12";
+      }
+    }
+
     if (!formData.studentDetails.className)
       errors.className = "Class name is required";
     if (!formData.studentDetails.schoolName)
@@ -172,7 +239,9 @@ function StudentForm() {
             required
           />
           {formErrors.fullName && (
-            <div className="error-message">{formErrors.fullName}</div>
+            <div className="error-message text-red-500">
+              {formErrors.fullName}
+            </div>
           )}
         </div>
         <div className="form-group">
@@ -181,13 +250,13 @@ function StudentForm() {
             type="email"
             name="email"
             className={`form-control ${formErrors.email ? "error" : ""}`}
-            placeholder="name@example.com"
+            placeholder="name@cybriadev.com"
             value={formData.email}
             onChange={handleChange}
             required
           />
           {formErrors.email && (
-            <div className="error-message">{formErrors.email}</div>
+            <div className="error-message text-red-500">{formErrors.email}</div>
           )}
         </div>
       </div>
@@ -230,7 +299,7 @@ function StudentForm() {
           </label>
         </div>
         {formErrors.gender && (
-          <div className="error-message">{formErrors.gender}</div>
+          <div className="error-message text-red-500">{formErrors.gender}</div>
         )}
       </div>
 
@@ -244,10 +313,12 @@ function StudentForm() {
             placeholder="e.g. 10"
             value={formData.studentDetails.grade}
             onChange={handleChange}
+            max={12}
+            min={1}
             required
           />
           {formErrors.grade && (
-            <div className="error-message">{formErrors.grade}</div>
+            <div className="error-message text-red-500">{formErrors.grade}</div>
           )}
         </div>
         <div className="form-group">
@@ -262,7 +333,9 @@ function StudentForm() {
             required
           />
           {formErrors.className && (
-            <div className="error-message">{formErrors.className}</div>
+            <div className="error-message text-red-500">
+              {formErrors.className}
+            </div>
           )}
         </div>
       </div>
@@ -279,7 +352,9 @@ function StudentForm() {
           required
         />
         {formErrors.schoolName && (
-          <div className="error-message">{formErrors.schoolName}</div>
+          <div className="error-message text-red-500">
+            {formErrors.schoolName}
+          </div>
         )}
       </div>
 
@@ -296,7 +371,9 @@ function StudentForm() {
             required
           />
           {formErrors.phoneNumber && (
-            <div className="error-message">{formErrors.phoneNumber}</div>
+            <div className="error-message text-red-500">
+              {formErrors.phoneNumber}
+            </div>
           )}
         </div>
         <div className="form-group">
@@ -311,7 +388,9 @@ function StudentForm() {
             required
           />
           {formErrors.address && (
-            <div className="error-message">{formErrors.address}</div>
+            <div className="error-message text-red-500">
+              {formErrors.address}
+            </div>
           )}
         </div>
       </div>
@@ -329,7 +408,9 @@ function StudentForm() {
             required
           />
           {formErrors.password && (
-            <div className="error-message">{formErrors.password}</div>
+            <div className="error-message text-red-500">
+              {formErrors.password}
+            </div>
           )}
         </div>
         <div className="form-group">
@@ -344,7 +425,9 @@ function StudentForm() {
             required
           />
           {formErrors.rePassword && (
-            <div className="error-message">{formErrors.rePassword}</div>
+            <div className="error-message text-red-500">
+              {formErrors.rePassword}
+            </div>
           )}
         </div>
       </div>
@@ -353,7 +436,9 @@ function StudentForm() {
         {loading ? "Creating account..." : "Create account"}
       </button>
 
-      {error && <div className="error-message form-error">{error}</div>}
+      {error && (
+        <div className="error-message text-red-500 form-error">{error}</div>
+      )}
     </form>
   );
 }
@@ -453,8 +538,8 @@ function ParentForm() {
     // Basic validation
     if (!formData.fullName.trim()) errors.fullName = "Full name is required";
     if (!formData.email.trim()) errors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      errors.email = "Email is invalid";
+    else if (!formData.email.endsWith("@cybriadev.com"))
+      errors.email = "Please use an email with @cybriadev.com domain";
 
     if (!formData.password) errors.password = "Password is required";
     else if (formData.password.length < 8)
@@ -472,7 +557,16 @@ function ParentForm() {
       errors.rePassword = "Passwords do not match";
 
     if (!formData.gender) errors.gender = "Gender is required";
-    if (!formData.phoneNumber) errors.phoneNumber = "Phone number is required";
+
+    // Phone number validation for Vietnam
+    if (!formData.phoneNumber) {
+      errors.phoneNumber = "Phone number is required";
+    } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
+      errors.phoneNumber = "Phone number must be exactly 10 digits";
+    } else if (!/^(03|05|07|08|09)\d{8}$/.test(formData.phoneNumber)) {
+      errors.phoneNumber = "Please enter a valid Vietnamese phone number";
+    }
+
     if (!formData.address) errors.address = "Address is required";
 
     // Validate student IDs
@@ -534,7 +628,9 @@ function ParentForm() {
             required
           />
           {formErrors.fullName && (
-            <div className="error-message">{formErrors.fullName}</div>
+            <div className="error-message text-red-500">
+              {formErrors.fullName}
+            </div>
           )}
         </div>
         <div className="form-group">
@@ -543,13 +639,13 @@ function ParentForm() {
             type="email"
             name="email"
             className={`form-control ${formErrors.email ? "error" : ""}`}
-            placeholder="name@example.com"
+            placeholder="name@cybriadev.com"
             value={formData.email}
             onChange={handleChange}
             required
           />
           {formErrors.email && (
-            <div className="error-message">{formErrors.email}</div>
+            <div className="error-message text-red-500">{formErrors.email}</div>
           )}
         </div>
       </div>
@@ -592,7 +688,7 @@ function ParentForm() {
           </label>
         </div>
         {formErrors.gender && (
-          <div className="error-message">{formErrors.gender}</div>
+          <div className="error-message text-red-500">{formErrors.gender}</div>
         )}
       </div>
 
@@ -609,7 +705,9 @@ function ParentForm() {
             required
           />
           {formErrors.phoneNumber && (
-            <div className="error-message">{formErrors.phoneNumber}</div>
+            <div className="error-message text-red-500">
+              {formErrors.phoneNumber}
+            </div>
           )}
         </div>
         <div className="form-group">
@@ -624,7 +722,9 @@ function ParentForm() {
             required
           />
           {formErrors.address && (
-            <div className="error-message">{formErrors.address}</div>
+            <div className="error-message text-red-500">
+              {formErrors.address}
+            </div>
           )}
         </div>
       </div>
@@ -652,14 +752,13 @@ function ParentForm() {
               <button
                 type="button"
                 className="ml-2 px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                onClick={() => removeStudentId(index)}
-              >
+                onClick={() => removeStudentId(index)}>
                 Remove
               </button>
             )}
 
             {formErrors[`studentId-${index}`] && (
-              <div className="error-message ml-2">
+              <div className="error-message text-red-500 ml-2">
                 {formErrors[`studentId-${index}`]}
               </div>
             )}
@@ -669,8 +768,7 @@ function ParentForm() {
         <button
           type="button"
           className="mt-2 px-3 py-2 bg-custom-green text-white rounded-md hover:custome-green"
-          onClick={addStudentId}
-        >
+          onClick={addStudentId}>
           Add Another Student ID
         </button>
       </div>
@@ -688,7 +786,9 @@ function ParentForm() {
             required
           />
           {formErrors.password && (
-            <div className="error-message">{formErrors.password}</div>
+            <div className="error-message text-red-500">
+              {formErrors.password}
+            </div>
           )}
           <p className="text-xs text-gray-500 mt-1">
             Password must be at least 8 characters and include uppercase,
@@ -707,7 +807,9 @@ function ParentForm() {
             required
           />
           {formErrors.rePassword && (
-            <div className="error-message">{formErrors.rePassword}</div>
+            <div className="error-message text-red-500">
+              {formErrors.rePassword}
+            </div>
           )}
         </div>
       </div>
@@ -716,7 +818,9 @@ function ParentForm() {
         {loading ? "Creating account..." : "Create account"}
       </button>
 
-      {error && <div className="error-message form-error">{error}</div>}
+      {error && (
+        <div className="error-message text-red-500 form-error">{error}</div>
+      )}
     </form>
   );
 }

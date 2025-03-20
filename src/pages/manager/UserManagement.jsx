@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   Flex,
-  Radio,
   Space,
   message,
   Card,
@@ -43,6 +42,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
 } from "@ant-design/icons";
+import { useAuthStore } from "../../stores/authStore";
 
 const { Title, Text } = Typography;
 
@@ -57,9 +57,10 @@ export default function UserManagement() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [form] = Form.useForm();
   const [searchTerm, setSearchTerm] = useState("");
-  const [childrenArr, setChildrenArr] = useState([]);
+  const [childrenList, setChildrenList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuthStore();
 
   const handleViewDetail = async (record) => {
     try {
@@ -71,8 +72,6 @@ export default function UserManagement() {
         message.error("Failed to fetch user details");
         return;
       }
-
-      // console.log("Original data:", data);
 
       let filteredData = { ...data }; // Clone data to avoid mutation
       const userRole = transformString(data.role).toLowerCase();
@@ -93,14 +92,14 @@ export default function UserManagement() {
           }));
 
           // Tạo mảng childrenArr để sử dụng trong renderUserDetails
-          setChildrenArr([
+          setChildrenList([
             {
               userId: data.userId,
               children: childrenInfo,
             },
           ]);
         } else {
-          setChildrenArr([]);
+          setChildrenList([]);
         }
       } else if (userRole === "psychologist") {
         filteredData = mergeNestedObject(data, "psychologistInfo");
@@ -250,33 +249,34 @@ export default function UserManagement() {
         title: "Actions",
         key: "actions",
         width: "10%",
-        render: (_, record) => (
-          <Space size="small">
-            <Tooltip title="View Details">
-              <Button
-                type="primary"
-                size="small"
-                icon={<EyeOutlined />}
-                onClick={() => {
-                  handleViewDetail(record);
-                  setIsModalVisible(true);
-                }}
-              />
-            </Tooltip>
-            <Tooltip title="Edit User">
-              <Button
-                type="default"
-                size="small"
-                icon={<EditOutlined />}
-                onClick={() => {
-                  handleViewDetail(record);
-                  setIsModalVisible(true);
-                  handleUpdate();
-                }}
-              />
-            </Tooltip>
-          </Space>
-        ),
+        render: (_, record) =>
+          user.userId !== record.userId && (
+            <Space size="small">
+              <Tooltip title="View Details">
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<EyeOutlined />}
+                  onClick={() => {
+                    handleViewDetail(record);
+                    setIsModalVisible(true);
+                  }}
+                />
+              </Tooltip>
+              <Tooltip title="Edit User">
+                <Button
+                  type="default"
+                  size="small"
+                  icon={<EditOutlined />}
+                  onClick={() => {
+                    handleViewDetail(record);
+                    setIsModalVisible(true);
+                    handleUpdate();
+                  }}
+                />
+              </Tooltip>
+            </Space>
+          ),
       },
     ],
     [normalizeRole]
@@ -382,6 +382,10 @@ export default function UserManagement() {
     const userRole = transformString(selectedUser.role).toLowerCase();
 
     const childrenArr = [];
+
+    console.log("====================================");
+    console.log(childrenList);
+    console.log("====================================");
 
     if (isEditMode) {
       return isLoading ? (
@@ -825,12 +829,9 @@ export default function UserManagement() {
                   </Flex>
                 }
                 size="small">
-                {childrenArr &&
-                childrenArr.length > 0 &&
-                childrenArr[0].children &&
-                childrenArr[0].children.length > 0 ? (
+                {childrenList.length && childrenList[0].children.length > 0 ? (
                   <Row gutter={[16, 16]}>
-                    {childrenArr[0].children.map((child) => (
+                    {childrenList[0].children.map((child) => (
                       <Col key={child.userId} xs={24} sm={12} md={8}>
                         <Card
                           hoverable

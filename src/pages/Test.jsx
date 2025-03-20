@@ -13,14 +13,10 @@ import {
   Input,
   Select,
   Pagination,
-  Dropdown,
   Button,
-  Spin,
   Empty,
   notification,
-  Progress,
   Tooltip,
-  Badge,
   Tag,
   Modal,
 } from "antd";
@@ -32,7 +28,7 @@ const { Option } = Select;
 
 const Test = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const { surveys, loading, fetchSurveys } = useSurveyStore();
   const [selectedTest, setSelectedTest] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -207,7 +203,7 @@ const Test = () => {
   return (
     <div className="general-wrapper ">
       {/* Hero section */}
-      <div className="hero-section">
+      <div className="hero-section bg-emerald-gradient">
         <div className="hero-content">
           <h1 className="hero-title">Mental Health Assessments</h1>
           <p className="hero-subtitle">
@@ -253,65 +249,69 @@ const Test = () => {
           </div>
 
           {/* Filters - Enhanced with visual cues */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="transition-all duration-300 hover:transform hover:scale-[1.01]">
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                Status
-              </label>
-              <Select
-                placeholder="All statuses"
-                allowClear
-                style={{ width: "100%" }}
-                onChange={(value) => setSelectedStatus(value)}
-                value={selectedStatus}
-                className="w-full"
-                size="large"
-                suffixIcon={<DownOutlined className="text-gray-400" />}
-                dropdownStyle={{ borderRadius: "0.75rem" }}
-              >
-                {statuses.map((status) => (
-                  <Option key={status} value={status}>
-                    {status === "COMPLETED" ? (
-                      <span className="flex items-center">
-                        <CheckCircleOutlined className="mr-2 text-green-500" />
-                        Completed
-                      </span>
-                    ) : (
-                      <span className="flex items-center">
-                        <ClockCircleOutlined className="mr-2 text-blue-500" />
-                        Not Completed
-                      </span>
-                    )}
-                  </Option>
-                ))}
-              </Select>
-            </div>
+          {user.role === "student" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="transition-all duration-300 hover:transform hover:scale-[1.01]">
+                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                  Status
+                </label>
+                <Select
+                  placeholder="All statuses"
+                  allowClear
+                  style={{ width: "100%" }}
+                  onChange={(value) => setSelectedStatus(value)}
+                  value={selectedStatus}
+                  className="w-full"
+                  size="large"
+                  suffixIcon={<DownOutlined className="text-gray-400" />}
+                  dropdownStyle={{ borderRadius: "0.75rem" }}
+                >
+                  {statuses.map((status) => (
+                    <Option key={status} value={status}>
+                      {status === "COMPLETED" ? (
+                        <span className="flex items-center">
+                          <CheckCircleOutlined className="mr-2 text-green-500" />
+                          Completed
+                        </span>
+                      ) : (
+                        <span className="flex items-center">
+                          <ClockCircleOutlined className="mr-2 text-blue-500" />
+                          Not Completed
+                        </span>
+                      )}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
 
-            <div className="flex-1 transition-all duration-300 hover:transform hover:scale-[1.01]">
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                <span className="inline-block w-2 h-2 bg-custom-green rounded-full mr-2"></span>
-                Category
-              </label>
-              <Select
-                placeholder="All categories"
-                allowClear
-                style={{ width: "100%" }}
-                onChange={setSelectedCategory}
-                value={selectedCategory}
-                className="w-full"
-                size="large"
-                suffixIcon={<DownOutlined className="text-gray-400" />}
-                dropdownStyle={{ borderRadius: "0.75rem" }}
-              >
-                {categories.map((category) => (
-                  <Option key={category} value={category}>
-                    <span className="capitalize">{category.toLowerCase()}</span>
-                  </Option>
-                ))}
-              </Select>
+              <div className="flex-1 transition-all duration-300 hover:transform hover:scale-[1.01]">
+                <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                  <span className="inline-block w-2 h-2 bg-custom-green rounded-full mr-2"></span>
+                  Category
+                </label>
+                <Select
+                  placeholder="All categories"
+                  allowClear
+                  style={{ width: "100%" }}
+                  onChange={setSelectedCategory}
+                  value={selectedCategory}
+                  className="w-full"
+                  size="large"
+                  suffixIcon={<DownOutlined className="text-gray-400" />}
+                  dropdownStyle={{ borderRadius: "0.75rem" }}
+                >
+                  {categories.map((category) => (
+                    <Option key={category} value={category}>
+                      <span className="capitalize">
+                        {category.toLowerCase()}
+                      </span>
+                    </Option>
+                  ))}
+                </Select>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Active filters display */}
           {(selectedStatus || selectedCategory || searchQuery) && (
@@ -330,7 +330,7 @@ const Test = () => {
                       : searchQuery}
                   </Tag>
                 )}
-                {selectedStatus && (
+                {user.role === "student" && selectedStatus && (
                   <Tag
                     closable
                     onClose={() => setSelectedStatus(undefined)}
@@ -342,7 +342,7 @@ const Test = () => {
                       : "Not Completed"}
                   </Tag>
                 )}
-                {selectedCategory && (
+                {user.role === "student" && selectedCategory && (
                   <Tag
                     closable
                     onClose={() => setSelectedCategory(undefined)}
@@ -371,7 +371,13 @@ const Test = () => {
                   <div
                     key={test.id}
                     onClick={() => handleTestClick(test)}
-                    className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 cursor-pointer transform hover:-translate-y-1 overflow-hidden group"
+                    className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 cursor-pointer transform hover:-translate-y-1 overflow-hidden group ${
+                      test.status === "ACTIVE"
+                        ? "opacity-100"
+                        : user.role === "student" || user.role === "parent"
+                        ? "hidden"
+                        : "block"
+                    }`}
                   >
                     <div
                       className={`border-l-4 ${categoryColor.border} h-full p-6 relative`}
@@ -388,20 +394,33 @@ const Test = () => {
                         >
                           {test.title}
                         </h3>
-                        <div className="flex items-center">
-                          {test.completeStatus === "COMPLETED" ? (
-                            <div className="bg-green-50 text-green-600 rounded-xl px-3 py-1.5 flex items-center">
-                              <CheckCircleOutlined className="mr-1.5" />
-                              <span className="font-medium">Completed</span>
-                            </div>
-                          ) : (
-                            <div className="bg-blue-50 text-blue-600 rounded-xl px-3 py-1.5 flex items-center">
-                              <ClockCircleOutlined className="mr-1.5" />
-                              <span className="font-medium">Not Completed</span>
-                            </div>
-                          )}
-                        </div>
+                        {user.role === "student" && (
+                          <div className="flex items-center">
+                            {test.completeStatus === "COMPLETED" ? (
+                              <div className="bg-green-50 text-green-600 rounded-xl px-3 py-1.5 flex items-center">
+                                <CheckCircleOutlined className="mr-1.5" />
+                                <span className="font-medium">Completed</span>
+                              </div>
+                            ) : (
+                              <div className="bg-blue-50 text-blue-600 rounded-xl px-3 py-1.5 flex items-center">
+                                <ClockCircleOutlined className="mr-1.5" />
+                                <span className="font-medium">
+                                  Not Completed
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
+
+                      {test.status === "INACTIVE" && (
+                        <Tag
+                          color="error"
+                          className="absolute top-3 right-5 text-white px-2 py-1 rounded-lg"
+                        >
+                          Inactive
+                        </Tag>
+                      )}
 
                       {/* Card Content */}
                       <p className="text-gray-600 mb-6 line-clamp-2 relative z-10">
@@ -443,13 +462,6 @@ const Test = () => {
                           <span className="font-medium">{test.category}</span>
                         </span>
                       </div>
-
-                      {/* Status indicator dot */}
-                      {test.status === "ACTIVE" ? (
-                        <div className="absolute top-6 right-6 w-2 h-2 bg-green-500 rounded-full shadow-sm shadow-green-200 animate-pulse"></div>
-                      ) : (
-                        <div className="absolute top-6 right-6 w-2 h-2 bg-red-500 rounded-full shadow-sm shadow-red-200"></div>
-                      )}
                     </div>
                   </div>
                 );
@@ -483,11 +495,11 @@ const Test = () => {
           {filteredTests.length > 0 && (
             <div className="max-w-3xl mx-auto px-4 mt-8">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                <div className="text-sm text-gray-500">
+                {/* <div className="text-sm text-gray-500">
                   Showing {Math.min(startIndex + 1, totalTests)}-
                   {Math.min(endIndex, totalTests)} of {totalTests}{" "}
                   {totalTests === 1 ? "assessment" : "assessments"}
-                </div>
+                </div> */}
                 <Pagination
                   current={currentPage}
                   total={totalTests}
@@ -525,43 +537,63 @@ const Test = () => {
           destroyOnClose={true}
           footer={
             <div className="flex justify-end gap-3">
-              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button
-                type="primary"
-                className="bg-custom-green hover:bg-custom-green/90"
-                onClick={() => handleStartTest(selectedTest)}
-                disabled={selectedTest.status === "INACTIVE"}
-                size="large"
-              >
-                {selectedTest.completeStatus === "COMPLETED"
-                  ? "Retake Assessment"
-                  : "Start Assessment"}
+              <Button size="large" danger onClick={() => setIsModalOpen(false)}>
+                Close
               </Button>
+              {user.role === "student" && (
+                <Button
+                  type="primary"
+                  className="bg-custom-green hover:bg-custom-green/90"
+                  onClick={() => handleStartTest(selectedTest)}
+                  disabled={selectedTest.status === "INACTIVE"}
+                  size="large"
+                >
+                  {selectedTest.completeStatus === "COMPLETED"
+                    ? "Retake Assessment"
+                    : "Start Assessment"}
+                </Button>
+              )}
             </div>
           }
         >
           <div className="space-y-4 animate-fadeIn">
             {/* Category and Status Badges */}
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className={`flex flex-wrap gap-2 mb-3`}>
               <Tag className="bg-custom-green/10 text-custom-green border-custom-green px-3 py-1 rounded-lg">
                 {selectedTest.category}
               </Tag>
-              {selectedTest.completeStatus === "COMPLETED" ? (
-                <Tag className="bg-green-50 text-green-600 border-green-200 px-3 py-1 rounded-lg flex items-center">
-                  <CheckCircleOutlined className="mr-1" />
-                  Completed
-                </Tag>
-              ) : (
-                <Tag className="bg-blue-50 text-blue-600 border-blue-200 px-3 py-1 rounded-lg flex items-center">
-                  <ClockCircleOutlined className="mr-1" />
-                  Not Completed
-                </Tag>
-              )}
+              {user.role === "student" &&
+                (selectedTest.completeStatus === "COMPLETED" ? (
+                  <Tag className="bg-green-50 text-green-600 border-green-200 px-3 py-1 rounded-lg flex items-center">
+                    <CheckCircleOutlined className="mr-1" />
+                    Completed
+                  </Tag>
+                ) : (
+                  <Tag className="bg-blue-50 text-blue-600 border-blue-200 px-3 py-1 rounded-lg flex items-center">
+                    <ClockCircleOutlined className="mr-1" />
+                    Not Completed
+                  </Tag>
+                ))}
+
+              {/* Add status tag showing active/inactive state */}
               <Tag
-                color={selectedTest.status === "ACTIVE" ? "green" : "red"}
-                className="px-3 py-1 rounded-lg"
+                className={`px-3 py-1 rounded-lg flex items-center ${
+                  selectedTest.status === "ACTIVE"
+                    ? "bg-green-50 text-green-600 border-green-200"
+                    : "bg-red-50 text-red-600 border-red-200"
+                }`}
               >
-                {selectedTest.status}
+                {selectedTest.status === "ACTIVE" ? (
+                  <>
+                    <CheckCircleOutlined className="mr-1" />
+                    Active
+                  </>
+                ) : (
+                  <>
+                    <ClockCircleOutlined className="mr-1" />
+                    Inactive
+                  </>
+                )}
               </Tag>
             </div>
 
@@ -674,27 +706,29 @@ const Test = () => {
                           selectedTest.statusStudentResponse.length - 1
                         ) {
                           return (
-                            <div
-                              key={index}
-                              className="bg-white p-4 rounded-lg border border-gray-100"
-                            >
-                              <div className="flex justify-between items-center pb-2 border-b border-gray-100">
-                                <span className="text-gray-500">
-                                  Last Completed:
-                                </span>
-                                <span className="font-medium text-gray-800">
-                                  {response.lastCompleteDate
-                                    ? formatDate(response.lastCompleteDate)
-                                    : "Not completed yet"}
-                                </span>
+                            user.role === "student" && (
+                              <div
+                                key={index}
+                                className="bg-white p-4 rounded-lg border border-gray-100"
+                              >
+                                <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                                  <span className="text-gray-500">
+                                    Last Completed:
+                                  </span>
+                                  <span className="font-medium text-gray-800">
+                                    {response.lastCompleteDate
+                                      ? formatDate(response.lastCompleteDate)
+                                      : "Not completed yet"}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center pt-2">
+                                  <span className="text-gray-500">Score:</span>
+                                  <span className="font-medium text-gray-800">
+                                    {response.score}
+                                  </span>
+                                </div>
                               </div>
-                              <div className="flex justify-between items-center pt-2">
-                                <span className="text-gray-500">Score:</span>
-                                <span className="font-medium text-gray-800">
-                                  {response.score}
-                                </span>
-                              </div>
-                            </div>
+                            )
                           );
                         }
                         return null;

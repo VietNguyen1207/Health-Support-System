@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="footer ">
+    <footer className="footer bg-emerald-gradient">
       <div className="footer-container">
         <div className="footer-grid">
           <div className="footer-section">

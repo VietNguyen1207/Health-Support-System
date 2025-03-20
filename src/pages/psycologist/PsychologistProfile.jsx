@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -13,8 +13,8 @@ import {
   Divider,
   Badge,
   List,
-  Timeline,
   Progress,
+  Typography,
 } from "antd";
 import {
   UserOutlined,
@@ -22,18 +22,13 @@ import {
   PhoneOutlined,
   HomeOutlined,
   CalendarOutlined,
-  TeamOutlined,
   TrophyOutlined,
   BulbOutlined,
   EditOutlined,
-  EnvironmentOutlined,
   ClockCircleOutlined,
-  FileTextOutlined,
   CheckCircleOutlined,
   MedicineBoxOutlined,
   BookOutlined,
-  VideoCameraOutlined,
-  RightOutlined,
   LinkOutlined,
 } from "@ant-design/icons";
 import { useUserStore } from "../../stores/userStore";
@@ -41,14 +36,16 @@ import { useAuthStore } from "../../stores/authStore";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 import { useProgramStore } from "../../stores/programStore";
 import dayjs from "dayjs";
+import PropTypes from "prop-types";
 
 const { TabPane } = Tabs;
+const { Title, Text } = Typography;
 
 const PsychologistProfile = () => {
   const { user: authUser } = useAuthStore();
-  const { getUserDetails, loading: userLoading } = useUserStore();
-  const { fetchUpcomingAppointments, loading: appointmentLoading } =
-    useAppointmentStore();
+  const { getUserDetails } = useUserStore();
+  const [userLoading, setUserLoading] = useState(true);
+  const { fetchUpcomingAppointments } = useAppointmentStore();
   const { fetchFacilitatedPrograms } = useProgramStore();
   const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState("1");
@@ -67,6 +64,8 @@ const PsychologistProfile = () => {
         setUserData(data);
       } catch (error) {
         console.error("Failed to fetch psychologist details:", error);
+      } finally {
+        setUserLoading(false);
       }
     };
 
@@ -130,8 +129,20 @@ const PsychologistProfile = () => {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spin size="large" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+        <div className="text-center">
+          <div className="mb-4">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 p-4">
+              <Spin size="large" />
+            </div>
+          </div>
+          <Title level={4} className="m-0 mb-2">
+            Loading Profile
+          </Title>
+          <Text type="secondary">
+            Please wait while we fetch your family&apos;s information...
+          </Text>
+        </div>
       </div>
     );
   }
@@ -147,18 +158,18 @@ const PsychologistProfile = () => {
   const { psychologistInfo } = userData;
 
   // Function to get status color
-  const getStatusColor = (status) => {
-    switch (status?.toUpperCase()) {
-      case "ACTIVE":
-        return "green";
-      case "AWAY":
-        return "orange";
-      case "UNAVAILABLE":
-        return "red";
-      default:
-        return "default";
-    }
-  };
+  // const getStatusColor = (status) => {
+  //   switch (status?.toUpperCase()) {
+  //     case "ACTIVE":
+  //       return "green";
+  //     case "AWAY":
+  //       return "orange";
+  //     case "UNAVAILABLE":
+  //       return "red";
+  //     default:
+  //       return "default";
+  //   }
+  // };
 
   // Function to get program status color
   const getProgramStatusColor = (status) => {
@@ -191,13 +202,11 @@ const PsychologistProfile = () => {
         <div className="min-h-[300px] flex items-center justify-center">
           <Empty
             description="No programs available"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          >
+            image={Empty.PRESENTED_IMAGE_SIMPLE}>
             <Button
               type="primary"
               className="bg-custom-green hover:bg-custom-green/90 mt-4"
-              onClick={handleNavigateToAddProgram}
-            >
+              onClick={handleNavigateToAddProgram}>
               Create First Program
             </Button>
           </Empty>
@@ -261,16 +270,15 @@ const PsychologistProfile = () => {
   // Program Card Component
   const ProgramCard = ({ program }) => {
     const startDate = dayjs(program.startDate);
-    const endDate = startDate.add(program.duration, "week");
-    const isActive = program.status === "ACTIVE";
+    // const endDate = startDate.add(program.duration, "week");
+    // const isActive = program.status === "ACTIVE";
     const participantPercentage =
       (program.currentParticipants / program.maxParticipants) * 100;
 
     return (
       <Card
         className="hover:shadow-lg transition-all border border-gray-100 rounded-xl overflow-hidden"
-        bodyStyle={{ padding: 0 }}
-      >
+        bodyStyle={{ padding: 0 }}>
         <div className="p-5">
           <div className="flex justify-between items-start mb-3">
             <h3 className="text-lg font-medium text-gray-800">
@@ -278,8 +286,7 @@ const PsychologistProfile = () => {
             </h3>
             <Tag
               color={getProgramStatusColor(program.status)}
-              className="rounded-full"
-            >
+              className="rounded-full">
               {program.status.charAt(0) + program.status.slice(1).toLowerCase()}
             </Tag>
           </div>
@@ -354,8 +361,7 @@ const PsychologistProfile = () => {
               <Button
                 type="link"
                 className="text-custom-green p-0 flex items-center"
-                onClick={() => window.open(program.meetingLink, "_blank")}
-              >
+                onClick={() => window.open(program.meetingLink, "_blank")}>
                 <LinkOutlined className="mr-1" />
                 Join Meeting
               </Button>
@@ -373,6 +379,10 @@ const PsychologistProfile = () => {
     );
   };
 
+  ProgramCard.propTypes = {
+    program: PropTypes.object.isRequired,
+  };
+
   // Render the appointments tab content
   const renderAppointmentsTab = () => {
     if (loadingAppointments) {
@@ -388,13 +398,11 @@ const PsychologistProfile = () => {
         <div className="min-h-[300px] flex items-center justify-center">
           <Empty
             description="No upcoming appointments"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          >
+            image={Empty.PRESENTED_IMAGE_SIMPLE}>
             <Button
               type="primary"
               className="bg-custom-green hover:bg-custom-green/90 mt-4"
-              onClick={handleNavigateToAppointments}
-            >
+              onClick={handleNavigateToAppointments}>
               View Calendar
             </Button>
           </Empty>
@@ -418,8 +426,7 @@ const PsychologistProfile = () => {
               <Card
                 className="mb-4 hover:shadow-md transition-all"
                 bodyStyle={{ padding: "16px" }}
-                key={appointment.appointmentID}
-              >
+                key={appointment.appointmentID}>
                 <div className="flex flex-col space-y-4">
                   {/* Header with appointment ID and status */}
                   <div className="flex justify-between items-center border-b pb-3">
@@ -442,8 +449,7 @@ const PsychologistProfile = () => {
                           ? "orange"
                           : "green"
                       }
-                      className="rounded-full px-3 py-1"
-                    >
+                      className="rounded-full px-3 py-1">
                       {appointment.status}
                     </Tag>
                   </div>
@@ -519,7 +525,7 @@ const PsychologistProfile = () => {
                         >
                           Check In
                         </Button> */}
-                        <Button
+                        {/* <Button
                           type="default"
                           onClick={() =>
                             navigate(
@@ -528,7 +534,7 @@ const PsychologistProfile = () => {
                           }
                         >
                           Details <RightOutlined />
-                        </Button>
+                        </Button> */}
                       </div>
                     </div>
                   </div>
@@ -560,8 +566,7 @@ const PsychologistProfile = () => {
           <Button
             type="link"
             onClick={() => navigate("/appointment-record")}
-            className="text-custom-green"
-          >
+            className="text-custom-green">
             View Appointment History
           </Button>
         </div>
@@ -593,8 +598,7 @@ const PsychologistProfile = () => {
                   style={{
                     color: "#3a6a49",
                     textShadow: "0 1px 2px rgba(255,255,255,0.2)",
-                  }}
-                >
+                  }}>
                   {userData.fullName
                     .split(" ")
                     .map((name) => name[0])
@@ -633,8 +637,7 @@ const PsychologistProfile = () => {
                         type="default"
                         shape="round"
                         icon={<EditOutlined />}
-                        className="bg-white/20 border-white/30 text-white hover:bg-white/30"
-                      >
+                        className="bg-white/20 border-white/30 text-white hover:bg-white/30">
                         Edit Profile
                       </Button>
                     </Tooltip>
@@ -780,8 +783,7 @@ const PsychologistProfile = () => {
           activeKey={activeTab}
           onChange={setActiveTab}
           type="card"
-          className="bg-white rounded-2xl shadow-md p-6"
-        >
+          className="bg-white rounded-2xl shadow-md p-6">
           <TabPane
             tab={
               <span className="flex items-center gap-2">
@@ -789,8 +791,7 @@ const PsychologistProfile = () => {
                 <span>Schedule</span>
               </span>
             }
-            key="1"
-          >
+            key="1">
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -800,8 +801,7 @@ const PsychologistProfile = () => {
                   type="primary"
                   className="bg-custom-green hover:bg-custom-green/90"
                   icon={<CalendarOutlined />}
-                  onClick={handleNavigateToAppointments}
-                >
+                  onClick={handleNavigateToAppointments}>
                   View Calendar
                 </Button>
               </div>
@@ -817,8 +817,7 @@ const PsychologistProfile = () => {
                 <span>Programs</span>
               </span>
             }
-            key="4"
-          >
+            key="4">
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -828,8 +827,7 @@ const PsychologistProfile = () => {
                   type="primary"
                   className="bg-custom-green hover:bg-custom-green/90"
                   icon={<BulbOutlined />}
-                  onClick={handleNavigateToAddProgram}
-                >
+                  onClick={handleNavigateToAddProgram}>
                   Create Program
                 </Button>
               </div>

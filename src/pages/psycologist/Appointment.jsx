@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import {
   CarryOutOutlined,
   QuestionCircleOutlined,
+  ReloadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import CustomCalendar from "../../components/CalendarComponent";
@@ -274,6 +275,14 @@ export default function Appointment() {
               disabled={selectedDate.isSame(today, "month")}>
               Previous
             </Button>
+            <Button
+              onClick={() => {
+                fetchData();
+                message.success("Calendar data refreshed");
+              }}
+              icon={<ReloadOutlined />}
+              title="Reload calendar data"
+            />
             <Button
               onClick={() => {
                 const newDate = selectedDate.add(1, "month");

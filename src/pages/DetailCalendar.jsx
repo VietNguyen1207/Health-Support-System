@@ -125,6 +125,7 @@ function DetailCalendar({ user, date, events, visible, onClose, fetchData }) {
       centered
       styles={{
         body: {
+          height: "78vh",
           maxHeight: "78vh",
           padding: "5px 50px",
         },
@@ -818,6 +819,9 @@ ProgramDetailContent.propTypes = {
     tags: PropTypes.arrayOf(PropTypes.string).isRequired,
     type: PropTypes.string.isRequired,
     meetingLink: PropTypes.string.isRequired,
+    currentParticipants: PropTypes.arrayOf(PropTypes.string).isRequired,
+    maxParticipants: PropTypes.number.isRequired,
+    weeklySchedule: PropTypes.arrayOf(PropTypes.string).isRequired,
   }).isRequired,
 };
 

@@ -5,14 +5,12 @@ import {
   PoweroffOutlined,
   // ProfileOutlined,
   SwapOutlined,
-  UserOutlined,
+  // UserOutlined,
 } from "@ant-design/icons";
 
 // src/data/menuItems.ts
 export const menuItems = [
-  { key: "/", label: "Home", path: "/" },
-  { key: "/about", label: "About", path: "/about" },
-  { key: "/services", label: "Services", path: "/services" },
+  // { key: "/", label: "Home", path: "/" },
   { key: "/blog", label: "Blog", path: "/blog" },
   {
     key: "program",
@@ -30,13 +28,13 @@ export const menuItems = [
         key: "/add-program",
         label: "Add Program",
         path: "/add-program",
-        roles: ["psychologist", "manager"],
+        roles: ["manager"],
       },
       {
         key: "/update-program",
         label: "Update Program",
         path: "/update-program",
-        roles: ["psychologist", "manager"],
+        roles: ["manager"],
       },
     ],
   },
@@ -50,7 +48,7 @@ export const menuItems = [
         key: "/test",
         label: "Survey List",
         path: "/test",
-        roles: ["psychologist", "student", "manager"],
+        roles: ["student", "psychologist", "manager"],
       },
       {
         key: "/create-test",
@@ -107,12 +105,12 @@ export const dropdownMenu = [
     icon: <HistoryOutlined />,
     roles: ["psychologist", "student"],
   },
-  {
-    label: "Children Record",
-    key: "/children-record",
-    icon: <UserOutlined />,
-    roles: ["parent"],
-  },
+  // {
+  //   label: "Children Record",
+  //   key: "/children-record",
+  //   icon: <UserOutlined />,
+  //   roles: ["parent"],
+  // },
   // {
   //   label: "Patient Record",
   //   key: "/patient-record",

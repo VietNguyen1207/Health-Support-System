@@ -3,12 +3,10 @@ import { ManagerLayout } from "../layouts/ManagerLayout";
 import { StandardLayout } from "../layouts/StandardLayout";
 import { PrivateRoute } from "../components/PrivateRoute";
 import Home from "../pages/Home";
-import Contact from "../pages/Contact";
 import Dashboard from "../pages/manager/Dashboard";
-import About from "../pages/About";
 import Register from "../pages/Register";
 import ForgotPassword from "../pages/ForgotPassword";
-import Service from "../pages/Service";
+// import Service from "../pages/Service";
 import Login from "../pages/Login";
 import { Unauthorized } from "../pages/error/Unauthorized";
 import Booking from "../pages/Booking";
@@ -26,14 +24,14 @@ import { Outlet } from "react-router-dom";
 import ChildrenRecord from "../pages/parent/ChildrenRecord";
 import AppointmentRecord from "../pages/student/AppointmentRecord";
 import TestRecord from "../pages/student/TestRecord";
-import PatientRecord from "../pages/psycologist/PatientRecord";
+// import PatientRecord from "../pages/psycologist/PatientRecord";
 import UserManagement from "../pages/manager/UserManagement";
 import SurveyManagement from "../pages/manager/SurveyManagement";
 import NotFound from "../pages/error/NotFound";
 import TestResult from "../pages/TestResult";
 import Blog from "../pages/Blog";
 import BlogDetail from "../pages/BlogDetail";
-import Application from "../pages/psycologist/Application";
+// import Application from "../pages/psycologist/Application";
 import NotificationDetail from "../pages/NotificationDetail";
 import PsychologistProfile from "../pages/psycologist/PsychologistProfile";
 import WorkSchedule from "../pages/psycologist/WorkSchedule";
@@ -48,9 +46,6 @@ export const routes = [
     element: <StandardLayout />,
     children: [
       { index: true, element: <Home /> },
-      { path: "contact", element: <Contact /> },
-      { path: "about", element: <About /> },
-      { path: "services", element: <Service /> },
       { path: "program", element: <Program /> },
       { path: "blog", element: <Blog /> },
       { path: "blog/:id", element: <BlogDetail /> },
@@ -95,24 +90,33 @@ export const routes = [
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={["psychologist", "manager"]}>
+          <PrivateRoute allowedRoles={["psychologist"]}>
             <Outlet />
           </PrivateRoute>
         ),
         children: [
           { path: "psychologist-profile", element: <PsychologistProfile /> },
-          { path: "application", element: <Application /> },
-          { path: "add-program", element: <AddProgram /> },
-          { path: "update-program", element: <UpdateProgram /> },
-          { path: "update-survey", element: <UpdateSurvey /> },
-          { path: "patient-record", element: <PatientRecord /> },
-          { path: "create-test", element: <CreateTest /> },
+          { path: "register-work-date", element: <WorkSchedule /> },
+          // { path: "application", element: <Application /> },
         ],
       },
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={["psychologist", "manager", "student"]}>
+          <PrivateRoute allowedRoles={["psychologist", "manager"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [
+          { path: "update-survey", element: <UpdateSurvey /> },
+          { path: "create-test", element: <CreateTest /> },
+          // { path: "patient-record", element: <PatientRecord /> },
+        ],
+      },
+      {
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["psychologist", "student", "manager"]}>
             <Outlet />
           </PrivateRoute>
         ),
@@ -121,7 +125,31 @@ export const routes = [
           { path: "calendar", element: <Appointment /> },
           { path: "appointment-record", element: <AppointmentRecord /> },
           { path: "notifications/:id", element: <NotificationDetail /> },
-          { path: "register-work-date", element: <WorkSchedule /> },
+        ],
+      },
+      {
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["parent"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [
+          { path: "children-record", element: <ChildrenRecord /> },
+          { path: "parent-calendar", element: <ParentCalendar /> },
+          { path: "parent-profile", element: <ParentProfile /> },
+        ],
+      },
+      {
+        path: "",
+        element: (
+          <PrivateRoute allowedRoles={["manager"]}>
+            <Outlet />
+          </PrivateRoute>
+        ),
+        children: [
+          { path: "add-program", element: <AddProgram /> },
+          { path: "update-program", element: <UpdateProgram /> },
         ],
       },
       {
@@ -132,18 +160,6 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [{ path: "children-record", element: <ChildrenRecord /> }],
-      },
-      {
-        path: "",
-        element: (
-          <PrivateRoute allowedRoles={["parent"]}>
-            <Outlet />
-          </PrivateRoute>
-        ),
-        children: [
-          { path: "parent-profile", element: <ParentProfile /> },
-          { path: "parent-calendar", element: <ParentCalendar /> },
-        ],
       },
       { path: "unauthorized", element: <Unauthorized /> },
     ],

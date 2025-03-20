@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   Progress,
   Tag,
   Spin,
   Empty,
-  Modal,
   Tabs,
   Button,
-  Tooltip,
   Statistic,
   List,
   Avatar,
   Badge,
+  Typography,
 } from "antd";
 import {
   CalendarOutlined,
@@ -27,15 +26,11 @@ import {
   HeartOutlined,
   BarChartOutlined,
   ClockCircleOutlined,
-  FileTextOutlined,
-  EditOutlined,
   EnvironmentOutlined,
   BulbOutlined,
   VideoCameraOutlined,
-  RightOutlined,
 } from "@ant-design/icons";
 import { useUserStore } from "../../stores/userStore";
-import { useAuthStore } from "../../stores/authStore";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
@@ -43,12 +38,12 @@ import ProgramDetailsModal from "../../components/ProgramDetailsModal";
 import { useSurveyStore } from "../../stores/surveyStore";
 
 const { TabPane } = Tabs;
+const { Title, Text } = Typography;
 
 const StudentProfile = () => {
-  const { user: authUser } = useAuthStore();
-  const { getUserDetails, loading: userLoading } = useUserStore();
-  const { fetchUpcomingAppointments, loading: appointmentLoading } =
-    useAppointmentStore();
+  const { getUserDetails } = useUserStore();
+  const [userLoading, setUserLoading] = useState(true);
+  const { fetchUpcomingAppointments } = useAppointmentStore();
   const { surveys, fetchSurveys } = useSurveyStore();
   const [userData, setUserData] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
@@ -61,18 +56,18 @@ const StudentProfile = () => {
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      if (authUser?.userId) {
-        try {
-          const data = await getUserDetails(authUser.userId);
-          setUserData(data);
-        } catch (error) {
-          console.error("Failed to fetch user details:", error);
-        }
+      try {
+        const data = await getUserDetails();
+        setUserData(data);
+      } catch (error) {
+        console.error("Failed to fetch user details:", error);
+      } finally {
+        setUserLoading(false);
       }
     };
 
     fetchUserDetails();
-  }, [getUserDetails, authUser]);
+  }, [getUserDetails]);
 
   useEffect(() => {
     // Fetch upcoming appointments when the appointments tab is selected
@@ -218,8 +213,7 @@ const StudentProfile = () => {
     return (
       <Card
         className="assessment-card bg-white rounded-xl shadow-sm hover:shadow-md transition-all"
-        bordered={false}
-      >
+        bordered={false}>
         <div className="flex items-center mb-4">
           <div className="bg-custom-green/10 p-2 rounded-full mr-3">{icon}</div>
           <h3 className="text-lg font-semibold text-gray-900 m-0">{title}</h3>
@@ -244,8 +238,7 @@ const StudentProfile = () => {
                     : getIndicatorText(score, type) === "Moderate"
                     ? "bg-yellow-50 text-yellow-700"
                     : "bg-red-50 text-red-700"
-                }`}
-            >
+                }`}>
               {getIndicatorText(score, type)}
             </div>
           </div>
@@ -278,13 +271,11 @@ const StudentProfile = () => {
         <div className="min-h-[300px] flex items-center justify-center">
           <Empty
             description="No upcoming appointments"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          >
+            image={Empty.PRESENTED_IMAGE_SIMPLE}>
             <Button
               type="primary"
               className="bg-custom-green hover:bg-custom-green/90 mt-4"
-              onClick={() => navigate("/book-appointment")}
-            >
+              onClick={() => navigate("/book-appointment")}>
               Schedule Appointment
             </Button>
           </Empty>
@@ -302,8 +293,7 @@ const StudentProfile = () => {
             type="primary"
             className="bg-custom-green hover:bg-custom-green/90"
             icon={<CalendarOutlined />}
-            onClick={() => navigate("/book-appointment")}
-          >
+            onClick={() => navigate("/book-appointment")}>
             Schedule New
           </Button>
         </div>
@@ -315,13 +305,12 @@ const StudentProfile = () => {
           renderItem={(appointment) => {
             const appointmentDate = dayjs(appointment.slotDate);
             const isToday = appointmentDate.isSame(dayjs(), "day");
-            const isPast = appointmentDate.isBefore(dayjs(), "day");
+            // const isPast = appointmentDate.isBefore(dayjs(), "day");
 
             return (
               <Card
                 className="mb-4 hover:shadow-md transition-all"
-                bodyStyle={{ padding: "16px" }}
-              >
+                bodyStyle={{ padding: "16px" }}>
                 <div className="flex flex-col md:flex-row md:items-center">
                   {/* Date column */}
                   <div className="md:w-1/4 mb-4 md:mb-0">
@@ -383,12 +372,11 @@ const StudentProfile = () => {
                         <Button
                           type="primary"
                           icon={<VideoCameraOutlined />}
-                          className="bg-custom-green hover:bg-custom-green/90"
-                        >
+                          className="bg-custom-green hover:bg-custom-green/90">
                           Join
                         </Button>
                       )}
-                      <Button
+                      {/* <Button
                         type="default"
                         onClick={() =>
                           navigate(
@@ -397,7 +385,7 @@ const StudentProfile = () => {
                         }
                       >
                         Details <RightOutlined />
-                      </Button>
+                      </Button> */}
                     </div>
                   </div>
                 </div>
@@ -410,8 +398,7 @@ const StudentProfile = () => {
           <Button
             type="link"
             onClick={() => navigate("/appointment-record")}
-            className="text-custom-green"
-          >
+            className="text-custom-green">
             View Appointment History
           </Button>
         </div>
@@ -430,8 +417,7 @@ const StudentProfile = () => {
           type="primary"
           className="bg-custom-green hover:bg-custom-green/90"
           icon={<TeamOutlined />}
-          onClick={() => navigate("/programs")}
-        >
+          onClick={() => navigate("/programs")}>
           Browse All Programs
         </Button>
       </div>
@@ -445,8 +431,7 @@ const StudentProfile = () => {
               key={program.programID}
               className="hover:shadow-lg transition-all cursor-pointer border border-gray-100 rounded-xl overflow-hidden"
               bodyStyle={{ padding: 0 }}
-              onClick={() => handleProgramClick(program)}
-            >
+              onClick={() => handleProgramClick(program)}>
               <div className="p-5">
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="text-lg font-medium text-gray-800">
@@ -454,8 +439,7 @@ const StudentProfile = () => {
                   </h3>
                   <Tag
                     color={program.type === "ONLINE" ? "blue" : "green"}
-                    className="rounded-full"
-                  >
+                    className="rounded-full">
                     {program.type.charAt(0) +
                       program.type.slice(1).toLowerCase()}
                   </Tag>
@@ -516,8 +500,7 @@ const StudentProfile = () => {
                             program.maxParticipants) *
                           100
                         }%`,
-                      }}
-                    ></div>
+                      }}></div>
                   </div>
                 </div>
               </div>
@@ -539,8 +522,7 @@ const StudentProfile = () => {
                     } else {
                       handleProgramClick(program);
                     }
-                  }}
-                >
+                  }}>
                   {program.type === "ONLINE" && program.meetingLink && (
                     <LinkOutlined className="mr-1" />
                   )}
@@ -563,8 +545,20 @@ const StudentProfile = () => {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spin size="large" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+        <div className="text-center">
+          <div className="mb-4">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 p-4">
+              <Spin size="large" />
+            </div>
+          </div>
+          <Title level={4} className="m-0 mb-2">
+            Loading Profile
+          </Title>
+          <Text type="secondary">
+            Please wait while we fetch your family&apos;s information...
+          </Text>
+        </div>
       </div>
     );
   }
@@ -579,6 +573,8 @@ const StudentProfile = () => {
 
   const { studentInfo, programsRecord } = userData;
 
+  console.log(programsRecord);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-16 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
@@ -591,8 +587,7 @@ const StudentProfile = () => {
                 style={{
                   color: "#3a6a49",
                   textShadow: "0 1px 2px rgba(0,0,0,0.2)",
-                }}
-              >
+                }}>
                 {userData.fullName
                   .split(" ")
                   .map((name) => name[0])
@@ -701,8 +696,7 @@ const StudentProfile = () => {
           activeKey={activeTab}
           onChange={setActiveTab}
           type="card"
-          className="bg-white rounded-2xl shadow-md p-6"
-        >
+          className="bg-white rounded-2xl shadow-md p-6">
           <TabPane
             tab={
               <span className="flex items-center gap-2">
@@ -710,8 +704,7 @@ const StudentProfile = () => {
                 <span>Mental Health</span>
               </span>
             }
-            key="1"
-          >
+            key="1">
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -763,8 +756,7 @@ const StudentProfile = () => {
                     type="link"
                     size="small"
                     className="mt-2 p-0"
-                    onClick={() => navigate("/test")}
-                  >
+                    onClick={() => navigate("/test")}>
                     Take New Assessment
                   </Button>
                 </Card>
@@ -821,8 +813,7 @@ const StudentProfile = () => {
                   </div>
                 }
                 className="mt-8"
-                bordered={false}
-              >
+                bordered={false}>
                 <div className="space-y-4">
                   <p className="text-gray-600">
                     Based on your assessment results, here are some
@@ -830,8 +821,8 @@ const StudentProfile = () => {
                   </p>
                   <ul className="list-disc pl-5 space-y-2 text-gray-600">
                     <li>
-                      Consider joining the "Stress Management" program to learn
-                      coping strategies
+                      Consider joining the &quot;Stress Management&quot; program
+                      to learn coping strategies
                     </li>
                     <li>Schedule regular check-ins with your counselor</li>
                     <li>Practice mindfulness exercises daily</li>
@@ -849,8 +840,7 @@ const StudentProfile = () => {
                 <span>Support Programs</span>
               </span>
             }
-            key="2"
-          >
+            key="2">
             {renderSupportProgramsTab()}
           </TabPane>
 
@@ -861,8 +851,7 @@ const StudentProfile = () => {
                 <span>Appointments</span>
               </span>
             }
-            key="3"
-          >
+            key="3">
             {renderAppointmentsTab()}
           </TabPane>
         </Tabs>

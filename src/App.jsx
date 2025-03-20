@@ -27,7 +27,7 @@ function App() {
           },
           Tabs: {
             itemSelectedColor: "#007824",
-            cardBg: "#D3D3D3",
+            cardBg: "#f0f0f0",
           },
           Button: {
             colorPrimary: "#4a7c59",
