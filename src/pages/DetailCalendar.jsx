@@ -125,6 +125,7 @@ function DetailCalendar({ user, date, events, visible, onClose, fetchData }) {
       centered
       styles={{
         body: {
+          height: "78vh",
           maxHeight: "78vh",
           padding: "5px 50px",
         },

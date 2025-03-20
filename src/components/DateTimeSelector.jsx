@@ -84,6 +84,7 @@ const TimeSlotCard = memo(({ slot, isSelected, onSelect }) => {
 
 TimeSlotCard.propTypes = {
   slot: PropTypes.shape({
+    booked: PropTypes.bool.isRequired,
     timeSlotId: PropTypes.string.isRequired,
     slotDate: PropTypes.string.isRequired,
     startTime: PropTypes.string.isRequired,
