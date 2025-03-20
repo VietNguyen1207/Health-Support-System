@@ -310,14 +310,14 @@ const UpdateProgram = () => {
               >
                 Edit Program
               </Menu.Item>
-              <Menu.Item
+              {/* <Menu.Item
                 key="delete"
                 icon={<DeleteOutlined className="text-red-500" />}
                 onClick={() => handleDelete(record.programID)}
                 danger
               >
                 Delete Program
-              </Menu.Item>
+              </Menu.Item> */}
             </Menu>
           }
           trigger={["click"]}
