@@ -10,7 +10,7 @@ import {
 
 // src/data/menuItems.ts
 export const menuItems = [
-  { key: "/", label: "Home", path: "/" },
+  // { key: "/", label: "Home", path: "/" },
   { key: "/blog", label: "Blog", path: "/blog" },
   {
     key: "program",
