@@ -22,7 +22,7 @@ const Login = () => {
       } else if (user.role === "parent") {
         navigate("/parent-profile");
       } else if (user.role === "manager") {
-        navigate("/manager/dashboard");
+        navigate("/manager");
       } else {
         navigate("/");
       }

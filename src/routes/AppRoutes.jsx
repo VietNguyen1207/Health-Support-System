@@ -3,9 +3,7 @@ import { ManagerLayout } from "../layouts/ManagerLayout";
 import { StandardLayout } from "../layouts/StandardLayout";
 import { PrivateRoute } from "../components/PrivateRoute";
 import Home from "../pages/Home";
-import Contact from "../pages/Contact";
 import Dashboard from "../pages/manager/Dashboard";
-import About from "../pages/About";
 import Register from "../pages/Register";
 import ForgotPassword from "../pages/ForgotPassword";
 // import Service from "../pages/Service";
@@ -48,9 +46,6 @@ export const routes = [
     element: <StandardLayout />,
     children: [
       { index: true, element: <Home /> },
-      { path: "contact", element: <Contact /> },
-      { path: "about", element: <About /> },
-      // { path: "services", element: <Service /> },
       { path: "program", element: <Program /> },
       { path: "blog", element: <Blog /> },
       { path: "blog/:id", element: <BlogDetail /> },
