@@ -819,6 +819,9 @@ ProgramDetailContent.propTypes = {
     tags: PropTypes.arrayOf(PropTypes.string).isRequired,
     type: PropTypes.string.isRequired,
     meetingLink: PropTypes.string.isRequired,
+    currentParticipants: PropTypes.arrayOf(PropTypes.string).isRequired,
+    maxParticipants: PropTypes.number.isRequired,
+    weeklySchedule: PropTypes.arrayOf(PropTypes.string).isRequired,
   }).isRequired,
 };
 
