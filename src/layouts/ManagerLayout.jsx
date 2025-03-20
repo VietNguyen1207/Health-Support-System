@@ -73,14 +73,14 @@ export const ManagerLayout = () => {
       label: "User Management",
     },
     {
-      key: "/manager/surveys",
-      icon: <FileOutlined />,
-      label: "Survey Management",
-    },
-    {
       key: "/manager/programs",
       icon: <CalendarOutlined />,
       label: "Program Management",
+    },
+    {
+      key: "/manager/surveys",
+      icon: <FileOutlined />,
+      label: "Survey Management",
     },
   ];
 
