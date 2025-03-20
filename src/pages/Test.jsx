@@ -150,8 +150,7 @@ const Test = () => {
       {[1, 2, 3].map((i) => (
         <div
           key={i}
-          className="bg-white rounded-xl shadow-md border border-gray-100 p-6"
-        >
+          className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
           <div className="animate-pulse">
             <div className="flex justify-between items-center mb-4">
               <div className="h-6 bg-gray-200 rounded w-1/3"></div>
@@ -241,8 +240,7 @@ const Test = () => {
               <Button
                 type="text"
                 className="text-gray-400 hover:text-gray-600"
-                onClick={() => setSearchQuery("")}
-              >
+                onClick={() => setSearchQuery("")}>
                 ✕
               </Button>
             )}
@@ -265,8 +263,7 @@ const Test = () => {
                   className="w-full"
                   size="large"
                   suffixIcon={<DownOutlined className="text-gray-400" />}
-                  dropdownStyle={{ borderRadius: "0.75rem" }}
-                >
+                  dropdownStyle={{ borderRadius: "0.75rem" }}>
                   {statuses.map((status) => (
                     <Option key={status} value={status}>
                       {status === "COMPLETED" ? (
@@ -299,8 +296,7 @@ const Test = () => {
                   className="w-full"
                   size="large"
                   suffixIcon={<DownOutlined className="text-gray-400" />}
-                  dropdownStyle={{ borderRadius: "0.75rem" }}
-                >
+                  dropdownStyle={{ borderRadius: "0.75rem" }}>
                   {categories.map((category) => (
                     <Option key={category} value={category}>
                       <span className="capitalize">
@@ -322,8 +318,7 @@ const Test = () => {
                   <Tag
                     closable
                     onClose={() => setSearchQuery("")}
-                    className="bg-gray-100 text-gray-700 rounded-lg px-3 py-1"
-                  >
+                    className="bg-gray-100 text-gray-700 rounded-lg px-3 py-1">
                     Search:{" "}
                     {searchQuery.length > 15
                       ? searchQuery.substring(0, 15) + "..."
@@ -334,8 +329,7 @@ const Test = () => {
                   <Tag
                     closable
                     onClose={() => setSelectedStatus(undefined)}
-                    className="bg-blue-50 text-blue-600 rounded-lg px-3 py-1"
-                  >
+                    className="bg-blue-50 text-blue-600 rounded-lg px-3 py-1">
                     Status:{" "}
                     {selectedStatus === "COMPLETED"
                       ? "Completed"
@@ -346,8 +340,7 @@ const Test = () => {
                   <Tag
                     closable
                     onClose={() => setSelectedCategory(undefined)}
-                    className="bg-custom-green/10 text-custom-green rounded-lg px-3 py-1"
-                  >
+                    className="bg-custom-green/10 text-custom-green rounded-lg px-3 py-1">
                     Category: {selectedCategory}
                   </Tag>
                 )}
@@ -377,21 +370,17 @@ const Test = () => {
                         : user.role === "student" || user.role === "parent"
                         ? "hidden"
                         : "block"
-                    }`}
-                  >
+                    }`}>
                     <div
-                      className={`border-l-4 ${categoryColor.border} h-full p-6 relative`}
-                    >
+                      className={`border-l-4 ${categoryColor.border} h-full p-6 relative`}>
                       {/* Decorative elements */}
                       <div
-                        className={`absolute top-0 right-0 w-32 h-32 ${categoryColor.bg} rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-30 transition-all duration-500`}
-                      ></div>
+                        className={`absolute top-0 right-0 w-32 h-32 ${categoryColor.bg} rounded-full -mr-16 -mt-16 opacity-0 group-hover:opacity-30 transition-all duration-500`}></div>
                       <div className="absolute bottom-0 left-1/2 w-16 h-16 bg-gray-50 rounded-full -mb-8 -ml-8 opacity-0 group-hover:opacity-50 transition-all duration-700 delay-100"></div>
 
                       <div className="flex items-center justify-between mb-3 relative z-10">
                         <h3
-                          className={`text-xl font-semibold text-gray-800 group-hover:${categoryColor.text} transition-colors`}
-                        >
+                          className={`text-xl font-semibold text-gray-800 group-hover:${categoryColor.text} transition-colors`}>
                           {test.title}
                         </h3>
                         {user.role === "student" && (
@@ -416,8 +405,7 @@ const Test = () => {
                       {test.status === "INACTIVE" && (
                         <Tag
                           color="error"
-                          className="absolute top-3 right-5 text-white px-2 py-1 rounded-lg"
-                        >
+                          className="absolute top-3 right-5 text-white px-2 py-1 rounded-lg">
                           Inactive
                         </Tag>
                       )}
@@ -430,8 +418,7 @@ const Test = () => {
                       <div className="flex flex-wrap gap-3 relative z-10">
                         <Tooltip title="Estimated time to complete">
                           <span
-                            className={`flex items-center bg-gray-50 px-3 py-1.5 rounded-lg text-gray-700 hover:${categoryColor.bg} transition-colors`}
-                          >
+                            className={`flex items-center bg-gray-50 px-3 py-1.5 rounded-lg text-gray-700 hover:${categoryColor.bg} transition-colors`}>
                             <CalendarOutlined
                               className={`mr-2 ${categoryColor.text}`}
                             />
@@ -441,8 +428,7 @@ const Test = () => {
 
                         <Tooltip title="Number of questions">
                           <span
-                            className={`flex items-center bg-gray-50 px-3 py-1.5 rounded-lg text-gray-700 hover:${categoryColor.bg} transition-colors`}
-                          >
+                            className={`flex items-center bg-gray-50 px-3 py-1.5 rounded-lg text-gray-700 hover:${categoryColor.bg} transition-colors`}>
                             <QuestionCircleOutlined
                               className={`mr-2 ${categoryColor.text}`}
                             />
@@ -456,8 +442,7 @@ const Test = () => {
                             categoryColor.text
                           } px-3 py-1.5 rounded-lg ml-auto shadow-sm border border-${
                             categoryColor.border.split("-")[1]
-                          }-200 group-hover:shadow transition-all`}
-                        >
+                          }-200 group-hover:shadow transition-all`}>
                           <FileTextOutlined className="mr-2" />
                           <span className="font-medium">{test.category}</span>
                         </span>
@@ -483,8 +468,7 @@ const Test = () => {
                     setSearchQuery("");
                     setSelectedStatus(undefined);
                     setSelectedCategory(undefined);
-                  }}
-                >
+                  }}>
                   Clear Filters
                 </Button>
               </div>
@@ -546,16 +530,14 @@ const Test = () => {
                   className="bg-custom-green hover:bg-custom-green/90"
                   onClick={() => handleStartTest(selectedTest)}
                   disabled={selectedTest.status === "INACTIVE"}
-                  size="large"
-                >
+                  size="large">
                   {selectedTest.completeStatus === "COMPLETED"
                     ? "Retake Assessment"
                     : "Start Assessment"}
                 </Button>
               )}
             </div>
-          }
-        >
+          }>
           <div className="space-y-4 animate-fadeIn">
             {/* Category and Status Badges */}
             <div className={`flex flex-wrap gap-2 mb-3`}>
@@ -581,8 +563,7 @@ const Test = () => {
                   selectedTest.status === "ACTIVE"
                     ? "bg-green-50 text-green-600 border-green-200"
                     : "bg-red-50 text-red-600 border-red-200"
-                }`}
-              >
+                }`}>
                 {selectedTest.status === "ACTIVE" ? (
                   <>
                     <CheckCircleOutlined className="mr-1" />
@@ -601,6 +582,27 @@ const Test = () => {
             <div className="border-b pb-3">
               <p className="text-gray-600">{selectedTest.description}</p>
             </div>
+
+            {/* Periodic Reset Information */}
+            {selectedTest.periodic && (
+              <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-3">
+                <h3 className="font-semibold text-gray-800 mb-2 flex items-center">
+                  <CalendarOutlined className="mr-2 text-blue-500" />
+                  Assessment Reset Schedule
+                </h3>
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                    <ClockCircleOutlined className="text-blue-600" />
+                  </div>
+                  <p className="text-gray-700 m-0">
+                    <span className="font-medium">Note:</span> This assessment
+                    will reset after {selectedTest.periodic || "..."} weeks.
+                    {selectedTest.completeStatus === "COMPLETED" &&
+                      " Your previous responses will be archived, and you'll be asked to complete it again."}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Assessment Details Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
@@ -709,8 +711,7 @@ const Test = () => {
                             user.role === "student" && (
                               <div
                                 key={index}
-                                className="bg-white p-4 rounded-lg border border-gray-100"
-                              >
+                                className="bg-white p-4 rounded-lg border border-gray-100">
                                 <div className="flex justify-between items-center pb-2 border-b border-gray-100">
                                   <span className="text-gray-500">
                                     Last Completed:
