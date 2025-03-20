@@ -370,6 +370,7 @@ const DateTimeSelector = ({
           if (slotHour === currentHour && slotMinute <= currentMinute)
             return false;
         } catch (error) {
+          console.log("error", error);
           console.error(
             "Error parsing time in slotsForSelectedDate:",
             slot.startTime
@@ -414,6 +415,7 @@ const DateTimeSelector = ({
             if (slotHour === currentHour && slotMinute <= currentMinute)
               return false;
           } catch (error) {
+            console.log("error", error);
             console.error(
               "Error parsing time in hasAvailableSlots:",
               slot.startTime
