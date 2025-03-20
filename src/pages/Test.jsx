@@ -369,7 +369,7 @@ const Test = () => {
                         ? "opacity-100"
                         : user.role === "student" || user.role === "parent"
                         ? "hidden"
-                        : "block opacity-50 pointer-events-none"
+                        : "block"
                     }`}>
                     <div
                       className={`border-l-4 ${categoryColor.border} h-full p-6 relative`}>
@@ -401,6 +401,14 @@ const Test = () => {
                           </div>
                         )}
                       </div>
+
+                      {test.status === "INACTIVE" && (
+                        <Tag
+                          color="error"
+                          className="absolute top-3 right-5 text-white px-2 py-1 rounded-lg">
+                          Inactive
+                        </Tag>
+                      )}
 
                       {/* Card Content */}
                       <p className="text-gray-600 mb-6 line-clamp-2 relative z-10">
@@ -514,7 +522,7 @@ const Test = () => {
           footer={
             <div className="flex justify-end gap-3">
               <Button size="large" danger onClick={() => setIsModalOpen(false)}>
-                Cancel
+                Close
               </Button>
               {user.role === "student" && (
                 <Button
