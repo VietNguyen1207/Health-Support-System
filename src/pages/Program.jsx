@@ -121,7 +121,8 @@ const Program = () => {
             <Card
               key={program.programID}
               className="group hover:shadow-2xl transition-all duration-300 border-0 rounded-2xl overflow-hidden bg-white"
-              bodyStyle={{ padding: 0 }}>
+              bodyStyle={{ padding: 0 }}
+            >
               {/* Card Header with Type Badge */}
               <div className="relative p-6 pb-4">
                 <div className="absolute top-6 right-6">
@@ -131,7 +132,8 @@ const Program = () => {
                       program.type === "ONLINE"
                         ? "bg-blue-50 text-blue-600 border-blue-100"
                         : "bg-green-50 text-green-600 border-green-100"
-                    }`}>
+                    }`}
+                  >
                     {program.type.charAt(0) +
                       program.type.slice(1).toLowerCase()}
                   </Tag>
@@ -207,10 +209,21 @@ const Program = () => {
                           ? "bg-orange-50 text-orange-700"
                           : program.status === "CLOSED"
                           ? "bg-red-50 text-red-700"
+                          : program.status === "IN_PROGRESS"
+                          ? "bg-blue-50 text-blue-700"
                           : "bg-gray-50 text-gray-700"
-                      }`}>
-                      {program.status.charAt(0) +
-                        program.status.slice(1).toLowerCase()}
+                      }`}
+                    >
+                      {program.status === "IN_PROGRESS"
+                        ? "In Progress"
+                        : program.status === "ACTIVE"
+                        ? "Active"
+                        : program.status === "FULL"
+                        ? "Full"
+                        : program.status === "CLOSED"
+                        ? "Closed"
+                        : program.status.charAt(0) +
+                          program.status.slice(1).toLowerCase()}
                     </span>
                   </div>
                 </div>
@@ -222,7 +235,8 @@ const Program = () => {
                   <Button
                     type="primary"
                     onClick={() => handleViewProgram(program.programID)}
-                    className="w-full bg-primary-green hover:bg-primary-green/90 flex items-center justify-center gap-2 group h-11 rounded-xl shadow-sm">
+                    className="w-full bg-primary-green hover:bg-primary-green/90 flex items-center justify-center gap-2 group h-11 rounded-xl shadow-sm"
+                  >
                     <span className="text-sm font-medium">View Program</span>
                     <ArrowRightOutlined className="transition-transform duration-300 group-hover:translate-x-1" />
                   </Button>
