@@ -493,7 +493,13 @@ const AddProgram = () => {
                       format="HH:mm"
                       className="w-full rounded-lg"
                       placeholder="Select start time"
-                      minuteStep={15}
+                      minuteStep={30}
+                      hideDisabledOptions={true}
+                      disabledMinutes={() => {
+                        return Array.from({ length: 60 })
+                          .map((_, i) => i)
+                          .filter((minute) => minute !== 0 && minute !== 30);
+                      }}
                     />
                   </Form.Item>
 
@@ -511,11 +517,37 @@ const AddProgram = () => {
                           if (!value || !getFieldValue("startTime")) {
                             return Promise.resolve();
                           }
-                          if (value.isBefore(getFieldValue("startTime"))) {
+
+                          const startTime = getFieldValue("startTime");
+
+                          // Check if end time is equal to start time
+                          if (value.isSame(startTime)) {
+                            return Promise.reject(
+                              new Error(
+                                "End time cannot be the same as start time"
+                              )
+                            );
+                          }
+
+                          // Check if end time is before start time
+                          if (value.isBefore(startTime)) {
                             return Promise.reject(
                               new Error("End time must be after start time")
                             );
                           }
+
+                          // Calculate minutes difference
+                          const minutesDiff = value.diff(startTime, "minute");
+
+                          // Require at least 30 minutes between start and end time
+                          if (minutesDiff < 30) {
+                            return Promise.reject(
+                              new Error(
+                                "Program must be at least 30 minutes long"
+                              )
+                            );
+                          }
+
                           return Promise.resolve();
                         },
                       }),
@@ -525,7 +557,13 @@ const AddProgram = () => {
                       format="HH:mm"
                       className="w-full rounded-lg"
                       placeholder="Select end time"
-                      minuteStep={15}
+                      minuteStep={30}
+                      hideDisabledOptions={true}
+                      disabledMinutes={() => {
+                        return Array.from({ length: 60 })
+                          .map((_, i) => i)
+                          .filter((minute) => minute !== 0 && minute !== 30);
+                      }}
                     />
                   </Form.Item>
                 </div>
