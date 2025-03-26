@@ -36,7 +36,8 @@ export default function Register() {
             name="userType"
             value={userType}
             onChange={handleChange}
-            required>
+            required
+          >
             <option value="student">Student</option>
             <option value="parent">Parent</option>
           </select>
@@ -752,7 +753,8 @@ function ParentForm() {
               <button
                 type="button"
                 className="ml-2 px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                onClick={() => removeStudentId(index)}>
+                onClick={() => removeStudentId(index)}
+              >
                 Remove
               </button>
             )}
@@ -768,7 +770,8 @@ function ParentForm() {
         <button
           type="button"
           className="mt-2 px-3 py-2 bg-custom-green text-white rounded-md hover:custome-green"
-          onClick={addStudentId}>
+          onClick={addStudentId}
+        >
           Add Another Student ID
         </button>
       </div>

@@ -11,6 +11,7 @@ import {
   Space,
   Spin,
   TimePicker,
+  Alert,
 } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useProgramStore } from "../../stores/programStore";
@@ -45,6 +46,8 @@ const AddProgram = () => {
   const [departments, setDepartments] = useState([]);
   const { fetchPsychologists } = usePsychologistStore();
   const [psychologists, setPsychologists] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [dayOfWeekWarning, setDayOfWeekWarning] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -137,6 +140,58 @@ const AddProgram = () => {
     }
   };
 
+  // Function to get day of week from a date
+  const getDayOfWeek = (date) => {
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    return days[date.day()];
+  };
+
+  // Handle date change
+  const handleDateChange = (date) => {
+    if (date) {
+      setSelectedDate(date);
+      const dayOfWeek = getDayOfWeek(date);
+
+      // Automatically set the weeklyAt field to match the day of week
+      form.setFieldsValue({ weeklyAt: dayOfWeek });
+
+      // Clear any warnings since we've auto-corrected the value
+      setDayOfWeekWarning(null);
+
+      // Validate the form to update submit button status
+      form.validateFields(["weeklyAt"]).catch(() => {
+        // Silent catch - just for triggering validation
+      });
+    } else {
+      setSelectedDate(null);
+      setDayOfWeekWarning(null);
+    }
+  };
+
+  // Handle weekly day selection
+  const handleWeeklyDayChange = (value) => {
+    if (selectedDate) {
+      const dayOfWeek = getDayOfWeek(selectedDate);
+      if (value !== dayOfWeek) {
+        setDayOfWeekWarning(
+          `The selected start date (${selectedDate.format(
+            "YYYY-MM-DD"
+          )}) is a ${dayOfWeek}, but you've selected ${value} for the weekly schedule.`
+        );
+      } else {
+        setDayOfWeekWarning(null);
+      }
+    }
+  };
+
   return (
     <div className="bg-gradient-to-b from-blue-50 to-white pt-24 pb-28 px-4 sm:px-6 lg:px-8">
       <div className="relative">
@@ -162,6 +217,8 @@ const AddProgram = () => {
               layout="vertical"
               onFinish={onFinish}
               className="space-y-6"
+              validateTrigger="onBlur"
+              scrollToFirstError
             >
               {/* Program Basic Information Section */}
               <div className="bg-gray-50 p-6 rounded-lg mb-8">
@@ -279,6 +336,7 @@ const AddProgram = () => {
                       disabledDate={(current) =>
                         current && current < new Date().setHours(0, 0, 0, 0)
                       }
+                      onChange={handleDateChange}
                     />
                   </Form.Item>
 
@@ -361,11 +419,24 @@ const AddProgram = () => {
                 </div>
               </div>
 
-              {/* Weekly Schedule Section - NEW */}
+              {/* Weekly Schedule Section */}
               <div className="bg-gray-50 p-6 rounded-lg mb-8">
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">
                   Weekly Schedule
                 </h2>
+
+                {dayOfWeekWarning && (
+                  <Alert
+                    message="Day of Week Mismatch"
+                    description={dayOfWeekWarning}
+                    type="warning"
+                    showIcon
+                    className="mb-4"
+                    closable
+                    onClose={() => setDayOfWeekWarning(null)}
+                  />
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <Form.Item
                     name="weeklyAt"
@@ -374,12 +445,36 @@ const AddProgram = () => {
                         Day of Week
                       </span>
                     }
-                    rules={[{ required: true, message: "Please select a day" }]}
+                    rules={[
+                      { required: true, message: "Please select a day" },
+                      ({ getFieldValue }) => ({
+                        validator(_, value) {
+                          const startDate = getFieldValue("startDate");
+                          if (!startDate) return Promise.resolve();
+                          if (!value) return Promise.resolve(); // Don't validate if no value selected
+
+                          const startDayOfWeek = getDayOfWeek(startDate);
+                          if (value !== startDayOfWeek) {
+                            return Promise.reject(
+                              new Error(
+                                `Must match start date's day (${startDayOfWeek})`
+                              )
+                            );
+                          }
+                          return Promise.resolve();
+                        },
+                      }),
+                    ]}
+                    validateTrigger={["onChange", "onBlur"]}
                   >
                     <Select
                       placeholder="Select day"
                       options={DAYS_OF_WEEK}
                       className="rounded-lg"
+                      onChange={(value) => {
+                        handleWeeklyDayChange(value);
+                        form.validateFields(["weeklyAt"]).catch(() => {});
+                      }}
                     />
                   </Form.Item>
 
@@ -509,6 +604,12 @@ const AddProgram = () => {
                   htmlType="submit"
                   loading={isLoading}
                   className="h-11 px-8 rounded-lg bg-primary-green hover:bg-primary-green/90 text-white font-medium"
+                  disabled={
+                    isLoading ||
+                    form.getFieldError("weeklyAt").length > 0 ||
+                    !form.isFieldTouched("startDate") ||
+                    !form.isFieldTouched("weeklyAt")
+                  }
                 >
                   Create Program
                 </Button>
