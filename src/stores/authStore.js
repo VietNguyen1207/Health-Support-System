@@ -55,14 +55,27 @@ export const useAuthStore = create(
       login: async (credentials) => {
         set({ loading: true, error: null });
         try {
+          // Clear any existing tokens first
+          localStorage.removeItem("token");
+          localStorage.removeItem("refreshToken");
+
           const { data } = await api.post("/auth/login", credentials);
+
+          // Validate the response data
+          if (!data.accessToken || !data.refreshToken) {
+            throw new Error("Invalid login response");
+          }
 
           // Store tokens
           localStorage.setItem("token", data.accessToken);
           localStorage.setItem("refreshToken", data.refreshToken);
 
+          // Update API headers immediately
+          api.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${data.accessToken}`;
+
           const { accessToken, refreshToken, ...userData } = data;
-          // Set user data directly from login response
           userData.role = data.role.toLowerCase().replace("role_", "");
 
           set({
@@ -74,6 +87,11 @@ export const useAuthStore = create(
 
           return userData;
         } catch (error) {
+          // Clear everything on error
+          localStorage.removeItem("token");
+          localStorage.removeItem("refreshToken");
+          set(initialState);
+
           console.error("Login error details:", {
             status: error.response?.status,
             data: error.response?.data,
@@ -89,8 +107,17 @@ export const useAuthStore = create(
 
       // Logout user
       logout: () => {
+        // Clear localStorage
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
+
+        // Clear API headers
+        delete api.defaults.headers.common["Authorization"];
+
+        // Clear persisted store data
+        useAuthStore.persist.clearStorage();
+
+        // Reset state
         set(initialState);
       },
 
@@ -232,6 +259,19 @@ export const useAuthStore = create(
       //   set({ user: data });
       //   return data;
       // },
+
+      // Add a new function to check and clear invalid auth state
+      checkAndClearInvalidAuth: () => {
+        const state = get();
+        const accessToken = state.token?.accessToken;
+
+        if (!accessToken || isTokenExpired(accessToken)) {
+          // Clear everything if token is invalid or expired
+          get().logout();
+          return false;
+        }
+        return true;
+      },
     }),
     {
       name: "auth-storage",
