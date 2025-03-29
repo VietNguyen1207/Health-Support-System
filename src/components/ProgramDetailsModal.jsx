@@ -17,6 +17,7 @@ const ProgramDetailsModal = ({
   program,
   loading,
   onJoinProgram,
+  onCancelParticipation,
 }) => {
   const { registerProgram, fetchProgramDetails, cancelProgramParticipation } =
     useProgramStore();
@@ -145,6 +146,11 @@ const ProgramDetailsModal = ({
       // Call the callback if provided to update the parent component
       if (onJoinProgram) {
         onJoinProgram(program.programID, updatedProgramData);
+      }
+
+      // Call the new cancellation callback if provided
+      if (onCancelParticipation) {
+        onCancelParticipation(program.programID);
       }
 
       // Fetch the updated program details in the background

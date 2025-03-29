@@ -12,6 +12,8 @@ import {
   Avatar,
   Badge,
   Typography,
+  Modal,
+  Result,
 } from "antd";
 import {
   CalendarOutlined,
@@ -29,6 +31,7 @@ import {
   EnvironmentOutlined,
   BulbOutlined,
   VideoCameraOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import { useUserStore } from "../../stores/userStore";
 import { useAppointmentStore } from "../../stores/appointmentStore";
@@ -53,12 +56,21 @@ const StudentProfile = () => {
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [completedSurveysCount, setCompletedSurveysCount] = useState(0);
   const navigate = useNavigate();
+  const [enrolledPrograms, setEnrolledPrograms] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [canceledProgramName, setCanceledProgramName] = useState("");
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
         const data = await getUserDetails();
         setUserData(data);
+
+        // Initialize enrolledPrograms from userData if needed
+        if (data && data.programsRecord) {
+          setEnrolledPrograms(data.programsRecord);
+        }
       } catch (error) {
         console.error("Failed to fetch user details:", error);
       } finally {
@@ -116,7 +128,7 @@ const StudentProfile = () => {
 
   const handleProgramClick = (program) => {
     setSelectedProgram(program);
-    setIsProgramModalVisible(true);
+    setIsModalOpen(true);
   };
 
   const handleProgramJoined = (programId, updatedProgram) => {
@@ -137,6 +149,43 @@ const StudentProfile = () => {
         ...userData,
         programsRecord: updatedProgramsRecord,
       });
+    }
+  };
+
+  const handleProgramCancellation = (programId) => {
+    // Find the program name before removing it (for success message)
+    if (userData && userData.programsRecord) {
+      const canceledProgram = userData.programsRecord.find(
+        (program) => program.programID === programId
+      );
+
+      if (canceledProgram) {
+        setCanceledProgramName(canceledProgram.title);
+      }
+
+      // Update userData state to remove canceled program
+      setUserData({
+        ...userData,
+        programsRecord: userData.programsRecord.filter(
+          (program) => program.programID !== programId
+        ),
+      });
+
+      // Update enrolledPrograms state if needed
+      setEnrolledPrograms((prevPrograms) =>
+        prevPrograms.filter((program) => program.programID !== programId)
+      );
+
+      // Close the details modal
+      setIsModalOpen(false);
+
+      // Show success modal
+      setIsSuccessModalOpen(true);
+
+      // Optionally auto-close success modal after 3 seconds
+      setTimeout(() => {
+        setIsSuccessModalOpen(false);
+      }, 3000);
     }
   };
 
@@ -213,7 +262,8 @@ const StudentProfile = () => {
     return (
       <Card
         className="assessment-card bg-white rounded-xl shadow-sm hover:shadow-md transition-all"
-        bordered={false}>
+        bordered={false}
+      >
         <div className="flex items-center mb-4">
           <div className="bg-custom-green/10 p-2 rounded-full mr-3">{icon}</div>
           <h3 className="text-lg font-semibold text-gray-900 m-0">{title}</h3>
@@ -238,7 +288,8 @@ const StudentProfile = () => {
                     : getIndicatorText(score, type) === "Moderate"
                     ? "bg-yellow-50 text-yellow-700"
                     : "bg-red-50 text-red-700"
-                }`}>
+                }`}
+            >
               {getIndicatorText(score, type)}
             </div>
           </div>
@@ -271,11 +322,13 @@ const StudentProfile = () => {
         <div className="min-h-[300px] flex items-center justify-center">
           <Empty
             description="No upcoming appointments"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}>
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          >
             <Button
               type="primary"
               className="bg-custom-green hover:bg-custom-green/90 mt-4"
-              onClick={() => navigate("/book-appointment")}>
+              onClick={() => navigate("/book-appointment")}
+            >
               Schedule Appointment
             </Button>
           </Empty>
@@ -293,7 +346,8 @@ const StudentProfile = () => {
             type="primary"
             className="bg-custom-green hover:bg-custom-green/90"
             icon={<CalendarOutlined />}
-            onClick={() => navigate("/book-appointment")}>
+            onClick={() => navigate("/book-appointment")}
+          >
             Schedule New
           </Button>
         </div>
@@ -310,7 +364,8 @@ const StudentProfile = () => {
             return (
               <Card
                 className="mb-4 hover:shadow-md transition-all"
-                bodyStyle={{ padding: "16px" }}>
+                bodyStyle={{ padding: "16px" }}
+              >
                 <div className="flex flex-col md:flex-row md:items-center">
                   {/* Date column */}
                   <div className="md:w-1/4 mb-4 md:mb-0">
@@ -372,7 +427,8 @@ const StudentProfile = () => {
                         <Button
                           type="primary"
                           icon={<VideoCameraOutlined />}
-                          className="bg-custom-green hover:bg-custom-green/90">
+                          className="bg-custom-green hover:bg-custom-green/90"
+                        >
                           Join
                         </Button>
                       )}
@@ -398,7 +454,8 @@ const StudentProfile = () => {
           <Button
             type="link"
             onClick={() => navigate("/appointment-record")}
-            className="text-custom-green">
+            className="text-custom-green"
+          >
             View Appointment History
           </Button>
         </div>
@@ -417,7 +474,8 @@ const StudentProfile = () => {
           type="primary"
           className="bg-custom-green hover:bg-custom-green/90"
           icon={<TeamOutlined />}
-          onClick={() => navigate("/programs")}>
+          onClick={() => navigate("/program")}
+        >
           Browse All Programs
         </Button>
       </div>
@@ -431,7 +489,8 @@ const StudentProfile = () => {
               key={program.programID}
               className="hover:shadow-lg transition-all cursor-pointer border border-gray-100 rounded-xl overflow-hidden"
               bodyStyle={{ padding: 0 }}
-              onClick={() => handleProgramClick(program)}>
+              onClick={() => handleProgramClick(program)}
+            >
               <div className="p-5">
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="text-lg font-medium text-gray-800">
@@ -439,7 +498,8 @@ const StudentProfile = () => {
                   </h3>
                   <Tag
                     color={program.type === "ONLINE" ? "blue" : "green"}
-                    className="rounded-full">
+                    className="rounded-full"
+                  >
                     {program.type.charAt(0) +
                       program.type.slice(1).toLowerCase()}
                   </Tag>
@@ -500,7 +560,8 @@ const StudentProfile = () => {
                             program.maxParticipants) *
                           100
                         }%`,
-                      }}></div>
+                      }}
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -522,7 +583,8 @@ const StudentProfile = () => {
                     } else {
                       handleProgramClick(program);
                     }
-                  }}>
+                  }}
+                >
                   {program.type === "ONLINE" && program.meetingLink && (
                     <LinkOutlined className="mr-1" />
                   )}
@@ -587,7 +649,8 @@ const StudentProfile = () => {
                 style={{
                   color: "#3a6a49",
                   textShadow: "0 1px 2px rgba(0,0,0,0.2)",
-                }}>
+                }}
+              >
                 {userData.fullName
                   .split(" ")
                   .map((name) => name[0])
@@ -696,7 +759,8 @@ const StudentProfile = () => {
           activeKey={activeTab}
           onChange={setActiveTab}
           type="card"
-          className="bg-white rounded-2xl shadow-md p-6">
+          className="bg-white rounded-2xl shadow-md p-6"
+        >
           <TabPane
             tab={
               <span className="flex items-center gap-2">
@@ -704,7 +768,8 @@ const StudentProfile = () => {
                 <span>Mental Health</span>
               </span>
             }
-            key="1">
+            key="1"
+          >
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -756,7 +821,8 @@ const StudentProfile = () => {
                     type="link"
                     size="small"
                     className="mt-2 p-0"
-                    onClick={() => navigate("/test")}>
+                    onClick={() => navigate("/test")}
+                  >
                     Take New Assessment
                   </Button>
                 </Card>
@@ -813,7 +879,8 @@ const StudentProfile = () => {
                   </div>
                 }
                 className="mt-8"
-                bordered={false}>
+                bordered={false}
+              >
                 <div className="space-y-4">
                   <p className="text-gray-600">
                     Based on your assessment results, here are some
@@ -840,7 +907,8 @@ const StudentProfile = () => {
                 <span>Support Programs</span>
               </span>
             }
-            key="2">
+            key="2"
+          >
             {renderSupportProgramsTab()}
           </TabPane>
 
@@ -851,19 +919,56 @@ const StudentProfile = () => {
                 <span>Appointments</span>
               </span>
             }
-            key="3">
+            key="3"
+          >
             {renderAppointmentsTab()}
           </TabPane>
         </Tabs>
 
         {/* Program Details Modal */}
         <ProgramDetailsModal
-          isOpen={isProgramModalVisible}
-          onClose={() => setIsProgramModalVisible(false)}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
           program={selectedProgram}
           loading={false}
           onJoinProgram={handleProgramJoined}
+          onCancelParticipation={handleProgramCancellation}
         />
+
+        {/* Success Modal */}
+        <Modal
+          open={isSuccessModalOpen}
+          footer={null}
+          onCancel={() => setIsSuccessModalOpen(false)}
+          width={400}
+          centered
+          closable={true}
+          maskClosable={true}
+          className="success-modal"
+        >
+          <Result
+            status="success"
+            icon={<CheckCircleOutlined style={{ color: "#4a7c59" }} />}
+            title="Program Cancelled Successfully"
+            subTitle={`You have been removed from "${canceledProgramName}".`}
+            extra={[
+              <Button
+                key="browse"
+                type="primary"
+                onClick={() => {
+                  setIsSuccessModalOpen(false);
+                  navigate("/program");
+                }}
+                className="bg-custom-green hover:bg-custom-green/90"
+              >
+                Browse Programs
+              </Button>,
+              <Button key="close" onClick={() => setIsSuccessModalOpen(false)}>
+                Close
+              </Button>,
+            ]}
+          />
+        </Modal>
       </div>
     </div>
   );
