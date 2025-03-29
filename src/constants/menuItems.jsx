@@ -119,7 +119,7 @@ export const dropdownMenu = [
   // },
   {
     label: "Dashboard",
-    key: "dashboard",
+    key: "manager/users",
     icon: <SwapOutlined />,
     roles: ["manager"],
   },

@@ -33,7 +33,7 @@ const Login = () => {
           navigate("/parent-profile");
           break;
         case "manager":
-          navigate("/manager");
+          navigate("/manager/users");
           break;
         default:
           navigate("/");
@@ -63,13 +63,11 @@ const Login = () => {
           onFinish={handleSubmit}
           initialValues={{ remember: false }}
           layout="vertical"
-          className="login-form"
-        >
+          className="login-form">
           <Form.Item
             label="Email"
             name="loginIdentifier"
-            rules={[{ required: true, message: "Please input your email!" }]}
-          >
+            rules={[{ required: true, message: "Please input your email!" }]}>
             <Input
               size="large"
               placeholder="Enter your Email"
@@ -81,8 +79,9 @@ const Login = () => {
           <Form.Item
             label="Password"
             name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
-          >
+            rules={[
+              { required: true, message: "Please input your password!" },
+            ]}>
             <Input.Password
               size="large"
               placeholder="Enter your password"
@@ -101,8 +100,7 @@ const Login = () => {
               htmlType="submit"
               loading={loading}
               size="large"
-              className="login-button"
-            >
+              className="login-button">
               Sign In
             </Button>
           </Form.Item>

@@ -3,7 +3,7 @@ import { ManagerLayout } from "../layouts/ManagerLayout";
 import { StandardLayout } from "../layouts/StandardLayout";
 import { PrivateRoute } from "../components/PrivateRoute";
 import Home from "../pages/Home";
-import Dashboard from "../pages/manager/Dashboard";
+// import Dashboard from "../pages/manager/Dashboard";
 import Register from "../pages/Register";
 import ForgotPassword from "../pages/ForgotPassword";
 // import Service from "../pages/Service";
@@ -37,6 +37,7 @@ import PsychologistProfile from "../pages/psycologist/PsychologistProfile";
 import WorkSchedule from "../pages/psycologist/WorkSchedule";
 import ProgramManagement from "../pages/manager/ProgramManagement";
 import UpdateSurvey from "../pages/psycologist/UpdateSurvey";
+import AppointmentManagement from "../pages/manager/AppointmentManagement";
 
 const Appointment = lazy(() => import("../pages/psycologist/Appointment"));
 
@@ -172,13 +173,14 @@ export const routes = [
       </PrivateRoute>
     ),
     children: [
-      { index: true, element: <Dashboard /> },
       {
+        index: true,
         path: "users",
         element: <UserManagement />,
       },
       { path: "surveys", element: <SurveyManagement /> },
       { path: "programs", element: <ProgramManagement /> },
+      { path: "appointments", element: <AppointmentManagement /> },
     ],
   },
   {

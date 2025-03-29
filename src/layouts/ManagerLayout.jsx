@@ -11,7 +11,6 @@ import {
 } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
-  HomeOutlined,
   UserOutlined,
   SwapOutlined,
   PoweroffOutlined,
@@ -63,11 +62,6 @@ export const ManagerLayout = () => {
 
   const menuItems = [
     {
-      key: "/manager",
-      icon: <HomeOutlined />,
-      label: "Dashboard",
-    },
-    {
       key: "/manager/users",
       icon: <UserOutlined />,
       label: "User Management",
@@ -81,6 +75,11 @@ export const ManagerLayout = () => {
       key: "/manager/surveys",
       icon: <FileOutlined />,
       label: "Survey Management",
+    },
+    {
+      key: "/manager/appointments",
+      icon: <CalendarOutlined />,
+      label: "Appointment Management",
     },
   ];
 
