@@ -82,6 +82,11 @@ export const ManagerLayout = () => {
       icon: <FileOutlined />,
       label: "Survey Management",
     },
+    {
+      key: "/manager/appointments",
+      icon: <CalendarOutlined />,
+      label: "Appointment Management",
+    },
   ];
 
   const handleMenuClick = (e) => {

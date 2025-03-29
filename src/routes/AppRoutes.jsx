@@ -37,6 +37,7 @@ import PsychologistProfile from "../pages/psycologist/PsychologistProfile";
 import WorkSchedule from "../pages/psycologist/WorkSchedule";
 import ProgramManagement from "../pages/manager/ProgramManagement";
 import UpdateSurvey from "../pages/psycologist/UpdateSurvey";
+import AppointmentManagement from "../pages/manager/AppointmentManagement";
 
 const Appointment = lazy(() => import("../pages/psycologist/Appointment"));
 
@@ -179,6 +180,7 @@ export const routes = [
       },
       { path: "surveys", element: <SurveyManagement /> },
       { path: "programs", element: <ProgramManagement /> },
+      { path: "appointments", element: <AppointmentManagement /> },
     ],
   },
   {

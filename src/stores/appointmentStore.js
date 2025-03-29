@@ -241,6 +241,61 @@ export const useAppointmentStore = create((set) => ({
     }
   },
 
+  // Fetch all appointment for manager
+  fetchAllAppointmentRecords: async (params) => {
+    set({ loading: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+      const queryParams = new URLSearchParams();
+
+      // Add filters if they exist
+      if (params.startDate) queryParams.append("startDate", params.startDate);
+      if (params.endDate) queryParams.append("endDate", params.endDate);
+      if (params.status) {
+        // Handle status as array since it can have multiple values
+        if (Array.isArray(params.status)) {
+          params.status.forEach((status) =>
+            queryParams.append("status", status)
+          );
+        } else {
+          queryParams.append("status", params.status);
+        }
+      }
+
+      const url = `/appointments/filter?${queryParams.toString()}`;
+      console.log("Fetching appointment records from:", url);
+
+      const response = await api.get(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      set({ appointments: response.data || [], loading: false });
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching appointment records:", {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      let errorMessage = "Failed to fetch appointment records";
+
+      if (error.response?.status === 500) {
+        errorMessage =
+          "The server encountered an error. Please try again later or contact support.";
+      } else if (error.response?.status === 403) {
+        errorMessage =
+          "You don't have permission to access these appointments.";
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      set({ error: errorMessage, loading: false, appointments: [] });
+      return []; // Return empty array instead of throwing
+    }
+  },
+
   // Fetch upcoming appointments for student and psychologist
   fetchUpcomingAppointments: async (id, userType = "student") => {
     set({ loading: true, error: null });
