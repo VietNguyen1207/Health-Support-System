@@ -3,9 +3,18 @@ import { ConfigProvider } from "antd";
 import { routes } from "./routes/AppRoutes";
 import "./App.css";
 import ScrollToTop from "./components/ScrollToTop";
+import { useEffect } from "react";
+import { useAuthStore } from "./stores/authStore";
 
 function App() {
   const element = useRoutes(routes);
+  const { checkAndClearInvalidAuth } = useAuthStore();
+
+  // Check token validity when app loads
+  useEffect(() => {
+    checkAndClearInvalidAuth();
+  }, []);
+
   return (
     <ConfigProvider
       theme={{
@@ -36,7 +45,8 @@ function App() {
           },
           Layout: {},
         },
-      }}>
+      }}
+    >
       <ScrollToTop />
       {element}
     </ConfigProvider>
@@ -46,7 +56,8 @@ function App() {
 function WrappedApp() {
   return (
     <BrowserRouter
-      future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+      future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
+    >
       <App />
     </BrowserRouter>
   );
