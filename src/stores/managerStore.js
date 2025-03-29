@@ -7,7 +7,7 @@ const initialState = {
   error: null,
 };
 
-const MANAGER_URL = "/managers/";
+const MANAGER_URL = "s/";
 
 const MANAGER_PATH = {
   GET_LEAVE_REQUEST: "leave-requests/all",
