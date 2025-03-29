@@ -301,4 +301,27 @@ export const useProgramStore = create((set) => ({
   capitalizeFirstLetter: (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   },
+
+  // Add this new function to fetch program participants
+  fetchProgramParticipants: async (programId) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await api.get(
+        `/programs/participants?programId=${programId}`
+      );
+      set({ loading: false });
+      return data;
+    } catch (error) {
+      console.error("Error fetching program participants:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      const errorMessage =
+        error.response?.data?.message || "Failed to fetch program participants";
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
 }));
