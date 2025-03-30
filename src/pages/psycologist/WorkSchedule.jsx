@@ -101,7 +101,8 @@ const TimeSlotItem = memo(
             : "border-gray-200 hover:border-primary"
         }
       `}
-        onClick={() => (!isDisabled || !isOver) && onToggle(slot.slotId)}>
+        onClick={() => (!isDisabled || !isOver) && onToggle(slot.slotId)}
+      >
         {/* Add an indicator for past slots */}
         <div>
           <div className="font-medium">
@@ -143,7 +144,8 @@ const TimeSlotTag = memo(({ slot }) => {
   return (
     <Tag
       color={slot.status === "AVAILABLE" ? "success" : "default"}
-      className="mb-1">
+      className="mb-1"
+    >
       {dayjs(slot.startTime, "HH:mm:ss").format("HH:mm")} -{" "}
       {dayjs(slot.endTime, "HH:mm:ss").format("HH:mm")}
     </Tag>
@@ -392,12 +394,13 @@ const WorkSchedule = () => {
   // Reset modal state when opening
   const showModal = useCallback(() => {
     setSelectedSlots([]);
-    setSelectedDate(dayjs());
+    // Do not reset the selectedDate here - keep the currently selected date
     setActiveTab("morning");
     setExistingSlotIds(new Set()); // Reset existing slot IDs
     setIsModalVisible(true);
 
-    const formattedDate = dayjs().format("YYYY-MM-DD");
+    // Use the currently selected date (from calendar) instead of today's date
+    const formattedDate = selectedDate.format("YYYY-MM-DD");
 
     const existingSlots = createdTimeSlots[formattedDate] || [];
 
@@ -414,7 +417,7 @@ const WorkSchedule = () => {
     console.log(
       `Found ${existingIds.size} existing slots for ${formattedDate} when opening modal`
     );
-  }, [createdTimeSlots]); // Thay đổi dependency từ timeSlots sang createdTimeSlots
+  }, [createdTimeSlots, selectedDate]); // Add selectedDate as a dependency
 
   // Count of available slots by period (slots that are not already created)
   const availableCountByPeriod = useMemo(() => {
@@ -519,6 +522,15 @@ const WorkSchedule = () => {
     []
   );
 
+  // Add a new function to navigate to today's date
+  const goToToday = useCallback(() => {
+    const today = dayjs();
+    setSelectedDate(today);
+
+    // Optionally fetch time slots for today
+    fetchCreatedTimeSlots(today);
+  }, [fetchCreatedTimeSlots]);
+
   return (
     <div className="p-6 general-wrapper">
       <Card className="mb-6">
@@ -527,9 +539,21 @@ const WorkSchedule = () => {
             <CalendarOutlined className="mr-2" />
             Work Schedule Management
           </Title>
-          <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
-            Create Schedule
-          </Button>
+
+          <div className="flex gap-3">
+            {/* Today button */}
+            <Button
+              icon={<CalendarOutlined />}
+              onClick={goToToday}
+              className="flex items-center"
+            >
+              Today
+            </Button>
+
+            <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
+              Create Schedule
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -559,7 +583,8 @@ const WorkSchedule = () => {
                   </span>
                 </Space>
               }
-              className="h-full">
+              className="h-full"
+            >
               {loadingTimeSlots ? (
                 <div className="flex justify-center items-center h-64">
                   <Spin size="large" />
@@ -571,7 +596,8 @@ const WorkSchedule = () => {
                   {Object.entries(selectedDateSlots).map(([period, slots]) => (
                     <Tabs.TabPane
                       tab={`${period} (${slots.length})`}
-                      key={period}>
+                      key={period}
+                    >
                       <Table
                         dataSource={slots}
                         columns={columns}
@@ -603,10 +629,12 @@ const WorkSchedule = () => {
             type="primary"
             loading={submitting}
             disabled={selectedSlots.length === 0}
-            onClick={handleSubmit}>
+            onClick={handleSubmit}
+          >
             Create Schedule
           </Button>,
-        ]}>
+        ]}
+      >
         <Form layout="vertical">
           <Form.Item label="Select Date" required className="mb-4">
             <DatePicker
@@ -652,7 +680,8 @@ const WorkSchedule = () => {
             activeKey={activeTab}
             onChange={setActiveTab}
             type="card"
-            className="time-slots-tabs">
+            className="time-slots-tabs"
+          >
             {Object.entries(slotsByPeriod).map(
               ([period, slots]) =>
                 slots.length > 0 && (
@@ -660,12 +689,14 @@ const WorkSchedule = () => {
                     tab={`${
                       period.charAt(0).toUpperCase() + period.slice(1)
                     } (${slots.length})`}
-                    key={period}>
+                    key={period}
+                  >
                     <div className="mb-3 flex justify-between items-center">
                       <Button
                         type="link"
                         onClick={() => selectAllInPeriod(period)}
-                        icon={<CheckCircleOutlined />}>
+                        icon={<CheckCircleOutlined />}
+                      >
                         {isAllPeriodSelected(period)
                           ? "Deselect All"
                           : "Select All"}
