@@ -157,14 +157,31 @@ const NotificationList = ({ onClose }) => {
       });
     }
 
+    // Enhanced navigation logic based on notification type and title
     if (noti.type === "APPOINTMENT") {
       if (noti.title.includes("Check-out") || noti.title.includes("Canceled")) {
         navigate("/appointment-record");
       } else navigate("/calendar");
+    } else if (noti.type === "PROGRAM") {
+      if (user.role === "student") {
+        // Navigate to student profile with Support Programs tab active
+        navigate("/student-profile", { state: { activeTab: "2" } });
+      } else {
+        navigate("/psychologist-profile");
+      }
+    } else if (noti.type === "SURVEY") {
+      if (user.role === "student") {
+        // Navigate to test/survey page for survey notifications
+        navigate("/test");
+      } else {
+        navigate("/psychologist-profile");
+      }
     } else {
       if (user.role === "student") {
         navigate("/student-profile");
-      } else navigate("/psychologist-profile");
+      } else {
+        navigate("/psychologist-profile");
+      }
     }
   };
 
