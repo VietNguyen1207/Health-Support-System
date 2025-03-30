@@ -43,13 +43,16 @@ const Header = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate(`/`);
+    navigate(`/login`);
   };
 
   const handleMenuClick = (e) => {
     switch (e.key) {
       case "logout":
         handleLogout();
+        break;
+      case "dashboard":
+        navigate(`${user?.role}`);
         break;
       default:
         navigate(e.key);
@@ -80,7 +83,7 @@ const Header = () => {
         <Link to="/register" className="btn btn-outline">
           Sign Up
         </Link>
-        <Link to="/" className="btn btn-primary">
+        <Link to="/login" className="btn btn-primary">
           Sign In
         </Link>
       </div>
@@ -95,7 +98,8 @@ const Header = () => {
             onClick={handleDropdownButton}
             className={`flex items-center gap-2 px-3 py-1 rounded-l-md border${
               user?.role === "manager" && `w-full pointer-events-none`
-            }`}>
+            }`}
+          >
             {user.fullName}
           </Button>,
           rightButton,
@@ -149,11 +153,12 @@ const Header = () => {
             subMenuTitleColor: "#4a7c59",
           },
         },
-      }}>
+      }}
+    >
       <header className="header">
         <div className="header-container">
           <div className="logo">
-            <Link to="#">
+            <Link to="/">
               <span className="logo-icon">🧠</span>
               <span className="logo-text">Mental Health Support</span>
             </Link>
@@ -177,7 +182,8 @@ const Header = () => {
                 <Button
                   type="primary"
                   className="rounded-full"
-                  onClick={() => navigate(navItems.specialItem.key)}>
+                  onClick={() => navigate(navItems.specialItem.key)}
+                >
                   <p className="text-white w-full">
                     {navItems.specialItem.label}
                   </p>
@@ -197,7 +203,8 @@ const Header = () => {
                       } else {
                         navigate("/calendar");
                       }
-                    }}>
+                    }}
+                  >
                     <CalendarFilled className="text-lg" />
                   </div>
                 </span>

@@ -157,14 +157,31 @@ const NotificationList = ({ onClose }) => {
       });
     }
 
+    // Enhanced navigation logic based on notification type and title
     if (noti.type === "APPOINTMENT") {
       if (noti.title.includes("Check-out") || noti.title.includes("Canceled")) {
         navigate("/appointment-record");
       } else navigate("/calendar");
+    } else if (noti.type === "PROGRAM") {
+      if (user.role === "student") {
+        // Navigate to student profile with Support Programs tab active
+        navigate("/student-profile", { state: { activeTab: "2" } });
+      } else {
+        navigate("/psychologist-profile");
+      }
+    } else if (noti.type === "SURVEY") {
+      if (user.role === "student") {
+        // Navigate to test/survey page for survey notifications
+        navigate("/test");
+      } else {
+        navigate("/psychologist-profile");
+      }
     } else {
       if (user.role === "student") {
         navigate("/student-profile");
-      } else navigate("/psychologist-profile");
+      } else {
+        navigate("/psychologist-profile");
+      }
     }
   };
 
@@ -243,7 +260,8 @@ const NotificationList = ({ onClose }) => {
               ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
               : "text-gray-600 hover:bg-gray-100"
           }`}
-          onClick={() => handleFilter(false)}>
+          onClick={() => handleFilter(false)}
+        >
           All
         </button>
         <button
@@ -252,7 +270,8 @@ const NotificationList = ({ onClose }) => {
               ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
               : "text-gray-600 hover:bg-gray-100"
           }`}
-          onClick={() => handleFilter(true)}>
+          onClick={() => handleFilter(true)}
+        >
           Unread
           {unreadCount > 0 && (
             <span className="ml-1 px-1.5 py-0.5 bg-blue-600 text-white text-xs rounded-full">
@@ -288,7 +307,8 @@ const NotificationList = ({ onClose }) => {
               }`}
               onClick={() => handleNotificationClick(notification)}
               onMouseEnter={() => handleNotificationHover(notification)}
-              onMouseLeave={() => handleNotificationLeave(notification)}>
+              onMouseLeave={() => handleNotificationLeave(notification)}
+            >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -304,7 +324,8 @@ const NotificationList = ({ onClose }) => {
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${getTypeColor(
                         notification.type
-                      )}`}>
+                      )}`}
+                    >
                       {notification.type}
                     </span>
                     <span className="text-gray-500 text-xs">
@@ -332,7 +353,8 @@ const NotificationList = ({ onClose }) => {
           <Button
             type="link"
             onClick={() => navigate("/notifications")}
-            className="text-blue-600 hover:text-blue-800">
+            className="text-blue-600 hover:text-blue-800"
+          >
             View All Notifications
           </Button>
         </div>

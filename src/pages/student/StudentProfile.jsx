@@ -35,7 +35,7 @@ import {
 } from "@ant-design/icons";
 import { useUserStore } from "../../stores/userStore";
 import { useAppointmentStore } from "../../stores/appointmentStore";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import ProgramDetailsModal from "../../components/ProgramDetailsModal";
 import { useSurveyStore } from "../../stores/surveyStore";
@@ -44,6 +44,7 @@ const { TabPane } = Tabs;
 const { Title, Text } = Typography;
 
 const StudentProfile = () => {
+  const location = useLocation();
   const { getUserDetails } = useUserStore();
   const [userLoading, setUserLoading] = useState(true);
   const { fetchUpcomingAppointments } = useAppointmentStore();
@@ -51,7 +52,7 @@ const StudentProfile = () => {
   const [userData, setUserData] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [isProgramModalVisible, setIsProgramModalVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState("1");
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || "1");
   const [upcomingAppointments, setUpcomingAppointments] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [completedSurveysCount, setCompletedSurveysCount] = useState(0);
@@ -604,6 +605,14 @@ const StudentProfile = () => {
       )}
     </div>
   );
+
+  // Clear the location state after using it (to prevent persisting on refresh)
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      // This will replace the current history entry to remove the state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   if (userLoading) {
     return (
