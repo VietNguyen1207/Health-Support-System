@@ -3,9 +3,8 @@ import { ConfigProvider } from "antd";
 import { routes } from "./routes/AppRoutes";
 import "./App.css";
 import ScrollToTop from "./components/ScrollToTop";
-import { useEffect, Suspense } from "react";
+import { useEffect } from "react";
 import { useAuthStore } from "./stores/authStore";
-import LoadingSpinner from "./components/LoadingSpinner";
 
 function App() {
   const element = useRoutes(routes);
@@ -46,9 +45,10 @@ function App() {
           },
           Layout: {},
         },
-      }}>
+      }}
+    >
       <ScrollToTop />
-      <Suspense fallback={<LoadingSpinner />}>{element}</Suspense>
+      {element}
     </ConfigProvider>
   );
 }
@@ -56,10 +56,9 @@ function App() {
 function WrappedApp() {
   return (
     <BrowserRouter
-      future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
-      <Suspense fallback={<LoadingSpinner />}>
-        <App />
-      </Suspense>
+      future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
+    >
+      <App />
     </BrowserRouter>
   );
 }

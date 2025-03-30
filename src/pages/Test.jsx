@@ -8,7 +8,7 @@ import {
   QuestionCircleOutlined,
   CalendarOutlined,
   BarChartOutlined,
-  InfoCircleOutlined,
+  HistoryOutlined,
 } from "@ant-design/icons";
 import {
   Input,
@@ -117,6 +117,18 @@ const Test = () => {
 
   const handleStartTest = async (test) => {
     try {
+      // Check if test is completed - in new rules, completed tests cannot be retaken in same period
+      if (test.completeStatus === "COMPLETED") {
+        notification.info({
+          message: "Assessment Already Completed",
+          description: `You've already completed this assessment for the current period. It will be available again after the period ends (${
+            test.periodic
+          } week${test.periodic > 1 ? "s" : ""}).`,
+          duration: 6,
+        });
+        return;
+      }
+
       // Navigate to the test with the survey data
       navigate("/test-question", {
         state: {
@@ -129,6 +141,11 @@ const Test = () => {
     } catch (error) {
       console.error("Error starting test:", error);
     }
+  };
+
+  // Function to navigate to TestRecord page
+  const handleViewTestHistory = () => {
+    navigate("/test-record");
   };
 
   const handlePageChange = (page) => {
@@ -424,9 +441,24 @@ const Test = () => {
                       )}
 
                       {/* Card Content */}
-                      <p className="text-gray-600 mb-6 line-clamp-2 relative z-10">
+                      <p className="text-gray-600 mb-4 line-clamp-2 relative z-10">
                         {test.description}
                       </p>
+
+                      {/* Period information - new */}
+                      {test.periodic > 0 && (
+                        <div className="mb-4 bg-gray-50 p-2 rounded-lg border border-gray-100 relative z-10">
+                          <div className="flex items-center text-sm text-gray-600">
+                            <CalendarOutlined
+                              className={`mr-2 ${categoryColor.text}`}
+                            />
+                            <span>
+                              Renews every {test.periodic} week
+                              {test.periodic > 1 ? "s" : ""}
+                            </span>
+                          </div>
+                        </div>
+                      )}
 
                       <div className="flex flex-wrap gap-3 relative z-10">
                         <Tooltip title="Estimated time to complete">
@@ -463,24 +495,6 @@ const Test = () => {
                           <span className="font-medium">{test.category}</span>
                         </span>
                       </div>
-
-                      {/* Add period info at the bottom of card */}
-                      {test.periodic && (
-                        <div className="mt-4 pt-3 border-t border-gray-100 text-sm text-gray-500 flex items-center">
-                          <CalendarOutlined className="mr-2" />
-                          {test.completeStatus === "COMPLETED" ? (
-                            <span>
-                              Completed for current period. Resets after{" "}
-                              {test.periodic} weeks.
-                            </span>
-                          ) : (
-                            <span>
-                              Available to complete in this {test.periodic}-week
-                              period.
-                            </span>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
                 );
@@ -556,8 +570,8 @@ const Test = () => {
           destroyOnClose={true}
           footer={
             <div className="flex justify-end gap-3">
-              <Button size="large" danger onClick={() => setIsModalOpen(false)}>
-                Close
+              <Button size="large" onClick={() => setIsModalOpen(false)}>
+                Cancel
               </Button>
               {user.role === "student" && (
                 <Button
@@ -571,7 +585,7 @@ const Test = () => {
                   size="large"
                 >
                   {selectedTest.completeStatus === "COMPLETED"
-                    ? "Already Completed"
+                    ? "Completed for this Period"
                     : "Start Assessment"}
                 </Button>
               )}
@@ -624,12 +638,12 @@ const Test = () => {
               <p className="text-gray-600">{selectedTest.description}</p>
             </div>
 
-            {/* Periodic Reset Information - Updated with clearer explanation */}
-            {selectedTest.periodic && (
+            {/* Period Reset Information */}
+            {selectedTest.periodic > 0 && (
               <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-3">
                 <h3 className="font-semibold text-gray-800 mb-2 flex items-center">
                   <CalendarOutlined className="mr-2 text-blue-500" />
-                  Assessment Schedule
+                  Assessment Period Information
                 </h3>
                 <div className="flex items-center">
                   <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
@@ -637,21 +651,19 @@ const Test = () => {
                   </div>
                   <div className="text-gray-700">
                     <p className="m-0">
-                      <span className="font-medium">Period:</span>{" "}
-                      {selectedTest.periodic || "..."} weeks
+                      <span className="font-medium">Period Length:</span>{" "}
+                      {selectedTest.periodic} week
+                      {selectedTest.periodic > 1 ? "s" : ""}
                     </p>
-                    {selectedTest.completeStatus === "COMPLETED" ? (
-                      <div className="mt-2 bg-yellow-50 border border-yellow-100 rounded-lg p-2 text-sm">
-                        <InfoCircleOutlined className="mr-2 text-yellow-500" />
-                        You've completed this assessment for the current period.
-                        It will be available again in the next period.
-                      </div>
-                    ) : (
-                      <div className="mt-2 bg-green-50 border border-green-100 rounded-lg p-2 text-sm">
-                        <InfoCircleOutlined className="mr-2 text-green-500" />
-                        This assessment is available for you to complete in the
-                        current period.
-                      </div>
+                    {selectedTest.completeStatus === "COMPLETED" && (
+                      <p className="m-0 mt-1 text-sm">
+                        <span className="bg-yellow-100 px-2 py-0.5 rounded-md text-yellow-700">
+                          Note:
+                        </span>{" "}
+                        You have already completed this assessment for the
+                        current period. The assessment will be available again
+                        at the start of the next period.
+                      </p>
                     )}
                   </div>
                 </div>
@@ -738,7 +750,9 @@ const Test = () => {
                       <CheckCircleOutlined className="text-custom-green text-sm" />
                     </div>
                     <span>
-                      You can only complete this assessment once per period
+                      You can only complete this assessment once per period (
+                      {selectedTest.periodic} week
+                      {selectedTest.periodic > 1 ? "s" : ""})
                     </span>
                   </li>
                 </ul>
@@ -746,13 +760,24 @@ const Test = () => {
             </div>
 
             {/* Results Section (Only if completed) */}
-            {selectedTest.statusStudentResponse &&
+            {user.role === "student" &&
+              selectedTest.statusStudentResponse &&
               selectedTest.statusStudentResponse.length > 0 && (
                 <div className="bg-gray-50 p-5 rounded-xl">
-                  <h3 className="font-semibold text-gray-800 mb-4 flex items-center">
-                    <BarChartOutlined className="mr-2 text-custom-green" />
-                    Your Results
-                  </h3>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-semibold text-gray-800 flex items-center m-0">
+                      <BarChartOutlined className="mr-2 text-custom-green" />
+                      Your Results
+                    </h3>
+                    <Button
+                      type="link"
+                      className="text-custom-green"
+                      icon={<HistoryOutlined />}
+                      onClick={handleViewTestHistory}
+                    >
+                      View History
+                    </Button>
+                  </div>
                   <div className="space-y-3">
                     {selectedTest.statusStudentResponse.map(
                       (response, index) => {
@@ -762,44 +787,27 @@ const Test = () => {
                           selectedTest.statusStudentResponse.length - 1
                         ) {
                           return (
-                            user.role === "student" && (
-                              <div
-                                key={index}
-                                className="bg-white p-4 rounded-lg border border-gray-100"
-                              >
-                                <div className="flex justify-between items-center pb-2 border-b border-gray-100">
-                                  <span className="text-gray-500">
-                                    Completed On:
-                                  </span>
-                                  <span className="font-medium text-gray-800">
-                                    {response.lastCompleteDate
-                                      ? formatDate(response.lastCompleteDate)
-                                      : "Not completed yet"}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between items-center pt-2">
-                                  <span className="text-gray-500">Score:</span>
-                                  <span className="font-medium text-gray-800">
-                                    {response.score}
-                                  </span>
-                                </div>
-
-                                {/* Add next assessment availability info */}
-                                {selectedTest.completeStatus === "COMPLETED" &&
-                                  selectedTest.periodic && (
-                                    <div className="mt-3 pt-3 border-t border-gray-100">
-                                      <Button
-                                        type="primary"
-                                        size="small"
-                                        onClick={() => navigate("/test-record")}
-                                        className="bg-custom-green hover:bg-custom-green/90"
-                                      >
-                                        View All Results
-                                      </Button>
-                                    </div>
-                                  )}
+                            <div
+                              key={index}
+                              className="bg-white p-4 rounded-lg border border-gray-100"
+                            >
+                              <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                                <span className="text-gray-500">
+                                  Last Completed:
+                                </span>
+                                <span className="font-medium text-gray-800">
+                                  {response.lastCompleteDate
+                                    ? formatDate(response.lastCompleteDate)
+                                    : "Not completed yet"}
+                                </span>
                               </div>
-                            )
+                              <div className="flex justify-between items-center pt-2">
+                                <span className="text-gray-500">Score:</span>
+                                <span className="font-medium text-gray-800">
+                                  {response.score}
+                                </span>
+                              </div>
+                            </div>
                           );
                         }
                         return null;

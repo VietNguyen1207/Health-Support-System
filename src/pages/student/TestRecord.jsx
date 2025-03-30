@@ -3,23 +3,32 @@ import {
   Card,
   Typography,
   Spin,
+  Tabs,
+  Timeline,
   Empty,
   Button,
   Tag,
+  Collapse,
   Progress,
+  Table,
   Tooltip,
+  Badge,
   Divider,
   Select,
+  Alert,
 } from "antd";
 import {
   BarChartOutlined,
   CalendarOutlined,
+  CheckCircleOutlined,
   FileTextOutlined,
+  HistoryOutlined,
   InfoCircleOutlined,
   LineChartOutlined,
   QuestionCircleOutlined,
   RiseOutlined,
   FallOutlined,
+  ClockCircleOutlined,
   FilterOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
@@ -28,6 +37,8 @@ import { useAuthStore } from "../../stores/authStore";
 import { useNavigate } from "react-router-dom";
 
 const { Title, Text, Paragraph } = Typography;
+const { TabPane } = Tabs;
+const { Panel } = Collapse;
 const { Option } = Select;
 
 const TestRecord = () => {
@@ -100,7 +111,6 @@ const TestRecord = () => {
             );
           }
         } catch (err) {
-          console.log(err);
           console.log(`No results found for survey ${surveyId}`);
           // Continue with next survey
         }
@@ -139,15 +149,15 @@ const TestRecord = () => {
   }, [testRecords]);
 
   // Format the score as a percentage
-  // const formatScorePercentage = (score) => {
-  //   if (!score || !score.includes("/")) return "0%";
+  const formatScorePercentage = (score) => {
+    if (!score || !score.includes("/")) return "0%";
 
-  //   const [numerator, denominator] = score.split("/").map(Number);
-  //   if (isNaN(numerator) || isNaN(denominator) || denominator === 0)
-  //     return "0%";
+    const [numerator, denominator] = score.split("/").map(Number);
+    if (isNaN(numerator) || isNaN(denominator) || denominator === 0)
+      return "0%";
 
-  //   return `${Math.round((numerator / denominator) * 100)}%`;
-  // };
+    return `${Math.round((numerator / denominator) * 100)}%`;
+  };
 
   // Get severity level based on score percentage and category
   const getSeverityLevel = (score, category) => {
@@ -211,9 +221,9 @@ const TestRecord = () => {
   };
 
   // Handle showing detailed results for a survey
-  // const handleViewDetails = (surveyId) => {
-  //   setExpandedSurvey(expandedSurvey === surveyId ? null : surveyId);
-  // };
+  const handleViewDetails = (surveyId) => {
+    setExpandedSurvey(expandedSurvey === surveyId ? null : surveyId);
+  };
 
   // Determine score trend for a category
   const getScoreTrend = (records) => {
@@ -296,7 +306,7 @@ const TestRecord = () => {
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex-1">
-              <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                 <span className="inline-block w-2 h-2 bg-custom-green rounded-full mr-2"></span>
                 Assessment Category
               </label>
@@ -308,7 +318,8 @@ const TestRecord = () => {
                 className="w-full"
                 size="large"
                 suffixIcon={<SearchOutlined className="text-gray-400" />}
-                dropdownStyle={{ borderRadius: "0.75rem" }}>
+                dropdownStyle={{ borderRadius: "0.75rem" }}
+              >
                 <Option value={null}>All Categories</Option>
                 {categories.map((category) => (
                   <Option key={category} value={category}>
@@ -320,7 +331,7 @@ const TestRecord = () => {
 
             <div className="flex-1">
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-gray-700 flex items-center">
+                <label className="block text-sm font-medium text-gray-700 flex items-center">
                   <span className="inline-block w-2 h-2 bg-custom-green rounded-full mr-2"></span>
                   Result Details
                 </label>
@@ -328,7 +339,8 @@ const TestRecord = () => {
                   type="link"
                   size="small"
                   onClick={() => setShowResponses(!showResponses)}
-                  className="text-custom-green hover:text-custom-green/80">
+                  className="text-custom-green hover:text-custom-green/80"
+                >
                   {showResponses ? "Hide All Responses" : "Show All Responses"}
                 </Button>
               </div>
@@ -375,7 +387,8 @@ const TestRecord = () => {
             <Button
               type="primary"
               onClick={() => navigate("/test")}
-              className="mt-4 bg-custom-green hover:bg-custom-green/90">
+              className="mt-4 bg-custom-green hover:bg-custom-green/90"
+            >
               Take an Assessment
             </Button>
           </div>
@@ -393,7 +406,8 @@ const TestRecord = () => {
                 return (
                   <div
                     key={category}
-                    className="bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg">
+                    className="bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg"
+                  >
                     {/* Category Header */}
                     <div
                       className="p-6 border-b"
@@ -402,7 +416,8 @@ const TestRecord = () => {
                         background: `linear-gradient(135deg, ${getCategoryColor(
                           category
                         )}10 0%, ${getCategoryColor(category)}05 100%)`,
-                      }}>
+                      }}
+                    >
                       <div className="flex justify-between items-center flex-wrap gap-4">
                         <div className="flex items-center">
                           <div
@@ -411,7 +426,8 @@ const TestRecord = () => {
                               boxShadow: `0 0 0 3px ${getCategoryColor(
                                 category
                               )}20`,
-                            }}>
+                            }}
+                          >
                             {category === "ANXIETY" ? (
                               <QuestionCircleOutlined
                                 style={{
@@ -439,7 +455,8 @@ const TestRecord = () => {
                             <Title
                               level={4}
                               className="mb-0"
-                              style={{ color: getCategoryColor(category) }}>
+                              style={{ color: getCategoryColor(category) }}
+                            >
                               {category.charAt(0) +
                                 category.slice(1).toLowerCase()}{" "}
                               Assessments
@@ -463,20 +480,23 @@ const TestRecord = () => {
                               <Tag
                                 color="success"
                                 icon={<RiseOutlined />}
-                                className="px-3 py-1 rounded-full">
+                                className="px-3 py-1 rounded-full"
+                              >
                                 Improving
                               </Tag>
                             ) : trend === "worsening" ? (
                               <Tag
                                 color="error"
                                 icon={<FallOutlined />}
-                                className="px-3 py-1 rounded-full">
+                                className="px-3 py-1 rounded-full"
+                              >
                                 Needs Attention
                               </Tag>
                             ) : (
                               <Tag
                                 color="processing"
-                                className="px-3 py-1 rounded-full">
+                                className="px-3 py-1 rounded-full"
+                              >
                                 Stable
                               </Tag>
                             )}
@@ -487,7 +507,7 @@ const TestRecord = () => {
 
                     {/* Records */}
                     <div className="divide-y divide-gray-100">
-                      {records.map((record) => {
+                      {records.map((record, index) => {
                         const severity = getSeverityLevel(
                           record.totalScore,
                           category
@@ -500,7 +520,8 @@ const TestRecord = () => {
                         return (
                           <div
                             key={`${record.surveyId}-${record.periodic}`}
-                            className="p-6">
+                            className="p-6"
+                          >
                             <div className="flex items-start">
                               {/* Period Badge */}
                               <div className="flex-none mr-4">
@@ -520,7 +541,8 @@ const TestRecord = () => {
                                     borderLeftWidth: "3px",
                                     borderLeftColor: getCategoryColor(category),
                                   }}
-                                  bodyStyle={{ padding: "16px" }}>
+                                  bodyStyle={{ padding: "16px" }}
+                                >
                                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                                     <div>
                                       <div className="flex items-center flex-wrap gap-2">
@@ -533,7 +555,8 @@ const TestRecord = () => {
                                         ) && (
                                           <Tag
                                             color="green"
-                                            className="rounded-full px-2">
+                                            className="rounded-full px-2"
+                                          >
                                             Latest
                                           </Tag>
                                         )}
@@ -567,7 +590,8 @@ const TestRecord = () => {
                                             : severity === "warning"
                                             ? "Moderate severity"
                                             : "High severity - needs attention"
-                                        }`}>
+                                        }`}
+                                      >
                                         <Progress
                                           type="circle"
                                           percent={scorePercent}
@@ -602,7 +626,8 @@ const TestRecord = () => {
                                       <div className="mb-4">
                                         <Text
                                           strong
-                                          className="text-gray-700 flex items-center mb-2">
+                                          className="text-gray-700 flex items-center mb-2"
+                                        >
                                           <InfoCircleOutlined className="mr-2" />
                                           Assessment Details
                                         </Text>
@@ -615,7 +640,8 @@ const TestRecord = () => {
                                         <div className="flex justify-between items-center mb-2">
                                           <Text
                                             strong
-                                            className="text-gray-700 flex items-center">
+                                            className="text-gray-700 flex items-center"
+                                          >
                                             <FileTextOutlined className="mr-2" />
                                             Your Responses
                                           </Text>
@@ -626,7 +652,8 @@ const TestRecord = () => {
                                               onClick={() =>
                                                 setExpandedSurvey(null)
                                               }
-                                              className="text-gray-500">
+                                              className="text-gray-500"
+                                            >
                                               Hide Responses
                                             </Button>
                                           )}
@@ -644,7 +671,8 @@ const TestRecord = () => {
                                               return (
                                                 <div
                                                   key={question.id}
-                                                  className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50">
+                                                  className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50"
+                                                >
                                                   <div className="flex justify-between flex-col sm:flex-row gap-3">
                                                     <div className="flex-1">
                                                       <Text strong>
@@ -669,7 +697,8 @@ const TestRecord = () => {
                                                               ? "warning"
                                                               : "error"
                                                           }
-                                                          className="px-3 py-1 text-center min-w-[120px]">
+                                                          className="px-3 py-1 text-center min-w-[120px]"
+                                                        >
                                                           <div>
                                                             {
                                                               selectedOption.label
@@ -704,7 +733,8 @@ const TestRecord = () => {
                                               record.surveyId
                                             )
                                           }
-                                          className="bg-custom-green hover:bg-custom-green/90">
+                                          className="bg-custom-green hover:bg-custom-green/90"
+                                        >
                                           View Full Report
                                         </Button>
                                       </div>
@@ -718,7 +748,8 @@ const TestRecord = () => {
                                             `${record.surveyId}-${record.periodic}`
                                           )
                                         }
-                                        icon={<QuestionCircleOutlined />}>
+                                        icon={<QuestionCircleOutlined />}
+                                      >
                                         View Responses
                                       </Button>
 
@@ -727,7 +758,8 @@ const TestRecord = () => {
                                         onClick={() =>
                                           handleViewFullResult(record.surveyId)
                                         }
-                                        className="bg-custom-green hover:bg-custom-green/90">
+                                        className="bg-custom-green hover:bg-custom-green/90"
+                                      >
                                         View Full Report
                                       </Button>
                                     </div>
