@@ -18,8 +18,6 @@ import { useProgramStore } from "../../stores/programStore";
 import { useState, useEffect } from "react";
 import { useAppointmentStore } from "../../stores/appointmentStore";
 import { usePsychologistStore } from "../../stores/psychologistStore";
-import { useAuthStore } from "../../stores/authStore";
-import dayjs from "dayjs";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -40,7 +38,6 @@ const AddProgram = () => {
   const [isOnline, setIsOnline] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingData, setIsFetchingData] = useState(false);
-  const { user } = useAuthStore();
   const { createProgram, fetchTags, tags } = useProgramStore();
   const { fetchDepartments } = useAppointmentStore();
   const [departments, setDepartments] = useState([]);
@@ -193,7 +190,7 @@ const AddProgram = () => {
   };
 
   return (
-    <div className="bg-gradient-to-b from-blue-50 to-white pt-24 pb-28 px-4 sm:px-6 lg:px-8">
+    <div className="">
       <div className="relative">
         {isFetchingData && (
           <div className="absolute inset-0 bg-white/70 z-50 flex justify-center items-center">
@@ -218,8 +215,7 @@ const AddProgram = () => {
               onFinish={onFinish}
               className="space-y-6"
               validateTrigger="onBlur"
-              scrollToFirstError
-            >
+              scrollToFirstError>
               {/* Program Basic Information Section */}
               <div className="bg-gray-50 p-6 rounded-lg mb-8">
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">
@@ -234,8 +230,7 @@ const AddProgram = () => {
                   }
                   rules={[
                     { required: true, message: "Please enter program title" },
-                  ]}
-                >
+                  ]}>
                   <Input
                     placeholder="Enter program title"
                     className="rounded-lg h-11"
@@ -254,8 +249,7 @@ const AddProgram = () => {
                       required: true,
                       message: "Please enter program description",
                     },
-                  ]}
-                >
+                  ]}>
                   <TextArea
                     rows={4}
                     placeholder="Enter program description"
@@ -273,17 +267,14 @@ const AddProgram = () => {
                     }
                     rules={[
                       { required: true, message: "Please select a department" },
-                    ]}
-                  >
+                    ]}>
                     <Select
                       placeholder="Select program department"
-                      loading={isLoading}
-                    >
+                      loading={isLoading}>
                       {departments.map((dept) => (
                         <Option
                           key={dept.departmentId}
-                          value={dept.departmentId}
-                        >
+                          value={dept.departmentId}>
                           {dept.departmentName}
                         </Option>
                       ))}
@@ -300,8 +291,7 @@ const AddProgram = () => {
                         required: true,
                         message: "Please add at least one tag",
                       },
-                    ]}
-                  >
+                    ]}>
                     <Select
                       mode="multiple"
                       placeholder="Select relevant tags"
@@ -328,8 +318,7 @@ const AddProgram = () => {
                     }
                     rules={[
                       { required: true, message: "Please select start date" },
-                    ]}
-                  >
+                    ]}>
                     <DatePicker
                       style={{ width: "100%" }}
                       className="rounded-lg"
@@ -353,8 +342,7 @@ const AddProgram = () => {
                         type: "number",
                         message: "Please enter a valid number",
                       },
-                    ]}
-                  >
+                    ]}>
                     <InputNumber
                       min={1}
                       max={52}
@@ -379,8 +367,7 @@ const AddProgram = () => {
                         type: "number",
                         message: "Please enter a valid number",
                       },
-                    ]}
-                  >
+                    ]}>
                     <InputNumber
                       min={1}
                       max={100}
@@ -402,8 +389,7 @@ const AddProgram = () => {
                         required: true,
                         message: "Please select a facilitator",
                       },
-                    ]}
-                  >
+                    ]}>
                     <Select
                       placeholder="Select facilitator"
                       options={psychologists}
@@ -465,8 +451,7 @@ const AddProgram = () => {
                         },
                       }),
                     ]}
-                    validateTrigger={["onChange", "onBlur"]}
-                  >
+                    validateTrigger={["onChange", "onBlur"]}>
                     <Select
                       placeholder="Select day"
                       options={DAYS_OF_WEEK}
@@ -487,8 +472,7 @@ const AddProgram = () => {
                     }
                     rules={[
                       { required: true, message: "Please select start time" },
-                    ]}
-                  >
+                    ]}>
                     <TimePicker
                       format="HH:mm"
                       className="w-full rounded-lg"
@@ -551,8 +535,7 @@ const AddProgram = () => {
                           return Promise.resolve();
                         },
                       }),
-                    ]}
-                  >
+                    ]}>
                     <TimePicker
                       format="HH:mm"
                       className="w-full rounded-lg"
@@ -581,8 +564,7 @@ const AddProgram = () => {
                       <span className="text-gray-700 font-medium">
                         Program Type
                       </span>
-                    }
-                  >
+                    }>
                     <div className="flex items-center space-x-3">
                       <Switch
                         checked={isOnline}
@@ -618,8 +600,7 @@ const AddProgram = () => {
                           message: "Please enter meeting link",
                         },
                         { type: "url", message: "Please enter a valid URL" },
-                      ]}
-                    >
+                      ]}>
                       <Input
                         placeholder="https://example.com/meeting"
                         className="rounded-lg h-11"
@@ -633,8 +614,7 @@ const AddProgram = () => {
                 <Button
                   onClick={() => form.resetFields()}
                   className="h-11 px-6 rounded-lg hover:bg-gray-100"
-                  disabled={isLoading}
-                >
+                  disabled={isLoading}>
                   Cancel
                 </Button>
                 <Button
@@ -647,8 +627,7 @@ const AddProgram = () => {
                     form.getFieldError("weeklyAt").length > 0 ||
                     !form.isFieldTouched("startDate") ||
                     !form.isFieldTouched("weeklyAt")
-                  }
-                >
+                  }>
                   Create Program
                 </Button>
               </div>

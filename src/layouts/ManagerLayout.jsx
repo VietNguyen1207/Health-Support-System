@@ -7,7 +7,6 @@ import {
   Menu,
   theme,
   Avatar,
-  Badge,
 } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -18,10 +17,10 @@ import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
   DownOutlined,
-  BellOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../stores/authStore";
 import { useNotificationStore } from "../stores/notificationStore";
+import NotificationBell from "../components/NotificationBell";
 
 const { Header, Sider, Content, Footer } = Layout;
 
@@ -36,8 +35,7 @@ export const ManagerLayout = () => {
   } = theme.useToken();
   const startPolling = useNotificationStore((state) => state.startPolling);
   const stopPolling = useNotificationStore((state) => state.stopPolling);
-  const { getNotifications, clearNotifications, notifications } =
-    useNotificationStore();
+  const { getNotifications, clearNotifications } = useNotificationStore();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -195,14 +193,7 @@ export const ManagerLayout = () => {
                 ?.label || "Dashboard"}
             </div>
             <div className="flex items-center">
-              <Badge count={notifications?.length || 0} className="mr-4">
-                <Button
-                  icon={<BellOutlined />}
-                  type="text"
-                  size="large"
-                  onClick={() => navigate("/manager/notifications")}
-                />
-              </Badge>
+              <NotificationBell />
               <Dropdown
                 menu={menuProps}
                 placement="bottomRight"
