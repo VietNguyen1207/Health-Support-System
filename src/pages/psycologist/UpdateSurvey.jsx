@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Form,
   Input,
@@ -9,7 +9,6 @@ import {
   InputNumber,
   Table,
   Tag,
-  Space,
   message,
   Spin,
   Typography,
@@ -17,7 +16,6 @@ import {
   Radio,
   Divider,
   Empty,
-  Tooltip,
 } from "antd";
 import {
   SearchOutlined,
@@ -216,8 +214,7 @@ const UpdateSurvey = () => {
           type="primary"
           icon={<EditOutlined />}
           onClick={() => showDrawer(record)}
-          className="bg-custom-green hover:bg-custom-green/90"
-        >
+          className="bg-custom-green hover:bg-custom-green/90">
           Edit
         </Button>
       ),
@@ -225,9 +222,9 @@ const UpdateSurvey = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8 pt-24">
-      <div className="max-w-6xl mx-auto">
-        <Card className="shadow-lg rounded-2xl mb-8">
+    <div className="">
+      <div className="">
+        <div>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
               <Title level={2} className="m-0">
@@ -247,8 +244,7 @@ const UpdateSurvey = () => {
               <Button
                 type="primary"
                 onClick={() => navigate("/create-test")}
-                className="bg-custom-green hover:bg-custom-green/90"
-              >
+                className="bg-custom-green hover:bg-custom-green/90">
                 Create New Survey
               </Button>
             </div>
@@ -273,7 +269,7 @@ const UpdateSurvey = () => {
               className="border rounded-lg overflow-hidden"
             />
           )}
-        </Card>
+        </div>
       </div>
 
       {/* Edit Survey Drawer */}
@@ -291,13 +287,11 @@ const UpdateSurvey = () => {
               onClick={() => form.submit()}
               loading={submitting}
               className="bg-custom-green hover:bg-custom-green/90"
-              icon={<SaveOutlined />}
-            >
+              icon={<SaveOutlined />}>
               Save Changes
             </Button>
           </div>
-        }
-      >
+        }>
         {selectedSurvey && (
           <Form
             form={form}
@@ -312,8 +306,7 @@ const UpdateSurvey = () => {
                 ? dayjs(selectedSurvey.startDate)
                 : null,
               periodic: selectedSurvey.periodic || 1,
-            }}
-          >
+            }}>
             <div className="mb-4">
               <Tag color="blue" className="mb-2">
                 Survey ID: {selectedSurvey.id || selectedSurvey.surveyId}
@@ -328,8 +321,9 @@ const UpdateSurvey = () => {
             <Form.Item
               name="title"
               label="Survey Title"
-              rules={[{ required: true, message: "Please enter survey title" }]}
-            >
+              rules={[
+                { required: true, message: "Please enter survey title" },
+              ]}>
               <Input placeholder="Enter survey title" />
             </Form.Item>
 
@@ -338,8 +332,7 @@ const UpdateSurvey = () => {
               label="Description"
               rules={[
                 { required: true, message: "Please enter survey description" },
-              ]}
-            >
+              ]}>
               <TextArea rows={4} placeholder="Enter survey description" />
             </Form.Item>
 
@@ -349,8 +342,7 @@ const UpdateSurvey = () => {
               rules={[
                 { required: true, message: "Please select standard type" },
               ]}
-              tooltip="The type of standardized assessment this survey represents"
-            >
+              tooltip="The type of standardized assessment this survey represents">
               <Select placeholder="Select standard type">
                 {standardTypes.map((type) => (
                   <Option key={type.value} value={type.value}>
@@ -363,8 +355,7 @@ const UpdateSurvey = () => {
             <Form.Item
               name="status"
               label="Status"
-              rules={[{ required: true, message: "Please select status" }]}
-            >
+              rules={[{ required: true, message: "Please select status" }]}>
               <Radio.Group>
                 {statusOptions.map((option) => (
                   <Radio key={option.value} value={option.value}>
@@ -377,8 +368,7 @@ const UpdateSurvey = () => {
             <Form.Item
               name="startDate"
               label="Start Date"
-              rules={[{ required: true, message: "Please select start date" }]}
-            >
+              rules={[{ required: true, message: "Please select start date" }]}>
               <DatePicker className="w-full" />
             </Form.Item>
 
@@ -388,8 +378,7 @@ const UpdateSurvey = () => {
               rules={[
                 { required: true, message: "Please enter periodic number" },
               ]}
-              tooltip="Period number for this survey"
-            >
+              tooltip="Period number for this survey">
               <InputNumber min={1} className="w-full" />
             </Form.Item>
 

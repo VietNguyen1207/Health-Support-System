@@ -1,16 +1,13 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   Tag,
   Button,
-  Space,
   message,
-  Modal,
   Tooltip,
   Card,
   Input,
   Badge,
-  Avatar,
   Dropdown,
   Menu,
   Typography,
@@ -19,25 +16,21 @@ import {
 } from "antd";
 import {
   EditOutlined,
-  DeleteOutlined,
   ReloadOutlined,
-  ExclamationCircleOutlined,
   SearchOutlined,
   CalendarOutlined,
   TeamOutlined,
-  FilterOutlined,
   MoreOutlined,
   ClockCircleOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  DownloadOutlined,
   SortAscendingOutlined,
   SortDescendingOutlined,
 } from "@ant-design/icons";
 import { useProgramStore } from "../../stores/programStore";
 import UpdateProgramModal from "../../components/UpdateProgramModal";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const UpdateProgram = () => {
   const { fetchPrograms, loading } = useProgramStore();
@@ -60,6 +53,7 @@ const UpdateProgram = () => {
       const data = await fetchPrograms();
       setPrograms(data);
     } catch (error) {
+      console.log(error);
       message.error("Failed to fetch programs");
     } finally {
       setRefreshing(false);
@@ -67,31 +61,31 @@ const UpdateProgram = () => {
   };
 
   // Handle program deletion
-  const handleDelete = (programId) => {
-    Modal.confirm({
-      title: "Delete Program",
-      icon: <ExclamationCircleOutlined className="text-red-500" />,
-      content: (
-        <div>
-          <p className="text-gray-700 mb-2">
-            Are you sure you want to delete this program?
-          </p>
-          <p className="text-red-500 text-sm">
-            This action cannot be undone and will remove all participant data.
-          </p>
-        </div>
-      ),
-      okText: "Yes, Delete",
-      okType: "danger",
-      okButtonProps: { className: "bg-red-500 hover:bg-red-600" },
-      cancelText: "Cancel",
-      className: "delete-confirmation-modal",
-      onOk: async () => {
-        message.info("Delete functionality will be implemented");
-        // TODO: Implement delete API call
-      },
-    });
-  };
+  // const handleDelete = (programId) => {
+  //   Modal.confirm({
+  //     title: "Delete Program",
+  //     icon: <ExclamationCircleOutlined className="text-red-500" />,
+  //     content: (
+  //       <div>
+  //         <p className="text-gray-700 mb-2">
+  //           Are you sure you want to delete this program?
+  //         </p>
+  //         <p className="text-red-500 text-sm">
+  //           This action cannot be undone and will remove all participant data.
+  //         </p>
+  //       </div>
+  //     ),
+  //     okText: "Yes, Delete",
+  //     okType: "danger",
+  //     okButtonProps: { className: "bg-red-500 hover:bg-red-600" },
+  //     cancelText: "Cancel",
+  //     className: "delete-confirmation-modal",
+  //     onOk: async () => {
+  //       message.info("Delete functionality will be implemented");
+  //       // TODO: Implement delete API call
+  //     },
+  //   });
+  // };
 
   // Handle program update
   const handleUpdate = (program) => {
@@ -288,8 +282,7 @@ const UpdateProgram = () => {
           <Tag
             color={statusInfo.color}
             icon={statusInfo.icon}
-            className="px-2 py-1 flex items-center w-fit"
-          >
+            className="px-2 py-1 flex items-center w-fit">
             {status.charAt(0) + status.slice(1).toLowerCase()}
           </Tag>
         );
@@ -306,8 +299,7 @@ const UpdateProgram = () => {
               <Menu.Item
                 key="edit"
                 icon={<EditOutlined className="text-blue-500" />}
-                onClick={() => handleUpdate(record)}
-              >
+                onClick={() => handleUpdate(record)}>
                 Edit Program
               </Menu.Item>
               {/* <Menu.Item
@@ -320,8 +312,7 @@ const UpdateProgram = () => {
               </Menu.Item> */}
             </Menu>
           }
-          trigger={["click"]}
-        >
+          trigger={["click"]}>
           <Button
             icon={<MoreOutlined />}
             className="border-none shadow-none hover:bg-gray-100 rounded-full"
@@ -332,7 +323,7 @@ const UpdateProgram = () => {
   ];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6">
       {/* Header Section */}
       <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center">
         {/* <div>
@@ -348,8 +339,7 @@ const UpdateProgram = () => {
           icon={<ReloadOutlined spin={refreshing} />}
           onClick={fetchProgramsList}
           loading={loading}
-          className="bg-primary-green hover:bg-primary-green/90 mt-4 md:mt-0"
-        >
+          className="bg-primary-green hover:bg-primary-green/90 mt-4 md:mt-0">
           Refresh List
         </Button>
       </div>
@@ -359,8 +349,7 @@ const UpdateProgram = () => {
         {stats.map((stat, index) => (
           <Card
             key={index}
-            className={`${stat.color} border-none shadow-sm hover:shadow-md transition-shadow`}
-          >
+            className={`${stat.color} border-none shadow-sm hover:shadow-md transition-shadow`}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">{stat.title}</p>
@@ -486,7 +475,7 @@ const UpdateProgram = () => {
       />
 
       {/* Add some custom styles */}
-      <style jsx global>{`
+      <style>{`
         .programs-table .ant-table-thead > tr > th {
           background-color: #f8fafc;
           font-weight: 600;

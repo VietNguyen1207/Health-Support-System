@@ -325,18 +325,6 @@ const NotificationList = ({ onClose }) => {
           </div>
         )}
       </div>
-
-      {/* View All Link */}
-      {displayedNotifications.length > 0 && (
-        <div className="p-3 text-center border-t">
-          <Button
-            type="link"
-            onClick={() => navigate("/notifications")}
-            className="text-blue-600 hover:text-blue-800">
-            View All Notifications
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

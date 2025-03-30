@@ -200,15 +200,14 @@ function AppointmentManagement() {
             ]}
             allowClear
           />
-        </div>
-
-        <div className="flex justify-end mt-4 space-x-2">
-          <Button onClick={handleReset} icon={<ReloadOutlined />}>
-            Reset
-          </Button>
-          <Button type="primary" onClick={handleSearch}>
-            Search
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleReset} icon={<ReloadOutlined />}>
+              Reset
+            </Button>
+            <Button type="primary" onClick={handleSearch}>
+              Search
+            </Button>
+          </div>
         </div>
       </Card>
 

@@ -24,9 +24,9 @@ const AppointmentRecord = lazy(() =>
 );
 const TestRecord = lazy(() => import("../pages/student/TestRecord"));
 const UserManagement = lazy(() => import("../pages/manager/UserManagement"));
-const SurveyManagement = lazy(() =>
-  import("../pages/manager/SurveyManagement")
-);
+// const SurveyManagement = lazy(() =>
+//   import("../pages/manager/SurveyManagement")
+// );
 const NotFound = lazy(() => import("../pages/error/NotFound"));
 const TestResult = lazy(() => import("../pages/TestResult"));
 const Blog = lazy(() => import("../pages/Blog"));
@@ -36,13 +36,14 @@ const PsychologistProfile = lazy(() =>
   import("../pages/psycologist/PsychologistProfile")
 );
 const WorkSchedule = lazy(() => import("../pages/psycologist/WorkSchedule"));
-const ProgramManagement = lazy(() =>
-  import("../pages/manager/ProgramManagement")
-);
+// const ProgramManagement = lazy(() =>
+//   import("../pages/manager/ProgramManagement")
+// );
 const UpdateSurvey = lazy(() => import("../pages/psycologist/UpdateSurvey"));
 const AppointmentManagement = lazy(() =>
   import("../pages/manager/AppointmentManagement")
 );
+const UpdateProgram = lazy(() => import("../pages/psycologist/UpdateProgram"));
 
 export const routes = [
   // Guest routes (Login, Register, etc)
@@ -58,19 +59,13 @@ export const routes = [
     children: [
       {
         path: "",
-        element: (
-          <PrivateRoute requiresGuest>
-            <Outlet />
-          </PrivateRoute>
-        ),
+        element: <Outlet />,
         children: [
           { index: true, element: <Login /> },
           { path: "register", element: <Register /> },
           { path: "forgot-password", element: <ForgotPassword /> },
         ],
       },
-      { path: "blog", element: <Blog /> },
-      { path: "blog/:id", element: <BlogDetail /> },
       { path: "unauthorized", element: <Unauthorized /> },
     ],
   },
@@ -87,9 +82,11 @@ export const routes = [
     ),
     children: [
       { path: "users", element: <UserManagement /> },
-      { path: "surveys", element: <SurveyManagement /> },
-      { path: "programs", element: <ProgramManagement /> },
+      // { path: "surveys", element: <SurveyManagement /> },
+      // { path: "programs", element: <ProgramManagement /> },
       { path: "appointments", element: <AppointmentManagement /> },
+      { path: "programs", element: <UpdateProgram /> },
+      { path: "surveys", element: <UpdateSurvey /> },
     ],
   },
 
@@ -105,16 +102,32 @@ export const routes = [
     ),
     children: [
       // Public routes within authenticated section
-      { path: "program", element: <Program /> },
-      { path: "blog", element: <Blog /> },
-      { path: "blog/:id", element: <BlogDetail /> },
+      {
+        path: "blog",
+        element: (
+          <PrivateRoute
+            allowedRoles={["student", "parent", "manager", "psychologist"]}>
+            <Blog />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "blog/:id",
+        element: (
+          <PrivateRoute
+            allowedRoles={["student", "parent", "manager", "psychologist"]}>
+            <BlogDetail />
+          </PrivateRoute>
+        ),
+      },
       { path: "unauthorized", element: <Unauthorized /> },
 
       // Role-specific routes
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={["student", "manager"]}>
+          <PrivateRoute
+            allowedRoles={["student", "parent", "psychologist", "manager"]}>
             <Outlet />
           </PrivateRoute>
         ),
