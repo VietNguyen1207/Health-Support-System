@@ -12,7 +12,6 @@ import {
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   UserOutlined,
-  SwapOutlined,
   PoweroffOutlined,
   CalendarOutlined,
   FileOutlined,
@@ -87,9 +86,6 @@ export const ManagerLayout = () => {
     // console.log(e);
 
     switch (e.key) {
-      case "home":
-        navigate("/");
-        break;
       case "logout":
         handleLogout();
         break;
@@ -102,11 +98,6 @@ export const ManagerLayout = () => {
   const menuProps = {
     items: [
       {
-        label: "Home",
-        key: "home",
-        icon: <SwapOutlined />,
-      },
-      {
         label: "Logout",
         key: "logout",
         icon: <PoweroffOutlined />,
@@ -118,7 +109,7 @@ export const ManagerLayout = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/login");
+    navigate("/");
   };
   const sideMenu = (
     <Menu

@@ -43,16 +43,13 @@ const Header = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate(`/login`);
+    navigate(`/`);
   };
 
   const handleMenuClick = (e) => {
     switch (e.key) {
       case "logout":
         handleLogout();
-        break;
-      case "dashboard":
-        navigate(`${user?.role}`);
         break;
       default:
         navigate(e.key);
@@ -83,7 +80,7 @@ const Header = () => {
         <Link to="/register" className="btn btn-outline">
           Sign Up
         </Link>
-        <Link to="/login" className="btn btn-primary">
+        <Link to="/" className="btn btn-primary">
           Sign In
         </Link>
       </div>
@@ -156,7 +153,7 @@ const Header = () => {
       <header className="header">
         <div className="header-container">
           <div className="logo">
-            <Link to="/">
+            <Link to="#">
               <span className="logo-icon">🧠</span>
               <span className="logo-text">Mental Health Support</span>
             </Link>

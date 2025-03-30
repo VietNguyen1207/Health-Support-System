@@ -27,7 +27,7 @@ export default function Register() {
       <div className="register-box">
         <h2 className="register-title">Start your website in seconds</h2>
         <p className="login-text">
-          Already have an account? <a href="/login">Login here</a>
+          Already have an account? <a href="/">Login here</a>
         </p>
         <div className="form-group">
           <label className="form-label">User Type</label>
@@ -36,8 +36,7 @@ export default function Register() {
             name="userType"
             value={userType}
             onChange={handleChange}
-            required
-          >
+            required>
             <option value="student">Student</option>
             <option value="parent">Parent</option>
           </select>
@@ -219,7 +218,7 @@ function StudentForm() {
     try {
       await register(formattedData);
       message.success("Registration successful! Please login.");
-      navigate("/login");
+      navigate("/");
     } catch (err) {
       message.error(err.message || "Registration failed. Please try again.");
     }
@@ -608,7 +607,7 @@ function ParentForm() {
     try {
       await registerParent(formattedData);
       message.success("Parent registration successful! Please login.");
-      navigate("/login");
+      navigate("/");
     } catch (err) {
       message.error(err.message || "Registration failed. Please try again.");
     }
@@ -753,8 +752,7 @@ function ParentForm() {
               <button
                 type="button"
                 className="ml-2 px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                onClick={() => removeStudentId(index)}
-              >
+                onClick={() => removeStudentId(index)}>
                 Remove
               </button>
             )}
@@ -770,8 +768,7 @@ function ParentForm() {
         <button
           type="button"
           className="mt-2 px-3 py-2 bg-custom-green text-white rounded-md hover:custome-green"
-          onClick={addStudentId}
-        >
+          onClick={addStudentId}>
           Add Another Student ID
         </button>
       </div>

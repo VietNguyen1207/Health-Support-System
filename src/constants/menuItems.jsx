@@ -1,11 +1,7 @@
 import {
   FileDoneOutlined,
-  // FileOutlined,
   HistoryOutlined,
   PoweroffOutlined,
-  // ProfileOutlined,
-  SwapOutlined,
-  // UserOutlined,
 } from "@ant-design/icons";
 
 // src/data/menuItems.ts
@@ -117,12 +113,6 @@ export const dropdownMenu = [
   //   icon: <UserOutlined />,
   //   roles: ["psychologist"],
   // },
-  {
-    label: "Dashboard",
-    key: "manager/users",
-    icon: <SwapOutlined />,
-    roles: ["manager"],
-  },
   {
     label: "Logout",
     key: "logout",
