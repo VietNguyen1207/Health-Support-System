@@ -893,7 +893,7 @@ function ProgramManagement() {
     {
       key: "ACTIVE",
       label: (
-        <Badge count={statistics.active} showZero>
+        <Badge count={statistics.active}>
           <span style={{ paddingRight: 10 }}>Active</span>
         </Badge>
       ),
@@ -901,7 +901,7 @@ function ProgramManagement() {
     {
       key: "IN_PROGRESS",
       label: (
-        <Badge count={statistics.inProgress} showZero>
+        <Badge count={statistics.inProgress}>
           <span style={{ paddingRight: 10 }}>In Progress</span>
         </Badge>
       ),
@@ -909,7 +909,7 @@ function ProgramManagement() {
     {
       key: "COMPLETED",
       label: (
-        <Badge count={statistics.completed} showZero>
+        <Badge count={statistics.completed}>
           <span style={{ paddingRight: 10 }}>Completed</span>
         </Badge>
       ),

@@ -88,7 +88,7 @@ function StudentForm() {
         // Nếu người dùng đã nhập một số
         if (gradeValue !== "") {
           // Giới hạn giá trị trong khoảng từ 1 đến 12
-          if (gradeValue < 1) gradeValue = 1;
+          if (gradeValue < 10) gradeValue = 10;
           if (gradeValue > 12) gradeValue = 12;
         }
 
@@ -102,7 +102,7 @@ function StudentForm() {
       }
       // Xử lý đặc biệt cho trường className
       else if (name === "className") {
-        // Lấy chữ cái đầu tiên từ input
+        // Lấy chữ cái đầu tiên từ input và chuyển đổi thành chữ hoa
         let classLetter = "";
         if (value) {
           // Lấy chữ cái đầu tiên và chuyển đổi thành chữ hoa
@@ -183,8 +183,8 @@ function StudentForm() {
       const gradeValue = Number(formData.studentDetails.grade);
       if (isNaN(gradeValue)) {
         errors.grade = "Grade must be a number";
-      } else if (gradeValue < 1 || gradeValue > 12) {
-        errors.grade = "Grade must be between 1 and 12";
+      } else if (gradeValue < 10 || gradeValue > 12) {
+        errors.grade = "Grade must be between 10 and 12";
       }
     }
 
@@ -314,7 +314,7 @@ function StudentForm() {
             value={formData.studentDetails.grade}
             onChange={handleChange}
             max={12}
-            min={1}
+            min={10}
             required
           />
           {formErrors.grade && (
