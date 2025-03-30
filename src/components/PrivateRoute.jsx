@@ -9,22 +9,37 @@ export const PrivateRoute = ({
 }) => {
   const { user } = useAuthStore();
 
+  // Guest routes logic
   if (requiresGuest) {
-    if (user) {
-      return <Navigate to="/" replace />;
-    }
-    return children;
+    return user ? (
+      <Navigate to={getRoleBasedPath(user.role)} replace />
+    ) : (
+      children
+    );
   }
 
+  // Protected routes logic
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/404" replace />;
+  // Role-based access check
+  if (allowedRoles.length && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return children;
+};
+
+// Helper function to get redirect path based on role
+const getRoleBasedPath = (role) => {
+  const paths = {
+    manager: "/manager/users",
+    psychologist: "/psychologist-profile",
+    student: "/student-profile",
+    parent: "/parent-profile",
+  };
+  return paths[role] || "/";
 };
 
 PrivateRoute.propTypes = {

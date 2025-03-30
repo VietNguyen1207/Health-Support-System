@@ -1,55 +1,61 @@
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { ManagerLayout } from "../layouts/ManagerLayout";
 import { StandardLayout } from "../layouts/StandardLayout";
 import { PrivateRoute } from "../components/PrivateRoute";
-import Home from "../pages/Home";
-// import Dashboard from "../pages/manager/Dashboard";
-import Register from "../pages/Register";
-import ForgotPassword from "../pages/ForgotPassword";
-// import Service from "../pages/Service";
-import Login from "../pages/Login";
-import { Unauthorized } from "../pages/error/Unauthorized";
-import Booking from "../pages/Booking";
-import Program from "../pages/Program";
-import Test from "../pages/Test";
-import TestQuestion from "../pages/TestQuestion";
-import AddProgram from "../pages/psycologist/AddProgram";
-import UpdateProgram from "../pages/psycologist/UpdateProgram";
-import CreateTest from "../pages/psycologist/CreateTest";
-import StudentProfile from "../pages/student/StudentProfile";
-import ParentProfile from "../pages/parent/ParentProfile";
-import ParentCalendar from "../pages/parent/ParentCalendar";
 import { Outlet } from "react-router-dom";
-// import Appointment from "../pages/psycologist/Appointment";
-import ChildrenRecord from "../pages/parent/ChildrenRecord";
-import AppointmentRecord from "../pages/student/AppointmentRecord";
-import TestRecord from "../pages/student/TestRecord";
-// import PatientRecord from "../pages/psycologist/PatientRecord";
-import UserManagement from "../pages/manager/UserManagement";
-import SurveyManagement from "../pages/manager/SurveyManagement";
-import NotFound from "../pages/error/NotFound";
-import TestResult from "../pages/TestResult";
-import Blog from "../pages/Blog";
-import BlogDetail from "../pages/BlogDetail";
-// import Application from "../pages/psycologist/Application";
-import NotificationDetail from "../pages/NotificationDetail";
-import PsychologistProfile from "../pages/psycologist/PsychologistProfile";
-import WorkSchedule from "../pages/psycologist/WorkSchedule";
-import ProgramManagement from "../pages/manager/ProgramManagement";
-import UpdateSurvey from "../pages/psycologist/UpdateSurvey";
-import AppointmentManagement from "../pages/manager/AppointmentManagement";
+import LoadingSpinner from "../components/LoadingSpinner";
 
+const Register = lazy(() => import("../pages/Register"));
+const ForgotPassword = lazy(() => import("../pages/ForgotPassword"));
+const Login = lazy(() => import("../pages/Login"));
+const Unauthorized = lazy(() => import("../pages/error/Unauthorized"));
+const Booking = lazy(() => import("../pages/Booking"));
+const Program = lazy(() => import("../pages/Program"));
+const Test = lazy(() => import("../pages/Test"));
+const TestQuestion = lazy(() => import("../pages/TestQuestion"));
+const CreateTest = lazy(() => import("../pages/psycologist/CreateTest"));
+const StudentProfile = lazy(() => import("../pages/student/StudentProfile"));
+const ParentProfile = lazy(() => import("../pages/parent/ParentProfile"));
+const ParentCalendar = lazy(() => import("../pages/parent/ParentCalendar"));
 const Appointment = lazy(() => import("../pages/psycologist/Appointment"));
+const ChildrenRecord = lazy(() => import("../pages/parent/ChildrenRecord"));
+const AppointmentRecord = lazy(() =>
+  import("../pages/student/AppointmentRecord")
+);
+const TestRecord = lazy(() => import("../pages/student/TestRecord"));
+const UserManagement = lazy(() => import("../pages/manager/UserManagement"));
+const SurveyManagement = lazy(() =>
+  import("../pages/manager/SurveyManagement")
+);
+const NotFound = lazy(() => import("../pages/error/NotFound"));
+const TestResult = lazy(() => import("../pages/TestResult"));
+const Blog = lazy(() => import("../pages/Blog"));
+const BlogDetail = lazy(() => import("../pages/BlogDetail"));
+const NotificationDetail = lazy(() => import("../pages/NotificationDetail"));
+const PsychologistProfile = lazy(() =>
+  import("../pages/psycologist/PsychologistProfile")
+);
+const WorkSchedule = lazy(() => import("../pages/psycologist/WorkSchedule"));
+const ProgramManagement = lazy(() =>
+  import("../pages/manager/ProgramManagement")
+);
+const UpdateSurvey = lazy(() => import("../pages/psycologist/UpdateSurvey"));
+const AppointmentManagement = lazy(() =>
+  import("../pages/manager/AppointmentManagement")
+);
 
 export const routes = [
+  // Guest routes (Login, Register, etc)
   {
     path: "/",
-    element: <StandardLayout />,
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <PrivateRoute requiresGuest>
+          <StandardLayout />
+        </PrivateRoute>
+      </Suspense>
+    ),
     children: [
-      { index: true, element: <Home /> },
-      { path: "program", element: <Program /> },
-      { path: "blog", element: <Blog /> },
-      { path: "blog/:id", element: <BlogDetail /> },
       {
         path: "",
         element: (
@@ -58,20 +64,53 @@ export const routes = [
           </PrivateRoute>
         ),
         children: [
-          {
-            path: "login",
-            element: <Login />,
-          },
-          {
-            path: "register",
-            element: <Register />,
-          },
-          {
-            path: "forgot-password",
-            element: <ForgotPassword />,
-          },
+          { index: true, element: <Login /> },
+          { path: "register", element: <Register /> },
+          { path: "forgot-password", element: <ForgotPassword /> },
         ],
       },
+      { path: "blog", element: <Blog /> },
+      { path: "blog/:id", element: <BlogDetail /> },
+      { path: "unauthorized", element: <Unauthorized /> },
+    ],
+  },
+
+  // Manager routes
+  {
+    path: "/manager",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <PrivateRoute allowedRoles={["manager"]}>
+          <ManagerLayout />
+        </PrivateRoute>
+      </Suspense>
+    ),
+    children: [
+      { path: "users", element: <UserManagement /> },
+      { path: "surveys", element: <SurveyManagement /> },
+      { path: "programs", element: <ProgramManagement /> },
+      { path: "appointments", element: <AppointmentManagement /> },
+    ],
+  },
+
+  // Standard layout routes (for authenticated users)
+  {
+    path: "/",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <PrivateRoute>
+          <StandardLayout />
+        </PrivateRoute>
+      </Suspense>
+    ),
+    children: [
+      // Public routes within authenticated section
+      { path: "program", element: <Program /> },
+      { path: "blog", element: <Blog /> },
+      { path: "blog/:id", element: <BlogDetail /> },
+      { path: "unauthorized", element: <Unauthorized /> },
+
+      // Role-specific routes
       {
         path: "",
         element: (
@@ -144,49 +183,15 @@ export const routes = [
       {
         path: "",
         element: (
-          <PrivateRoute allowedRoles={["manager"]}>
-            <Outlet />
-          </PrivateRoute>
-        ),
-        children: [
-          { path: "add-program", element: <AddProgram /> },
-          { path: "update-program", element: <UpdateProgram /> },
-        ],
-      },
-      {
-        path: "",
-        element: (
           <PrivateRoute allowedRoles={["parent", "manager"]}>
             <Outlet />
           </PrivateRoute>
         ),
         children: [{ path: "children-record", element: <ChildrenRecord /> }],
       },
-      { path: "unauthorized", element: <Unauthorized /> },
     ],
   },
-  {
-    path: "/manager",
-    element: (
-      <PrivateRoute allowedRoles={["manager"]}>
-        <ManagerLayout />
-      </PrivateRoute>
-    ),
-    children: [
-      {
-        index: true,
-        path: "users",
-        element: <UserManagement />,
-      },
-      { path: "surveys", element: <SurveyManagement /> },
-      { path: "programs", element: <ProgramManagement /> },
-      { path: "appointments", element: <AppointmentManagement /> },
-    ],
-  },
-  {
-    path: "/notifications",
-    element: <NotificationDetail />,
-  },
+
   {
     path: "*",
     element: <NotFound />,
