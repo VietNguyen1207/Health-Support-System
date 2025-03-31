@@ -44,6 +44,7 @@ const AppointmentManagement = lazy(() =>
   import("../pages/manager/AppointmentManagement")
 );
 const UpdateProgram = lazy(() => import("../pages/psycologist/UpdateProgram"));
+const AddProgram = lazy(() => import("../pages/psycologist/AddProgram"));
 
 export const routes = [
   // Guest routes (Login, Register, etc)
@@ -87,6 +88,8 @@ export const routes = [
       { path: "appointments", element: <AppointmentManagement /> },
       { path: "programs", element: <UpdateProgram /> },
       { path: "surveys", element: <UpdateSurvey /> },
+      { path: "add-program", element: <AddProgram /> },
+      { path: "create-test", element: <CreateTest /> },
     ],
   },
 
@@ -106,7 +109,8 @@ export const routes = [
         path: "blog",
         element: (
           <PrivateRoute
-            allowedRoles={["student", "parent", "manager", "psychologist"]}>
+            allowedRoles={["student", "parent", "manager", "psychologist"]}
+          >
             <Blog />
           </PrivateRoute>
         ),
@@ -115,7 +119,8 @@ export const routes = [
         path: "blog/:id",
         element: (
           <PrivateRoute
-            allowedRoles={["student", "parent", "manager", "psychologist"]}>
+            allowedRoles={["student", "parent", "manager", "psychologist"]}
+          >
             <BlogDetail />
           </PrivateRoute>
         ),
@@ -127,7 +132,8 @@ export const routes = [
         path: "",
         element: (
           <PrivateRoute
-            allowedRoles={["student", "parent", "psychologist", "manager"]}>
+            allowedRoles={["student", "parent", "psychologist", "manager"]}
+          >
             <Outlet />
           </PrivateRoute>
         ),

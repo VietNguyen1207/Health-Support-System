@@ -138,8 +138,8 @@ export const useSurveyStore = create((set, get) => ({
         throw new Error("Authentication required");
       }
 
-      const response = await fetch(
-        `https://api.cybriadev.com/api/surveys/results/student?surveyId=${surveyId}&studentId=${studentId}`,
+      const { data } = await api.get(
+        `/surveys/results/student?surveyId=${surveyId}&studentId=${studentId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -147,21 +147,18 @@ export const useSurveyStore = create((set, get) => ({
         }
       );
 
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 403) {
-          throw new Error("You don't have permission to view these results");
-        }
-        throw new Error(`Error: ${response.status}`);
-      }
-
-      const data = await response.json();
       console.log("Survey results data:", data);
       set({ selectedSurvey: data, loading: false });
       return data;
     } catch (error) {
       console.error("Error fetching survey results:", error);
-      set({ error: error.message, loading: false });
-      throw error;
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch survey results";
+
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
     }
   },
 

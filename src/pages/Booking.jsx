@@ -32,7 +32,8 @@ const SpecializationSelect = memo(
     <div>
       <label
         htmlFor="specialization"
-        className="block text-base font-medium text-gray-700 mb-4">
+        className="block text-base font-medium text-gray-700 mb-4"
+      >
         Select Specialization<span className="text-red-500">*</span>
       </label>
       <select
@@ -43,7 +44,8 @@ const SpecializationSelect = memo(
         onChange={onChange}
         className={`mt-1 block w-full rounded-md shadow-sm focus:border-custom-green focus:ring-custom-green ${
           error ? "border-red-500" : "border-gray-300"
-        }`}>
+        }`}
+      >
         <option value="" className="text-gray-400">
           --- Select a Specialization ---
         </option>
@@ -72,7 +74,8 @@ const PsychologistSelect = memo(
     <div className="space-y-3">
       <label
         htmlFor="psychologist"
-        className="block text-base font-medium text-gray-700">
+        className="block text-base font-medium text-gray-700"
+      >
         Select Psychologist<span className="text-red-500">*</span>
       </label>
 
@@ -97,6 +100,7 @@ const PsychologistSelect = memo(
         <Select
           id="psychologist"
           name="psychologist"
+          value={selectedPsychologist}
           onChange={(value) =>
             onChange({ target: { name: "psychologist", value } })
           }
@@ -119,11 +123,13 @@ const PsychologistSelect = memo(
                 Select a psychologist to view their available appointment slots
               </div>
             </div>
-          )}>
+          )}
+        >
           {psychologists.map((psych) => (
             <Select.Option
               key={psych.psychologistId}
-              value={psych.psychologistId}>
+              value={psych.psychologistId}
+            >
               <div className="flex items-center gap-5 py-2 px-1">
                 <div className="font-medium text-base text-gray-700">
                   {psych.info.fullName}
@@ -152,7 +158,8 @@ const PsychologistSelect = memo(
             .map((psych) => (
               <Card
                 key={psych.psychologistId}
-                className="bg-green-50 border border-green-100 shadow-sm">
+                className="bg-green-50 border border-green-100 shadow-sm"
+              >
                 <div className="flex items-start">
                   <Avatar
                     icon={<UserOutlined />}
@@ -212,7 +219,8 @@ const ReasonTextarea = memo(({ value, onChange }) => (
   <div>
     <label
       htmlFor="reason"
-      className="block text-base font-medium text-gray-700 mb-4">
+      className="block text-base font-medium text-gray-700 mb-4"
+    >
       Reason for Appointment (Optional)
     </label>
     <textarea
@@ -401,7 +409,8 @@ const Booking = () => {
           onClick={() => {
             notification.destroy();
             navigate("/calendar");
-          }}>
+          }}
+        >
           View Calendar
         </Button>
       ),
@@ -471,13 +480,19 @@ const Booking = () => {
       const { name, value, type, checked } = e.target;
 
       if (name === "specialization") {
+        // When specialization changes
         setSelectedSpecialization(value);
+
+        // Reset psychologist and timeSlot in one update to prevent race conditions
         setFormData((prev) => ({
           ...prev,
           [name]: value,
-          psychologist: "", // Reset psychologist when specialization changes
+          psychologist: null, // Reset psychologist when specialization changes
           timeSlotId: null, // Reset timeSlotId when specialization changes
         }));
+
+        // Clear time slots when specialization changes
+        clearTimeSlots();
 
         // Clear related errors
         setErrors((prev) => ({
@@ -506,14 +521,9 @@ const Booking = () => {
         // Fetch time slots for the selected psychologist
         if (value) {
           try {
-            // console.log("Fetching time slots for psychologist:", value);
             setTimeSlotsLoading(true);
             await getTimeSlots(value);
-            // console.log("Time slots fetched:", result);
             setTimeSlotsLoading(false);
-
-            // Check if timeSlots is available in the store after fetching
-            // console.log("Current timeSlots in store:", timeSlots);
           } catch (error) {
             console.error("Error fetching time slots:", error);
             notification.error({
@@ -538,7 +548,7 @@ const Booking = () => {
         }
       }
     },
-    [errors, timeSlots] // Add timeSlots to dependencies
+    [errors, clearTimeSlots, getTimeSlots]
   );
 
   // Add a useEffect to monitor timeSlots changes
@@ -572,7 +582,8 @@ const Booking = () => {
         <div
           className={`max-w-7xl min-w-6xl mx-auto bg-white rounded-lg shadow-md p-8 mb-8 ${
             isLoading ? "pointer-events-none opacity-75" : ""
-          }`}>
+          }`}
+        >
           <h2 className="text-2xl font-bold text-custom-green mb-8 pb-2 border-b">
             Book an Appointment
           </h2>
@@ -638,7 +649,8 @@ const Booking = () => {
                 type="primary"
                 disabled={disabledButton}
                 loading={bookingLoading}
-                onClick={handleSubmit}>
+                onClick={handleSubmit}
+              >
                 Book Appointment
               </Button>
             </div>
