@@ -1,157 +1,99 @@
-import { useParams, useNavigate } from "react-router-dom";
-import {
-  Typography,
-  Breadcrumb,
-  Card,
-  Space,
-  Divider,
-  Button,
-  Affix,
-} from "antd";
-import {
-  LeftOutlined,
-  CalendarOutlined,
-  UserOutlined,
-  RightOutlined,
-} from "@ant-design/icons";
-import blogData from "../data/blog.json";
+import { useEffect } from "react";
+import { useLocation, useParams } from "react-router-dom";
+import { Card, Spin, Typography, Space, Tag, Divider } from "antd";
+import { CalendarOutlined, UserOutlined, LikeOutlined, LikeFilled } from "@ant-design/icons";
+import { useArticleStore } from "../stores/apiBlog"; 
 
 const { Title, Paragraph } = Typography;
 
 const BlogDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const blog = blogData.blog[id];
-  const currentIndex = parseInt(id);
+  const { articleId } = useParams();
+  const location = useLocation();
 
-  // Get related blogs (excluding current blog)
-  const relatedBlogs = blogData.blog
-    .filter((_, index) => index !== currentIndex)
-    .slice(0, 3);
+  const { avatar, description, createDate } = location.state || {};
+  
+  const { article, getArticleById, likeArticle, resetArticle, loading } = useArticleStore((state) => ({
+    article: state.article,
+    getArticleById: state.getArticleById,
+    likeArticle: state.likeArticle,
+    resetArticle: state.resetArticle,
+    loading: state.loading,
+  }));
 
-  if (!blog) return null;
+  useEffect(() => {
+    resetArticle(); 
+    if (articleId) {
+      getArticleById(articleId); 
+    }
+  }, [articleId, getArticleById, resetArticle]);
+
+  
+  if (loading) {
+    return (
+      <div className="w-full h-full flex justify-center items-center py-32">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (!article) {
+    return <div>Article not found!</div>;
+  }
+
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 general-wrapper">
-      <div className="mx-auto relative">
-        {/* Breadcrumb */}
-        <Breadcrumb className="mb-8">
-          <Breadcrumb.Item>
-            <Button
-              type="text"
-              icon={<LeftOutlined />}
-              onClick={() => navigate("/blog")}
-              className="hover:text-blue-600">
-              Back to Blogs
-            </Button>
-          </Breadcrumb.Item>
-        </Breadcrumb>
-        <div className="flex gap-8">
-          <div className="bg-white flex-1 shadow-md px-8 py-4 rounded-lg">
-            {/* Header Image */}
-            <div className="rounded-lg overflow-hidden mb-8">
-              <img
-                src={blog.avatar}
-                alt={blog.title}
-                className="w-full h-[400px] object-cover"
-              />
-            </div>
-
-            {/* Blog Header */}
-            <div className="text-center mb-12">
-              <Title level={1} className="mb-4">
-                {blog.title}
-              </Title>
-              <Space
-                split={<Divider type="vertical" />}
-                className="text-gray-500">
-                <Space>
-                  <UserOutlined />
-                  {blog.createBy}
-                </Space>
-                <Space>
-                  <CalendarOutlined />
-                  {blog.createDate}
-                </Space>
-              </Space>
-            </div>
-
-            {/* Blog Content */}
-            <div>
-              <Paragraph className="text-lg text-gray-700 mb-8">
-                {blog.description}
-              </Paragraph>
-
-              {blog.children.map((section, index) => (
-                <div key={index} className="mb-12">
-                  {section.headerSection && (
-                    <Title level={3} className="mb-6">
-                      {section.headerSection}
-                    </Title>
-                  )}
-
-                  <Paragraph className="text-gray-700 mb-6">
-                    {section.sectionContent}
-                  </Paragraph>
-
-                  {section.imageSection && (
-                    <div className="rounded-lg overflow-hidden my-8">
-                      <img
-                        src={section.imageSection}
-                        alt={section.headerSection}
-                        className="w-full object-cover"
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+    <div className="general-wrapper p-8">
+      <Card
+        hoverable
+        cover={
+          <div className="h-64 overflow-hidden">
+            <img
+              alt={article.title}
+              src={avatar}
+              className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+            />
           </div>
-          {/* Sidebar */}
-          <Affix offsetTop={100} className="hidden lg:block">
-            <div className="w-80">
-              <Card className="shadow-md">
-                <Title level={4} className="mb-6">
-                  Related Articles
-                </Title>
-                <div className="space-y-6">
-                  {relatedBlogs.map((relatedBlog, index) => (
-                    <div
-                      key={index}
-                      className="group cursor-pointer"
-                      onClick={() =>
-                        navigate(
-                          `/blog/${index === currentIndex ? index + 1 : index}`
-                        )
-                      }>
-                      <div className="h-32 mb-2 overflow-hidden rounded-lg">
-                        <img
-                          src={relatedBlog.avatar}
-                          alt={relatedBlog.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <Title
-                        level={5}
-                        className="line-clamp-2 group-hover:text-blue-600 transition-colors">
-                        {relatedBlog.title}
-                      </Title>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <CalendarOutlined className="mr-2" />
-                        {relatedBlog.createDate}
-                      </div>
-                      <div className="mt-2 flex items-center text-blue-600 text-sm group-hover:text-blue-700">
-                        Read More
-                        <RightOutlined className="ml-1 text-xs group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
-          </Affix>
-        </div>
-      </div>
+        }
+        className="shadow-md hover:shadow-xl transition-shadow duration-300"
+      >
+        <Space direction="vertical" size="small" className="w-full">
+          <Tag color="blue" className="mb-2">
+            {article.tags?.join(", ") || "No tags"}
+          </Tag>
+
+          <Title level={2} className="mb-2">{article.title}</Title>
+
+          <Paragraph className="text-gray-600">{description || "No description available."}</Paragraph>
+
+          <Divider className="my-3" />
+
+          <Space className="text-gray-500 text-sm">
+            <Space>
+              <UserOutlined />
+              {article.authorName || "Unknown Author"}
+            </Space>
+            <Space>
+              <CalendarOutlined />
+              {createDate}
+            </Space>
+          </Space>
+
+          <Divider className="my-3" />
+
+          <Title level={3}>Content</Title>
+          <Paragraph>{article.content || "Content not available."}</Paragraph>
+
+          <Space className="text-gray-500 text-sm">
+            <button
+              onClick={() => likeArticle(article.articleId)}
+              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              {article.isLiked ? <LikeFilled /> : <LikeOutlined />}
+              <span>Like ({article.likes})</span>
+            </button>
+          </Space>
+        </Space>
+      </Card>
     </div>
   );
 };

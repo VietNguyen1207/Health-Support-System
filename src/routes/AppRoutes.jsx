@@ -116,7 +116,7 @@ export const routes = [
         ),
       },
       {
-        path: "blog/:id",
+        path: "blog/:articleId",
         element: (
           <PrivateRoute
             allowedRoles={["student", "parent", "manager", "psychologist"]}
