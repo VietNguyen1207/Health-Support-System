@@ -21,6 +21,7 @@ import {
   Skeleton,
   Table,
   Tag,
+  Drawer,
 } from "antd";
 import TagComponent from "../../components/TagComponent";
 // import TableData from "../../data/table-data.json";
@@ -40,27 +41,14 @@ import {
   CloseCircleOutlined,
   SearchOutlined,
   ReloadOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../../stores/authStore";
-
+import { useAppointmentStore } from "../../stores/appointmentStore";
 const { Title, Text } = Typography;
 
 // Updated to include MANAGER role
 const ROLE_SET = ["all", "student", "parent", "psychologist", "manager"];
-
-const StatsCardSkeleton = () => (
-  <Card>
-    <Flex vertical align="center">
-      <Skeleton.Input style={{ width: 100 }} size="small" active />
-      <Skeleton.Input
-        style={{ width: 60, margin: "8px 0" }}
-        size="large"
-        active
-      />
-      <Skeleton.Input style={{ width: 80 }} size="small" active />
-    </Flex>
-  </Card>
-);
 
 const TableSkeleton = () => (
   <div>
@@ -129,13 +117,13 @@ const UserDetailsSkeleton = () => (
 
 export default function UserManagement() {
   const [data, setData] = useState([]);
-  const { users, getAllUsers, getUserDetails, reactivateUser, deactivateUser } =
+  const { users, getAllUsers, getUserDetails, updateUser, reactivateUser, deactivateUser } =
     useUserStore();
+    const {registerPsychologist, loading: registerLoading} = useAuthStore();
+    const {departments, fetchDepartments} = useAppointmentStore();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [isEditMode, setIsEditMode] = useState(false);
   const [form] = Form.useForm();
-  const [searchTerm, setSearchTerm] = useState("");
   const [childrenList, setChildrenList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -144,6 +132,9 @@ export default function UserManagement() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [genderFilter, setGenderFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const [isCreatePsychologistModalVisible, setIsCreatePsychologistModalVisible] = useState(false);
+  const [createPsychologistForm] = Form.useForm();
 
   const handleViewDetail = async (record) => {
     try {
@@ -236,14 +227,7 @@ export default function UserManagement() {
           </div>
         ),
         width: "25%",
-        filteredValue: searchText ? [searchText] : null,
-        onFilter: (value, record) => {
-          return (
-            record.fullName.toLowerCase().includes(value.toLowerCase()) ||
-            record.userId.toLowerCase().includes(value.toLowerCase()) ||
-            record.email.toLowerCase().includes(value.toLowerCase())
-          );
-        },
+      
       },
       {
         title: "Contact",
@@ -279,11 +263,6 @@ export default function UserManagement() {
             tag={transformString(value)}
           />
         ),
-        filters: ROLE_SET.filter((r) => r !== "all").map((r) => ({
-          text: transformString(r),
-          value: r.toUpperCase(),
-        })),
-        onFilter: (value, record) => record.role.toUpperCase() === value,
         width: "15%",
       },
       {
@@ -298,11 +277,6 @@ export default function UserManagement() {
             />
           );
         },
-        filters: [
-          { text: "Male", value: "Male" },
-          { text: "Female", value: "Female" },
-        ],
-        onFilter: (value, record) => normalizeGender(record.gender) === value,
         width: "10%",
       },
       {
@@ -318,11 +292,6 @@ export default function UserManagement() {
             {record.active ? "Active" : "Inactive"}
           </Tag>
         ),
-        filters: [
-          { text: "Active", value: true },
-          { text: "Inactive", value: false },
-        ],
-        onFilter: (value, record) => record.active === value,
         width: "10%",
       },
       {
@@ -344,26 +313,16 @@ export default function UserManagement() {
               >
                 View
               </Button>
-              {record.active ? (
-                <Button
-                  danger
-                  onClick={() => handleDeactivateUser(record.userId)}
-                  size="middle"
-                  icon={<CloseCircleOutlined />}
-                >
-                  Deactivate
-                </Button>
-              ) : (
-                <Button
-                  type="primary"
-                  className="bg-blue-500 hover:bg-blue-600"
-                  onClick={() => handleReactivateUser(record.userId)}
-                  size="middle"
-                  icon={<CheckCircleOutlined />}
-                >
-                  Reactivate
-                </Button>
-              )}
+              <Button
+                icon={<EditOutlined />}
+                onClick={() => {
+                  handleViewDetail(record);
+                  setIsDrawerVisible(true);
+                }}
+                size="middle"
+              >
+                Edit
+              </Button>
             </Flex>
           ),
       },
@@ -469,19 +428,39 @@ export default function UserManagement() {
     }
   }, [users, loading, roleFilter, genderFilter, statusFilter, searchText]);
 
-  const handleUpdate = () => {
-    setIsEditMode(true);
-  };
-
-  const handleUpdateSubmit = async () => {
+  const handleUpdateSubmit = async (values) => {
     try {
-      // Implement update logic here
+      // Create a clean user object with only the fields we want to update
+      const userRole = transformString(selectedUser.role).toLowerCase();
+      const userData = {
+        fullName: values.fullName,
+        email: values.email,
+        phoneNumber: values.phone,
+        gender: values.gender,
+        address: values.address,
+        // Add role-specific fields based on user role
+        ...(userRole === "student" && {
+          grade: values.grade,
+          className: values.className,
+        }),
+        ...(userRole === "psychologist" && {
+          yearsOfExperience: values.yearsOfExperience,
+          departmentName: values.departmentName,
+        }),
+        verified: selectedUser.verified,
+        active: selectedUser.active,
+        deleted: selectedUser.deleted,
+        // Don't include children list for parents here
+      };
+      
+      await updateUser(userData, selectedUser.userId);
       message.success("User updated successfully");
-      setIsEditMode(false);
-      setIsModalVisible(false);
+      setIsDrawerVisible(false);
+      // Refresh the user list
+      await getAllUsers();
     } catch (error) {
-      message.error("Failed to update user");
-      console.log(error);
+      message.error("Failed to update user: " + (error.message || "Unknown error"));
+      console.error(error);
     }
   };
 
@@ -539,216 +518,14 @@ export default function UserManagement() {
     // Determine the actual role of the selected user when in "all" mode
     const userRole = transformString(selectedUser.role).toLowerCase();
 
-    const childrenArr = [];
-
-    console.log("====================================");
-    console.log(childrenList);
-    console.log("====================================");
-
-    if (isEditMode) {
-      return isLoading ? (
-        <Skeleton active />
-      ) : (
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleUpdateSubmit}
-          initialValues={{
-            fullName: selectedUser.fullName,
-            email: selectedUser.email,
-            phone: selectedUser.phone || selectedUser.phoneNumber,
-            gender: selectedUser.gender,
-            address: selectedUser.address,
-            ...(userRole === "student" && {
-              grade: selectedUser.grade,
-              className: selectedUser.className,
-            }),
-            ...(userRole === "psychologist" && {
-              yearsOfExperience: selectedUser.yearsOfExperience,
-              departmentName: selectedUser.departmentName,
-            }),
-            ...(userRole === "parent" && {
-              children:
-                childrenArr
-                  .find((item) => item.userId === selectedUser.userId)
-                  ?.children?.map((child) => child.userId) || [],
-            }),
-          }}
-        >
-          <Tabs defaultActiveKey="basic">
-            <Tabs.TabPane tab="Basic Information" key="basic">
-              <Card>
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item
-                      name="fullName"
-                      label="Full Name"
-                      rules={[
-                        { required: true, message: "Please input full name!" },
-                      ]}
-                    >
-                      <Input style={{ borderRadius: "8px" }} />
-                    </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      name="gender"
-                      label="Gender"
-                      rules={[
-                        { required: true, message: "Please select gender!" },
-                      ]}
-                    >
-                      <Select>
-                        <Select.Option value="Male">Male</Select.Option>
-                        <Select.Option value="Female">Female</Select.Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                </Row>
-
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item
-                      name="email"
-                      label="Email"
-                      rules={[
-                        { required: true, message: "Please input email!" },
-                        {
-                          type: "email",
-                          message: "Please enter a valid email!",
-                        },
-                      ]}
-                    >
-                      <Input style={{ borderRadius: "8px" }} />
-                    </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      name="phone"
-                      label="Phone"
-                      rules={[
-                        { required: true, message: "Please input phone!" },
-                      ]}
-                    >
-                      <Input style={{ borderRadius: "8px" }} />
-                    </Form.Item>
-                  </Col>
-                </Row>
-
-                <Form.Item name="address" label="Address">
-                  <Input style={{ borderRadius: "8px" }} />
-                </Form.Item>
-              </Card>
-            </Tabs.TabPane>
-
-            <Tabs.TabPane
-              tab="Role Specific"
-              key="role"
-              disabled={userRole === "manager"}
-            >
-              <Card>
-                {userRole === "student" && (
-                  <Row gutter={16}>
-                    <Col span={12}>
-                      <Form.Item
-                        name="grade"
-                        label="Grade"
-                        rules={[
-                          { required: true, message: "Please input grade!" },
-                        ]}
-                      >
-                        <InputNumber
-                          min={1}
-                          max={12}
-                          style={{ width: "100%", height: "32px" }}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                      <Form.Item
-                        name="className"
-                        label="Class"
-                        rules={[
-                          { required: true, message: "Please input class!" },
-                        ]}
-                      >
-                        <Input style={{ borderRadius: "8px" }} />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                )}
-
-                {userRole === "psychologist" && (
-                  <>
-                    <Form.Item
-                      name="departmentName"
-                      label="Department"
-                      rules={[
-                        { required: true, message: "Please input department!" },
-                      ]}
-                    >
-                      <Input style={{ borderRadius: "8px" }} />
-                    </Form.Item>
-                    <Form.Item
-                      name="yearsOfExperience"
-                      label="Years of Experience"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please input years of experience!",
-                        },
-                      ]}
-                    >
-                      <InputNumber min={0} style={{ width: "100%" }} />
-                    </Form.Item>
-                  </>
-                )}
-
-                {userRole === "parent" && (
-                  <Form.Item name="children" label="Children">
-                    <Select
-                      mode="multiple"
-                      placeholder="Select children"
-                      style={{ width: "100%" }}
-                      options={childrenArr}
-                      optionFilterProp="label"
-                    />
-                  </Form.Item>
-                )}
-              </Card>
-            </Tabs.TabPane>
-          </Tabs>
-
-          <Flex gap={12} justify="end" style={{ marginTop: 16 }}>
-            <Popconfirm
-              title="Cancel editing"
-              description="Are you sure you want to cancel? All changes will be lost."
-              onConfirm={() => setIsEditMode(false)}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button>Cancel</Button>
-            </Popconfirm>
-            <Button type="primary" htmlType="submit">
-              Save Changes
-            </Button>
-          </Flex>
-        </Form>
-      );
-    }
+    // console.log("====================================");
+    // console.log(childrenList);
+    // console.log("====================================");
 
     return isLoading ? (
       <Skeleton active />
     ) : (
-      <Tabs defaultActiveKey="profile">
-        <Tabs.TabPane
-          tab={
-            <span>
-              <UserOutlined /> Profile
-            </span>
-          }
-          key="profile"
-        >
+      <>
           <Flex vertical gap={16}>
             {/* User Profile Card */}
             <Card>
@@ -1060,38 +837,47 @@ export default function UserManagement() {
               </Card>
             )}
           </Flex>
-
-          {/* Add this section for activation/deactivation actions */}
-          <Flex justify="end" gap={12} style={{ marginTop: 16 }}>
-            {user.userId !== selectedUser.userId &&
-              (selectedUser.active ? (
-                <Button
-                  danger
-                  icon={<CloseCircleOutlined />}
-                  onClick={() => {
-                    handleDeactivateUser(selectedUser.userId);
-                    setIsModalVisible(false);
-                  }}
-                >
-                  Deactivate User
-                </Button>
-              ) : (
-                <Button
-                  type="primary"
-                  className="bg-blue-500 hover:bg-blue-600"
-                  icon={<CheckCircleOutlined />}
-                  onClick={() => {
-                    handleReactivateUser(selectedUser.userId);
-                    setIsModalVisible(false);
-                  }}
-                >
-                  Reactivate User
-                </Button>
-              ))}
-          </Flex>
-        </Tabs.TabPane>
-      </Tabs>
+</>
     );
+  };
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  // Add this function to handle psychologist creation
+  const handleCreatePsychologist = async (values) => {
+    try {
+      setLoading(true);
+      // console.log(values);
+      
+      // Construct the psychologist object
+      const psychologistData = {
+        fullName: values.fullName,
+        email: values.email,
+        password: values.password,
+        gender: values.gender,
+        phoneNumber: values.phone,
+        address: values.address,
+        psychologistDetails: {
+          departmentID: values.departmentId,
+          yearsOfExperience: values.yearsOfExperience,
+        },
+      };
+      
+      await registerPsychologist(psychologistData);
+      message.success("Psychologist created successfully");
+      setIsCreatePsychologistModalVisible(false);
+      createPsychologistForm.resetFields();
+      
+      // Refresh the user list
+      await getAllUsers();
+    } catch (error) {
+      console.error("Failed to create psychologist:", error);
+      message.error("Failed to create psychologist: " + (error.message || "Unknown error"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -1115,6 +901,13 @@ export default function UserManagement() {
                 className="w-64"
                 allowClear
               />
+              <Button 
+                type="primary" 
+                icon={<UserOutlined />} 
+                onClick={() => setIsCreatePsychologistModalVisible(true)}
+              >
+                New Psychologist
+              </Button>
             </div>
           </div>
 
@@ -1259,27 +1052,412 @@ export default function UserManagement() {
         </div>
       </div>
 
-      {/* User details modal */}
+      {/* User Edit Drawer */}
+      <Drawer
+        title={
+          <Flex align="center" gap={8}>
+            <EditOutlined className="text-blue-500" />
+            <span>Edit User: {selectedUser?.fullName}</span>
+          </Flex>
+        }
+        width={600}
+        placement="right"
+        onClose={() => {
+          setIsDrawerVisible(false);
+          form.resetFields();
+        }}
+        open={isDrawerVisible}
+        extra={
+          <Space>
+            <Button 
+              type="primary" 
+              onClick={() => form.submit()}
+            >
+              Save
+            </Button>
+          </Space>
+        }
+      >
+        {isLoading ? (
+          <Skeleton active paragraph={{ rows: 10 }} />
+        ) : selectedUser ? (
+          (() => {
+            const userRole = transformString(selectedUser.role).toLowerCase();
+            return (
+              <Form
+                form={form}
+                layout="vertical"
+                onFinish={(values) => {
+                  handleUpdateSubmit(values);
+                  setIsDrawerVisible(false);
+                }}
+                initialValues={{
+                  fullName: selectedUser.fullName,
+                  email: selectedUser.email,
+                  phone: selectedUser.phoneNumber || selectedUser.phone,
+                  gender: selectedUser.gender?.toUpperCase(),
+                  address: selectedUser.address,
+                  ...(userRole === "student" && {
+                    grade: selectedUser.grade,
+                    className: selectedUser.className,
+                  }),
+                  ...(userRole === "psychologist" && {
+                    yearsOfExperience: selectedUser.yearsOfExperience,
+                    departmentName: selectedUser.departmentName,
+                  }),
+                  ...(userRole === "parent" && {
+                    children:
+                      childrenList
+                        .find((item) => item.userId === selectedUser.userId)
+                        ?.children?.map((child) => child.userId) || [],
+                  }),
+                }}
+              >
+                <div className="space-y-6">
+                  <Card title="Basic Information" size="small">
+                    <Row gutter={16}>
+                      <Col span={12}>
+                        <Form.Item
+                          name="fullName"
+                          label="Full Name"
+                          rules={[{ required: true, message: "Please input full name!" }]}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </Col>
+                      <Col span={12}>
+                        <Form.Item
+                          name="gender"
+                          label="Gender"
+                          rules={[{ required: true, message: "Please select gender!" }]}
+                        >
+                          <Select>
+                            <Select.Option value="MALE">Male</Select.Option>
+                            <Select.Option value="FEMALE">Female</Select.Option>
+                          </Select>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
+                    <Row gutter={16}>
+                      <Col span={12}>
+                        <Form.Item
+                          name="email"
+                          label="Email"
+                          rules={[
+                            { required: true, message: "Please input email!" },
+                            { type: "email", message: "Please enter a valid email!" },
+                          ]}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </Col>
+                      <Col span={12}>
+                        <Form.Item
+                          name="phone"
+                          label="Phone"
+                          rules={[{ required: true, message: "Please input phone!" }]}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
+                    <Form.Item name="address" label="Address">
+                      <Input.TextArea rows={2} />
+                    </Form.Item>
+                  </Card>
+
+                  {userRole !== "manager" && (
+                    <Card title="Role-Specific Information" size="small">
+                      {userRole === "student" && (
+                        <Row gutter={16}>
+                          <Col span={12}>
+                            <Form.Item
+                              name="grade"
+                              label="Grade"
+                              rules={[{ required: true, message: "Please input grade!" }]}
+                            >
+                              <InputNumber min={1} max={12} style={{ width: "100%" }} />
+                            </Form.Item>
+                          </Col>
+                          <Col span={12}>
+                            <Form.Item
+                              name="className"
+                              label="Class"
+                              rules={[{ required: true, message: "Please input class!" }]}
+                            >
+                              <Input />
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      )}
+
+                      {userRole === "psychologist" && (
+                        <>
+                          <Form.Item
+                            name="departmentId"
+                            label="Department"
+                            rules={[{ required: true, message: "Please select a department" }]}
+                          >
+                            <Select
+                              placeholder="Select a department"
+                              showSearch
+                              optionFilterProp="children"
+                              filterOption={(input, option) =>
+                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                              }
+                              notFoundContent={departments.length === 0 ? "Loading departments..." : "No department found"}
+                            >
+                              {departments.map(dept => (
+                                <Select.Option key={dept.departmentId} value={dept.departmentId}>
+                                  {dept.departmentName}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                          <Form.Item
+                            name="yearsOfExperience"
+                            label="Years of Experience"
+                            rules={[{ required: true, message: "Please input years of experience!" }]}
+                          >
+                            <InputNumber min={0} style={{ width: "100%" }} />
+                          </Form.Item>
+                        </>
+                      )}
+
+                      {userRole === "parent" && (
+                        <Form.Item name="children" label="Children">
+                          <Select
+                            mode="multiple"
+                            placeholder="Select children"
+                            style={{ width: "100%" }}
+                            options={childrenList
+                              .find((item) => item.userId === selectedUser.userId)
+                              ?.children?.map(child => ({
+                                label: child.fullName,
+                                value: child.userId
+                              })) || []}
+                            optionFilterProp="label"
+                          />
+                        </Form.Item>
+                      )}
+                    </Card>
+                  )}
+
+                  {selectedUser.active ? (
+                    <Form.Item>
+                      <Button 
+                        danger 
+                        icon={<CloseCircleOutlined />}
+                        onClick={() => {
+                          handleDeactivateUser(selectedUser.userId);
+                          setIsDrawerVisible(false);
+                        }}
+                      >
+                        Deactivate User
+                      </Button>
+                    </Form.Item>
+                  ) : (
+                    <Form.Item>
+                      <Button 
+                        type="primary" 
+                        className="bg-green-500 hover:bg-green-600"
+                        icon={<CheckCircleOutlined />}
+                        onClick={() => {
+                          handleReactivateUser(selectedUser.userId);
+                          setIsDrawerVisible(false);
+                        }}
+                      >
+                        Reactivate User
+                      </Button>
+                    </Form.Item>
+                  )}
+                </div>
+              </Form>
+            )
+          })()
+        ) : (
+          <Empty description="User not found" />
+        )}
+      </Drawer>
+
+      {/* Add User Details Modal */}
       <Modal
         title={
-          <div className="flex items-center gap-2">
-            <UserOutlined className="text-custom-green" />
-            <span>User Details</span>
-          </div>
+          <Flex align="center" gap={8}>
+            <UserOutlined className="text-blue-500" />
+            <span>User Details: {selectedUser?.fullName}</span>
+          </Flex>
         }
         open={isModalVisible}
-        onCancel={() => {
-          setIsModalVisible(false);
-          setIsEditMode(false);
-        }}
-        footer={null}
+        onCancel={() => setIsModalVisible(false)}
         width={800}
-        destroyOnClose
-        maskClosable={true}
-        className="user-details-modal"
+        footer={[
+          <Button danger key="close" onClick={() => setIsModalVisible(false)}>
+            Close
+          </Button>,
+          
+          selectedUser && user.userId !== selectedUser.userId && (
+            <Button 
+              key="edit"
+              type="primary" 
+              icon={<EditOutlined />}
+              onClick={() => {
+                setIsModalVisible(false);
+                setIsDrawerVisible(true);
+              }}
+            >
+              Edit User
+            </Button>
+          )
+        ]}
+        destroyOnClose={true}
+        styles={{body: { maxHeight: '70vh', overflow: 'auto' }}}
       >
         {renderUserDetails()}
       </Modal>
+
+      {/* Create Psychologist Drawer */}
+      <Drawer
+        title={
+          <Flex align="center" gap={8}>
+            <UserOutlined className="text-purple-600" />
+            <span>Create New Psychologist</span>
+          </Flex>
+        }
+        open={isCreatePsychologistModalVisible}
+        onClose={() => {
+          setIsCreatePsychologistModalVisible(false);
+          createPsychologistForm.resetFields();
+        }}
+        width={600}
+        placement="right"
+        extra={
+          <Space>
+            <Button 
+              type="primary" 
+              onClick={() => createPsychologistForm.submit()}
+            >
+              Create Psychologist
+            </Button>
+          </Space>
+        }
+      >
+        <Form
+          form={createPsychologistForm}
+          layout="vertical"
+          onFinish={(values) => {
+            handleCreatePsychologist(values);
+            setIsCreatePsychologistModalVisible(false);
+          }}
+          initialValues={{
+            gender: "MALE",
+          }}
+        >
+          <div className="space-y-6">
+            <Card title="Basic Information" size="small">
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    name="fullName"
+                    label="Full Name"
+                    rules={[{ required: true, message: "Please enter full name" }]}
+                  >
+                    <Input placeholder="Enter full name" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    name="gender"
+                    label="Gender"
+                    rules={[{ required: true, message: "Please select gender" }]}
+                  >
+                    <Select>
+                      <Select.Option value="MALE">Male</Select.Option>
+                      <Select.Option value="FEMALE">Female</Select.Option>
+                    </Select>
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    name="email"
+                    label="Email"
+                    rules={[
+                      { required: true, message: "Please enter email" },
+                      { type: "email", message: "Please enter a valid email" },
+                    ]}
+                  >
+                    <Input placeholder="Enter email" />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    name="phone"
+                    label="Phone"
+                    rules={[{ required: true, message: "Please enter phone number" }]}
+                  >
+                    <Input placeholder="Enter phone number" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              <Form.Item
+                name="password"
+                label="Password"
+                rules={[
+                  { required: true, message: "Please enter password" },
+                  { min: 6, message: "Password must be at least 6 characters" },
+                ]}
+              >
+                <Input.Password placeholder="Enter password" />
+              </Form.Item>
+
+              <Form.Item
+                name="address"
+                label="Address"
+              >
+                <Input.TextArea rows={2} placeholder="Enter address" />
+              </Form.Item>
+            </Card>
+
+            <Card title="Professional Information" size="small">
+              <Form.Item
+                name="departmentId"
+                label="Department"
+                rules={[{ required: true, message: "Please select a department" }]}
+              >
+                <Select
+                  placeholder="Select a department"
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  notFoundContent={departments.length === 0 ? "Loading departments..." : "No department found"}
+                >
+                  {departments.map(dept => (
+                    <Select.Option key={dept.departmentId} value={dept.departmentId}>
+                      {dept.departmentName}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              
+              <Form.Item
+                name="yearsOfExperience"
+                label="Years of Experience"
+                rules={[{ required: true, message: "Please enter years of experience" }]}
+              >
+                <InputNumber min={0} style={{ width: "100%" }} placeholder="Enter years of experience" />
+              </Form.Item>
+            </Card>
+          </div>
+        </Form>
+      </Drawer>
     </div>
   );
 }

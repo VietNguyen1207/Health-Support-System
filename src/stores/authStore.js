@@ -222,6 +222,31 @@ export const useAuthStore = create(
         }
       },
 
+      // Register psychologist
+      registerPsychologist: async (userData) => {
+        set({ loading: true, error: null });
+        try {
+          // console.log(userData);
+          
+          await api.post("/auth/register-psychologist", userData);
+
+          // Return the response data
+          set({ loading: false });
+        } catch (error) {
+          console.error("Psychologist registration error details:", {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message,
+          });
+
+          const errorMessage =
+            error.response?.data?.message ||
+            "Failed to register psychologist account";
+          set({ error: errorMessage, loading: false });
+          throw new Error(errorMessage);
+        }
+      },
+
       // Register parent
       registerParent: async (userData) => {
         set({ loading: true, error: null });
