@@ -17,21 +17,18 @@ import {
   Tabs,
   Badge,
   Typography,
-  Tooltip,
   Empty,
   Skeleton,
+  Table,
+  Tag,
 } from "antd";
-import TableComponent from "../../components/TableComponent";
 import TagComponent from "../../components/TagComponent";
 // import TableData from "../../data/table-data.json";
 import { mergeNestedObject, transformString } from "../../utils/Helper";
-import SearchInputComponent from "../../components/SearchInputComponent";
 import { useUserStore } from "../../stores/userStore";
 import MaleIcon from "../../assets/male-icon.svg";
 import FemaleIcon from "../../assets/female-icon.svg";
 import {
-  // DeleteOutlined,
-  EditOutlined,
   EyeOutlined,
   UserOutlined,
   PhoneOutlined,
@@ -41,6 +38,8 @@ import {
   CalendarOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  SearchOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../../stores/authStore";
 
@@ -48,6 +47,85 @@ const { Title, Text } = Typography;
 
 // Updated to include MANAGER role
 const ROLE_SET = ["all", "student", "parent", "psychologist", "manager"];
+
+const StatsCardSkeleton = () => (
+  <Card>
+    <Flex vertical align="center">
+      <Skeleton.Input style={{ width: 100 }} size="small" active />
+      <Skeleton.Input
+        style={{ width: 60, margin: "8px 0" }}
+        size="large"
+        active
+      />
+      <Skeleton.Input style={{ width: 80 }} size="small" active />
+    </Flex>
+  </Card>
+);
+
+const TableSkeleton = () => (
+  <div>
+    {[...Array(5)].map((_, index) => (
+      <Card key={index} className="mb-3">
+        <Row gutter={16} align="middle">
+          <Col span={8}>
+            <Flex align="center" gap={12}>
+              <Skeleton.Avatar active size={40} />
+              <div>
+                <Skeleton.Input style={{ width: 150 }} active size="small" />
+                <div style={{ marginTop: 4 }}>
+                  <Skeleton.Input style={{ width: 120 }} active size="small" />
+                </div>
+              </div>
+            </Flex>
+          </Col>
+          <Col span={8}>
+            <Skeleton.Input style={{ width: "90%" }} active />
+          </Col>
+          <Col span={4}>
+            <Skeleton.Button active style={{ width: 80 }} />
+          </Col>
+          <Col span={4}>
+            <Space>
+              <Skeleton.Button active style={{ width: 32 }} size="small" />
+              <Skeleton.Button active style={{ width: 32 }} size="small" />
+            </Space>
+          </Col>
+        </Row>
+      </Card>
+    ))}
+  </div>
+);
+
+const UserDetailsSkeleton = () => (
+  <div className="space-y-4">
+    <Card>
+      <Flex align="center" gap={24}>
+        <Skeleton.Avatar size={80} active />
+        <Flex vertical gap={4} flex={1}>
+          <Skeleton.Input style={{ width: 200 }} active />
+          <Flex gap={8}>
+            <Skeleton.Button active style={{ width: 60 }} />
+            <Skeleton.Button active style={{ width: 80 }} />
+          </Flex>
+          <Skeleton.Input style={{ width: 150 }} active size="small" />
+        </Flex>
+      </Flex>
+    </Card>
+
+    <Row gutter={16}>
+      <Col xs={24} md={12}>
+        <Card>
+          <Skeleton active paragraph={{ rows: 3 }} />
+        </Card>
+      </Col>
+      <Col xs={24} md={12}>
+        <Card>
+          <Skeleton active paragraph={{ rows: 3 }} />
+        </Card>
+      </Col>
+    </Row>
+  </div>
+);
 
 export default function UserManagement() {
   const [data, setData] = useState([]);
@@ -61,6 +139,7 @@ export default function UserManagement() {
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuthStore();
+  const [searchText, setSearchText] = useState("");
 
   const handleViewDetail = async (record) => {
     try {
@@ -133,43 +212,52 @@ export default function UserManagement() {
         title: "User",
         key: "user",
         render: (_, record) => (
-          <Flex align="center" gap={12}>
-            <Avatar
-              size={40}
-              icon={<UserOutlined />}
-              src={record.gender === "Male" ? MaleIcon : FemaleIcon}
-              style={{
-                backgroundColor:
-                  record.gender === "Male" ? "#e6f4ff" : "#fff0f6",
-                padding: 4,
-              }}
-            />
-            <Flex vertical>
-              <Text strong>{record.fullName}</Text>
-              <Text type="secondary" style={{ fontSize: "12px" }}>
-                {record.email}
-              </Text>
-            </Flex>
-          </Flex>
+          <div>
+            <div className="font-medium flex items-center gap-2">
+              <Avatar
+                size={32}
+                icon={<UserOutlined />}
+                src={record.gender === "Male" ? MaleIcon : FemaleIcon}
+                style={{
+                  backgroundColor:
+                    record.gender === "Male" ? "#e6f4ff" : "#fff0f6",
+                  padding: 4,
+                }}
+              />
+              {record.fullName}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              ID: {record.userId}
+            </div>
+          </div>
         ),
-        width: "30%",
+        width: "25%",
+        filteredValue: searchText ? [searchText] : null,
+        onFilter: (value, record) => {
+          return (
+            record.fullName.toLowerCase().includes(value.toLowerCase()) ||
+            record.userId.toLowerCase().includes(value.toLowerCase()) ||
+            record.email.toLowerCase().includes(value.toLowerCase())
+          );
+        },
       },
       {
         title: "Contact",
         key: "contact",
         render: (_, record) => (
-          <Flex vertical>
-            <Text>
-              <PhoneOutlined /> {record.phone || record.phoneNumber || "N/A"}
-            </Text>
-            <Text style={{ fontSize: "12px" }}>
-              <HomeOutlined /> {record.address || "N/A"}
-            </Text>
-          </Flex>
+          <div className="text-sm">
+            <div className="flex items-center">
+              <MailOutlined className="mr-2 text-gray-400" />
+              {record.email}
+            </div>
+            <div className="flex items-center mt-1">
+              <PhoneOutlined className="mr-2 text-gray-400" />
+              {record.phone || record.phoneNumber || "N/A"}
+            </div>
+          </div>
         ),
-        width: "35%",
+        width: "30%",
       },
-      // Manager
       {
         title: "Role",
         dataIndex: "role",
@@ -198,7 +286,6 @@ export default function UserManagement() {
         title: "Gender",
         dataIndex: "gender",
         render: (value) => {
-          // Normalize gender from API format (MALE/FEMALE) to display format (Male/Female)
           const normalizedGender = normalizeGender(value);
           return (
             <TagComponent
@@ -208,14 +295,8 @@ export default function UserManagement() {
           );
         },
         filters: [
-          {
-            text: "Male",
-            value: "Male",
-          },
-          {
-            text: "Female",
-            value: "Female",
-          },
+          { text: "Male", value: "Male" },
+          { text: "Female", value: "Female" },
         ],
         onFilter: (value, record) => normalizeGender(record.gender) === value,
         width: "10%",
@@ -224,23 +305,18 @@ export default function UserManagement() {
         title: "Status",
         key: "status",
         render: (_, record) => (
-          <Flex>
-            {record.active ? (
-              <Badge status="success" text="Active" />
-            ) : (
-              <Badge status="error" text="Inactive" />
-            )}
-          </Flex>
+          <Tag
+            color={record.active ? "green" : "red"}
+            icon={
+              record.active ? <CheckCircleOutlined /> : <CloseCircleOutlined />
+            }
+          >
+            {record.active ? "Active" : "Inactive"}
+          </Tag>
         ),
         filters: [
-          {
-            text: "Active",
-            value: true,
-          },
-          {
-            text: "Inactive",
-            value: false,
-          },
+          { text: "Active", value: true },
+          { text: "Inactive", value: false },
         ],
         onFilter: (value, record) => record.active === value,
         width: "10%",
@@ -251,35 +327,21 @@ export default function UserManagement() {
         width: "10%",
         render: (_, record) =>
           user.userId !== record.userId && (
-            <Space size="small">
-              <Tooltip title="View Details">
-                <Button
-                  type="primary"
-                  size="small"
-                  icon={<EyeOutlined />}
-                  onClick={() => {
-                    handleViewDetail(record);
-                    setIsModalVisible(true);
-                  }}
-                />
-              </Tooltip>
-              <Tooltip title="Edit User">
-                <Button
-                  type="default"
-                  size="small"
-                  icon={<EditOutlined />}
-                  onClick={() => {
-                    handleViewDetail(record);
-                    setIsModalVisible(true);
-                    handleUpdate();
-                  }}
-                />
-              </Tooltip>
-            </Space>
+            <Button
+              type="primary"
+              icon={<EyeOutlined />}
+              onClick={() => {
+                handleViewDetail(record);
+                setIsModalVisible(true);
+              }}
+              className="bg-custom-green hover:bg-custom-green/90"
+            >
+              View Details
+            </Button>
           ),
       },
     ],
-    [normalizeRole]
+    [user.userId, searchText]
   );
 
   useEffect(() => {
@@ -378,6 +440,10 @@ export default function UserManagement() {
   const renderUserDetails = () => {
     if (!selectedUser) return null;
 
+    if (isLoading) {
+      return <UserDetailsSkeleton />;
+    }
+
     // Determine the actual role of the selected user when in "all" mode
     const userRole = transformString(selectedUser.role).toLowerCase();
 
@@ -415,7 +481,8 @@ export default function UserManagement() {
                   .find((item) => item.userId === selectedUser.userId)
                   ?.children?.map((child) => child.userId) || [],
             }),
-          }}>
+          }}
+        >
           <Tabs defaultActiveKey="basic">
             <Tabs.TabPane tab="Basic Information" key="basic">
               <Card>
@@ -426,7 +493,8 @@ export default function UserManagement() {
                       label="Full Name"
                       rules={[
                         { required: true, message: "Please input full name!" },
-                      ]}>
+                      ]}
+                    >
                       <Input style={{ borderRadius: "8px" }} />
                     </Form.Item>
                   </Col>
@@ -436,7 +504,8 @@ export default function UserManagement() {
                       label="Gender"
                       rules={[
                         { required: true, message: "Please select gender!" },
-                      ]}>
+                      ]}
+                    >
                       <Select>
                         <Select.Option value="Male">Male</Select.Option>
                         <Select.Option value="Female">Female</Select.Option>
@@ -456,7 +525,8 @@ export default function UserManagement() {
                           type: "email",
                           message: "Please enter a valid email!",
                         },
-                      ]}>
+                      ]}
+                    >
                       <Input style={{ borderRadius: "8px" }} />
                     </Form.Item>
                   </Col>
@@ -466,7 +536,8 @@ export default function UserManagement() {
                       label="Phone"
                       rules={[
                         { required: true, message: "Please input phone!" },
-                      ]}>
+                      ]}
+                    >
                       <Input style={{ borderRadius: "8px" }} />
                     </Form.Item>
                   </Col>
@@ -481,7 +552,8 @@ export default function UserManagement() {
             <Tabs.TabPane
               tab="Role Specific"
               key="role"
-              disabled={userRole === "manager"}>
+              disabled={userRole === "manager"}
+            >
               <Card>
                 {userRole === "student" && (
                   <Row gutter={16}>
@@ -491,7 +563,8 @@ export default function UserManagement() {
                         label="Grade"
                         rules={[
                           { required: true, message: "Please input grade!" },
-                        ]}>
+                        ]}
+                      >
                         <InputNumber
                           min={1}
                           max={12}
@@ -505,7 +578,8 @@ export default function UserManagement() {
                         label="Class"
                         rules={[
                           { required: true, message: "Please input class!" },
-                        ]}>
+                        ]}
+                      >
                         <Input style={{ borderRadius: "8px" }} />
                       </Form.Item>
                     </Col>
@@ -519,7 +593,8 @@ export default function UserManagement() {
                       label="Department"
                       rules={[
                         { required: true, message: "Please input department!" },
-                      ]}>
+                      ]}
+                    >
                       <Input style={{ borderRadius: "8px" }} />
                     </Form.Item>
                     <Form.Item
@@ -530,7 +605,8 @@ export default function UserManagement() {
                           required: true,
                           message: "Please input years of experience!",
                         },
-                      ]}>
+                      ]}
+                    >
                       <InputNumber min={0} style={{ width: "100%" }} />
                     </Form.Item>
                   </>
@@ -557,7 +633,8 @@ export default function UserManagement() {
               description="Are you sure you want to cancel? All changes will be lost."
               onConfirm={() => setIsEditMode(false)}
               okText="Yes"
-              cancelText="No">
+              cancelText="No"
+            >
               <Button>Cancel</Button>
             </Popconfirm>
             <Button type="primary" htmlType="submit">
@@ -578,7 +655,8 @@ export default function UserManagement() {
               <UserOutlined /> Profile
             </span>
           }
-          key="profile">
+          key="profile"
+        >
           <Flex vertical gap={16}>
             {/* User Profile Card */}
             <Card>
@@ -645,7 +723,8 @@ export default function UserManagement() {
                       <span>Contact Information</span>
                     </Flex>
                   }
-                  size="small">
+                  size="small"
+                >
                   <Flex vertical gap={12}>
                     <Flex align="center" gap={8}>
                       <MailOutlined style={{ color: "#1890ff" }} />
@@ -693,7 +772,8 @@ export default function UserManagement() {
                         <span>Mental Health Scores</span>
                       </Flex>
                     }
-                    size="small">
+                    size="small"
+                  >
                     <Flex vertical gap={12}>
                       <Flex justify="space-between" align="center">
                         <Text strong>Depression:</Text>
@@ -707,14 +787,16 @@ export default function UserManagement() {
                             minWidth: "30px",
                             textAlign: "center",
                             display: "inline-block",
-                          }}>
+                          }}
+                        >
                           {selectedUser.depressionScore}
                         </div>
                       </Flex>
                       <Flex
                         justify="space-between"
                         align="center"
-                        style={{ marginTop: "8px" }}>
+                        style={{ marginTop: "8px" }}
+                      >
                         <Text strong>Anxiety:</Text>
                         <div
                           style={{
@@ -726,14 +808,16 @@ export default function UserManagement() {
                             minWidth: "30px",
                             textAlign: "center",
                             display: "inline-block",
-                          }}>
+                          }}
+                        >
                           {selectedUser.anxietyScore}
                         </div>
                       </Flex>
                       <Flex
                         justify="space-between"
                         align="center"
-                        style={{ marginTop: "8px" }}>
+                        style={{ marginTop: "8px" }}
+                      >
                         <Text strong>Stress:</Text>
                         <div
                           style={{
@@ -745,7 +829,8 @@ export default function UserManagement() {
                             minWidth: "30px",
                             textAlign: "center",
                             display: "inline-block",
-                          }}>
+                          }}
+                        >
                           {selectedUser.stressScore}
                         </div>
                       </Flex>
@@ -761,7 +846,8 @@ export default function UserManagement() {
                         <span>Professional Information</span>
                       </Flex>
                     }
-                    size="small">
+                    size="small"
+                  >
                     <Flex vertical gap={12}>
                       <Flex align="center" gap={8}>
                         <Text strong>Department:</Text>
@@ -788,7 +874,8 @@ export default function UserManagement() {
                     </Flex>
                   }
                   size="small"
-                  style={{ marginTop: userRole === "parent" ? 0 : 16 }}>
+                  style={{ marginTop: userRole === "parent" ? 0 : 16 }}
+                >
                   <Flex vertical gap={12}>
                     <Flex align="center" gap={8}>
                       <Text strong>Created:</Text>
@@ -828,7 +915,8 @@ export default function UserManagement() {
                     <span>Children Information</span>
                   </Flex>
                 }
-                size="small">
+                size="small"
+              >
                 {childrenList.length && childrenList[0].children.length > 0 ? (
                   <Row gutter={[16, 16]}>
                     {childrenList[0].children.map((child) => (
@@ -836,7 +924,8 @@ export default function UserManagement() {
                         <Card
                           hoverable
                           size="small"
-                          style={{ borderRadius: 8 }}>
+                          style={{ borderRadius: 8 }}
+                        >
                           <Flex align="center" gap={12}>
                             <Avatar
                               size={48}
@@ -885,119 +974,132 @@ export default function UserManagement() {
   };
 
   return (
-    <Flex vertical gap={20}>
-      {/* Header with role selection and search */}
-      <Card>
-        <Flex justify="space-between" align="center" wrap="wrap">
-          <Title level={4} style={{ margin: 0 }}>
-            User Management
-          </Title>
-          <Flex gap={16} align="center" wrap="wrap">
-            <SearchInputComponent
-              style={{ width: 250 }}
-              placeholder="Search by name, email, phone..."
-              onSearch={onSearch}
-              onClear={initialData}
-              allowClear
-            />
-          </Flex>
-        </Flex>
-      </Card>
-
-      {/* Stats summary */}
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Flex vertical align="center">
-              <Text type="secondary">Total Users</Text>
-              <Title level={2} style={{ margin: "8px 0" }}>
-                {data.length}
+    <div className="">
+      <div className="">
+        <div>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div>
+              <Title level={2} className="m-0">
+                User Management
               </Title>
-              <Badge
-                status={loading ? "processing" : "success"}
-                text={loading ? "Loading..." : "Updated"}
+              <Text type="secondary">View and manage user accounts</Text>
+            </div>
+
+            <div className="flex gap-3">
+              <Input
+                placeholder="Search users..."
+                prefix={<SearchOutlined className="text-gray-400" />}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="w-64"
               />
-            </Flex>
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Flex vertical align="center">
-              <Text type="secondary">Active Users</Text>
-              <Title level={2} style={{ margin: "8px 0" }}>
-                {data.filter((user) => user.active).length}
-              </Title>
-              <Badge status="success" text="Online" />
-            </Flex>
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Flex vertical align="center">
-              <Text type="secondary">Male</Text>
-              <Title level={2} style={{ margin: "8px 0" }}>
-                {
-                  data.filter((user) => normalizeGender(user.gender) === "Male")
-                    .length
-                }
-              </Title>
-              <Badge status="processing" text="Users" />
-            </Flex>
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={6}>
-          <Card>
-            <Flex vertical align="center">
-              <Text type="secondary">Female</Text>
-              <Title level={2} style={{ margin: "8px 0" }}>
-                {
-                  data.filter(
-                    (user) => normalizeGender(user.gender) === "Female"
-                  ).length
-                }
-              </Title>
-              <Badge status="pink" text="Users" />
-            </Flex>
-          </Card>
-        </Col>
-      </Row>
+            </div>
+          </div>
 
-      {/* User table */}
-      <Card>
-        <TableComponent
-          data={data}
-          columns={columns.filter((col) => !col.hidden)}
-          loading={loading}
-          setData={setData}
-          onSelectRowKey={onSelectRowKey}
-          pagination={{
-            defaultPageSize: 10,
-            showSizeChanger: true,
-            pageSizeOptions: ["10", "20", "50"],
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} items`,
-          }}
-          rowKey="userId"
-          scroll={{ x: "max-content" }}
-        />
-      </Card>
+          {/* Filters Row */}
+          <div className="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <div className="flex flex-wrap justify-between items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Text type="secondary">Role:</Text>
+                <Select
+                  defaultValue="all"
+                  style={{ width: 120 }}
+                  onChange={(value) => {
+                    // Implement role filter if needed
+                  }}
+                  options={ROLE_SET.map((role) => ({
+                    value: role,
+                    label: transformString(role),
+                  }))}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  icon={<ReloadOutlined spin={loading} />}
+                  onClick={() => {
+                    setLoading(true);
+                    getAllUsers().finally(() => setLoading(false));
+                  }}
+                  className="ml-2"
+                >
+                  Refresh
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {loading ? (
+            <TableSkeleton />
+          ) : data.length === 0 ? (
+            <Empty
+              description="No users found"
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+          ) : (
+            <Table
+              dataSource={data}
+              columns={columns}
+              rowKey="userId"
+              pagination={{ pageSize: 10 }}
+              className="border rounded-lg overflow-hidden"
+              expandable={{
+                expandedRowRender: (record) => (
+                  <div className="py-3 px-4 bg-gray-50 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+                      <div>
+                        <p className="text-gray-500 mb-1 text-sm">Address</p>
+                        <p className="text-gray-800">
+                          {record.address || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 mb-1 text-sm">
+                          System Info
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <Tag icon={<CalendarOutlined />} color="blue">
+                            Created:{" "}
+                            {new Date(record.createdAt).toLocaleDateString()}
+                          </Tag>
+                          <Tag
+                            icon={
+                              record.verified ? (
+                                <CheckCircleOutlined />
+                              ) : (
+                                <CloseCircleOutlined />
+                              )
+                            }
+                            color={record.verified ? "green" : "red"}
+                          >
+                            {record.verified ? "Verified" : "Unverified"}
+                          </Tag>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 mb-1 text-sm">
+                          Last Updated
+                        </p>
+                        <Tag icon={<CalendarOutlined />} color="cyan">
+                          {new Date(record.updatedAt).toLocaleDateString()}
+                        </Tag>
+                      </div>
+                    </div>
+                  </div>
+                ),
+              }}
+            />
+          )}
+        </div>
+      </div>
 
       {/* User details modal */}
       <Modal
         title={
-          <Flex align="center" gap={8}>
-            {isEditMode ? (
-              <>
-                <EditOutlined />
-                <span>Edit User</span>
-              </>
-            ) : (
-              <>
-                <UserOutlined />
-                <span>User Details</span>
-              </>
-            )}
-          </Flex>
+          <div className="flex items-center gap-2">
+            <UserOutlined className="text-custom-green" />
+            <span>User Details</span>
+          </div>
         }
         open={isModalVisible}
         onCancel={() => {
@@ -1007,29 +1109,11 @@ export default function UserManagement() {
         footer={null}
         width={800}
         destroyOnClose
-        maskClosable={!isEditMode}
-        className="user-details-modal">
+        maskClosable={true}
+        className="user-details-modal"
+      >
         {renderUserDetails()}
       </Modal>
-
-      {/* Action buttons */}
-      <Flex justify="end" gap={12}>
-        <Button
-          type="primary"
-          onClick={() => {
-            // Implement add user functionality
-            message.info("Add user functionality will be implemented");
-          }}>
-          Add New User
-        </Button>
-        <Button
-          onClick={() => {
-            // Implement export functionality
-            message.info("Export functionality will be implemented");
-          }}>
-          Export Data
-        </Button>
-      </Flex>
-    </Flex>
+    </div>
   );
 }
