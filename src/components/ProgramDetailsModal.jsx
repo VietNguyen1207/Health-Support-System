@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Tag, Space, Skeleton, message, Popconfirm } from "antd";
+import {
+  Modal,
+  Button,
+  Tag,
+  Space,
+  Skeleton,
+  message,
+  Popconfirm,
+  Tooltip,
+} from "antd";
 import {
   CalendarOutlined,
   TeamOutlined,
@@ -7,6 +16,7 @@ import {
   LinkOutlined,
   UserOutlined,
   CloseCircleOutlined,
+  ArrowRightOutlined,
 } from "@ant-design/icons";
 import { useProgramStore } from "../stores/programStore";
 import { useAuthStore } from "../stores/authStore";
@@ -49,6 +59,9 @@ const ProgramDetailsModal = ({
       }
     };
   }, [isOpen]);
+
+  // Add this function to check if program is full
+  const isProgramFull = program && program.status === "FULL";
 
   const handleJoinProgram = async () => {
     if (!program || !user) return;
@@ -198,25 +211,30 @@ const ProgramDetailsModal = ({
         <div className="flex justify-end gap-3">
           <Button onClick={onClose}>Close</Button>
           {!registered ? (
-            <Button
-              type="primary"
-              className="bg-primary-green hover:bg-primary-green/90"
-              onClick={handleJoinProgram}
-              loading={registering}
-              disabled={
-                !user ||
-                !(user.studentId || user.studentInfo?.studentId) ||
-                registering ||
-                (displayProgram && displayProgram.status === "FULL") ||
-                (displayProgram && displayProgram.studentStatus === "JOINED")
+            <Tooltip
+              title={
+                isProgramFull
+                  ? "This program is currently full"
+                  : "Join this program"
               }
             >
-              {displayProgram && displayProgram.status === "FULL"
-                ? "Program Full"
-                : displayProgram && displayProgram.studentStatus === "JOINED"
-                ? "Already Registered"
-                : "Join Program"}
-            </Button>
+              <Button
+                type="primary"
+                onClick={handleJoinProgram}
+                loading={registering}
+                disabled={isProgramFull}
+                className={`w-full bg-primary-green hover:bg-primary-green/90 flex items-center justify-center gap-2 group h-11 rounded-xl shadow-sm ${
+                  isProgramFull ? "opacity-60 cursor-not-allowed" : ""
+                }`}
+              >
+                <span className="text-sm font-medium">
+                  {isProgramFull ? "Program Full" : "Join Program"}
+                </span>
+                {!isProgramFull && (
+                  <ArrowRightOutlined className="transition-transform duration-300 group-hover:translate-x-1" />
+                )}
+              </Button>
+            </Tooltip>
           ) : (
             <div className="flex gap-2">
               {displayProgram &&

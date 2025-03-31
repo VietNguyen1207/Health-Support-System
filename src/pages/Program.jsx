@@ -38,7 +38,11 @@ const Program = () => {
   useEffect(() => {
     fetchPrograms().then((data) => {
       if (data) {
-        setLocalPrograms(data);
+        // Filter out programs with COMPLETED status
+        const filteredPrograms = data.filter(
+          (program) => program.status !== "COMPLETED"
+        );
+        setLocalPrograms(filteredPrograms);
       }
     });
   }, [fetchPrograms]);
