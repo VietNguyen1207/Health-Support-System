@@ -129,7 +129,8 @@ const UserDetailsSkeleton = () => (
 
 export default function UserManagement() {
   const [data, setData] = useState([]);
-  const { users, getAllUsers, getUserDetails } = useUserStore();
+  const { users, getAllUsers, getUserDetails, reactivateUser, deactivateUser } =
+    useUserStore();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -140,6 +141,9 @@ export default function UserManagement() {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuthStore();
   const [searchText, setSearchText] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [genderFilter, setGenderFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const handleViewDetail = async (record) => {
     try {
@@ -324,20 +328,43 @@ export default function UserManagement() {
       {
         title: "Actions",
         key: "actions",
-        width: "10%",
+        width: "15%",
         render: (_, record) =>
           user.userId !== record.userId && (
-            <Button
-              type="primary"
-              icon={<EyeOutlined />}
-              onClick={() => {
-                handleViewDetail(record);
-                setIsModalVisible(true);
-              }}
-              className="bg-custom-green hover:bg-custom-green/90"
-            >
-              View Details
-            </Button>
+            <Flex gap={8}>
+              <Button
+                type="primary"
+                icon={<EyeOutlined />}
+                onClick={() => {
+                  handleViewDetail(record);
+                  setIsModalVisible(true);
+                }}
+                className="bg-custom-green hover:bg-custom-green/90"
+                size="middle"
+              >
+                View
+              </Button>
+              {record.active ? (
+                <Button
+                  danger
+                  onClick={() => handleDeactivateUser(record.userId)}
+                  size="middle"
+                  icon={<CloseCircleOutlined />}
+                >
+                  Deactivate
+                </Button>
+              ) : (
+                <Button
+                  type="primary"
+                  className="bg-blue-500 hover:bg-blue-600"
+                  onClick={() => handleReactivateUser(record.userId)}
+                  size="middle"
+                  icon={<CheckCircleOutlined />}
+                >
+                  Reactivate
+                </Button>
+              )}
+            </Flex>
           ),
       },
     ],
@@ -392,28 +419,55 @@ export default function UserManagement() {
     console.log(selectedRowKeys, selectedRows);
   };
 
-  const onSearch = (searchTerm) => {
-    setSearchTerm(searchTerm);
+  const filterData = () => {
+    // Start with all users
+    let filteredData = filterDataByRole();
 
-    if (!searchTerm.trim()) {
-      initialData();
-      return;
+    // Apply role filter if not "all"
+    if (roleFilter !== "all") {
+      filteredData = filteredData.filter(
+        (user) => user.role.toUpperCase() === roleFilter.toUpperCase()
+      );
     }
 
-    const normalizedSearch = searchTerm.trim().toLowerCase();
+    // Apply gender filter if not "all"
+    if (genderFilter !== "all") {
+      filteredData = filteredData.filter(
+        (user) =>
+          normalizeGender(user.gender).toUpperCase() ===
+          genderFilter.toUpperCase()
+      );
+    }
 
-    // More comprehensive search across multiple fields
-    const filteredData = filterDataByRole().filter(
-      (item) =>
-        String(item.fullName).toLowerCase().includes(normalizedSearch) ||
-        String(item.email).toLowerCase().includes(normalizedSearch) ||
-        (item.phone && String(item.phone).includes(normalizedSearch)) ||
-        (item.phoneNumber &&
-          String(item.phoneNumber).includes(normalizedSearch))
-    );
+    // Apply status filter if not "all"
+    if (statusFilter !== "all") {
+      filteredData = filteredData.filter(
+        (user) => user.active === (statusFilter === "active")
+      );
+    }
 
-    setData(filteredData);
+    // Apply search filter if text exists
+    if (searchText) {
+      const normalizedSearch = searchText.trim().toLowerCase();
+      filteredData = filteredData.filter(
+        (item) =>
+          String(item.fullName).toLowerCase().includes(normalizedSearch) ||
+          String(item.email).toLowerCase().includes(normalizedSearch) ||
+          (item.phone && String(item.phone).includes(normalizedSearch)) ||
+          (item.phoneNumber &&
+            String(item.phoneNumber).includes(normalizedSearch))
+      );
+    }
+
+    return filteredData;
   };
+
+  // Update the useEffect to include statusFilter in dependencies
+  useEffect(() => {
+    if (users.length > 0 && !loading) {
+      setData(filterData());
+    }
+  }, [users, loading, roleFilter, genderFilter, statusFilter, searchText]);
 
   const handleUpdate = () => {
     setIsEditMode(true);
@@ -431,11 +485,49 @@ export default function UserManagement() {
     }
   };
 
-  // const handleDelete = () => {
-  //   // Implement delete logic
-  //   message.warning("Delete functionality will be implemented");
-  //   setIsModalVisible(false);
-  // };
+  const handleDeactivateUser = async (userId) => {
+    try {
+      setLoading(true);
+      await deactivateUser(userId);
+
+      // Update the selected user if the deactivated user is currently selected
+      if (selectedUser && selectedUser.userId === userId) {
+        setSelectedUser((prev) => ({ ...prev, active: false }));
+      }
+
+      // Fetch fresh user data to ensure everything is in sync
+      await getAllUsers();
+
+      message.success(`User ${userId} has been deactivated successfully.`);
+    } catch (error) {
+      console.error("Failed to deactivate user:", error);
+      message.error("Failed to deactivate user. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReactivateUser = async (userId) => {
+    try {
+      setLoading(true);
+      await reactivateUser(userId);
+
+      // Update the selected user if the reactivated user is currently selected
+      if (selectedUser && selectedUser.userId === userId) {
+        setSelectedUser((prev) => ({ ...prev, active: true }));
+      }
+
+      // Fetch fresh user data to ensure everything is in sync
+      await getAllUsers();
+
+      message.success(`User ${userId} has been reactivated successfully.`);
+    } catch (error) {
+      console.error("Failed to reactivate user:", error);
+      message.error("Failed to reactivate user. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderUserDetails = () => {
     if (!selectedUser) return null;
@@ -968,6 +1060,35 @@ export default function UserManagement() {
               </Card>
             )}
           </Flex>
+
+          {/* Add this section for activation/deactivation actions */}
+          <Flex justify="end" gap={12} style={{ marginTop: 16 }}>
+            {user.userId !== selectedUser.userId &&
+              (selectedUser.active ? (
+                <Button
+                  danger
+                  icon={<CloseCircleOutlined />}
+                  onClick={() => {
+                    handleDeactivateUser(selectedUser.userId);
+                    setIsModalVisible(false);
+                  }}
+                >
+                  Deactivate User
+                </Button>
+              ) : (
+                <Button
+                  type="primary"
+                  className="bg-blue-500 hover:bg-blue-600"
+                  icon={<CheckCircleOutlined />}
+                  onClick={() => {
+                    handleReactivateUser(selectedUser.userId);
+                    setIsModalVisible(false);
+                  }}
+                >
+                  Reactivate User
+                </Button>
+              ))}
+          </Flex>
         </Tabs.TabPane>
       </Tabs>
     );
@@ -992,6 +1113,7 @@ export default function UserManagement() {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 className="w-64"
+                allowClear
               />
             </div>
           </div>
@@ -999,19 +1121,56 @@ export default function UserManagement() {
           {/* Filters Row */}
           <div className="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
             <div className="flex flex-wrap justify-between items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Text type="secondary">Role:</Text>
-                <Select
-                  defaultValue="all"
-                  style={{ width: 120 }}
-                  onChange={(value) => {
-                    // Implement role filter if needed
-                  }}
-                  options={ROLE_SET.map((role) => ({
-                    value: role,
-                    label: transformString(role),
-                  }))}
-                />
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Text type="secondary">Role:</Text>
+                  <Select
+                    defaultValue="all"
+                    value={roleFilter}
+                    style={{ width: 140 }}
+                    onChange={(value) => {
+                      setRoleFilter(value);
+                    }}
+                    options={ROLE_SET.map((role) => ({
+                      value: role,
+                      label: transformString(role),
+                    }))}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Text type="secondary">Gender:</Text>
+                  <Select
+                    defaultValue="all"
+                    value={genderFilter}
+                    style={{ width: 120 }}
+                    onChange={(value) => {
+                      setGenderFilter(value);
+                    }}
+                    options={[
+                      { value: "all", label: "All" },
+                      { value: "MALE", label: "Male" },
+                      { value: "FEMALE", label: "Female" },
+                    ]}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Text type="secondary">Status:</Text>
+                  <Select
+                    defaultValue="all"
+                    value={statusFilter}
+                    style={{ width: 120 }}
+                    onChange={(value) => {
+                      setStatusFilter(value);
+                    }}
+                    options={[
+                      { value: "all", label: "All" },
+                      { value: "active", label: "Active" },
+                      { value: "inactive", label: "Inactive" },
+                    ]}
+                  />
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
@@ -1019,7 +1178,14 @@ export default function UserManagement() {
                   icon={<ReloadOutlined spin={loading} />}
                   onClick={() => {
                     setLoading(true);
-                    getAllUsers().finally(() => setLoading(false));
+                    getAllUsers().finally(() => {
+                      setLoading(false);
+                      // Reset filters when refreshing
+                      setRoleFilter("all");
+                      setGenderFilter("all");
+                      setStatusFilter("all");
+                      setSearchText("");
+                    });
                   }}
                   className="ml-2"
                 >

@@ -125,7 +125,7 @@ const AddProgram = () => {
 
       await createProgram(newProgram);
       message.success("Program created successfully!");
-      navigate("/manager/program");
+      navigate("/manager/programs");
     } catch (error) {
       console.error("Creation error:", error);
       message.error(
