@@ -163,6 +163,7 @@ const UpdateProgram = () => {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [filterType, setFilterType] = useState("All");
   const [sortOrder, setSortOrder] = useState("newest");
+  const [filterStatus, setFilterStatus] = useState("All");
 
   // New states for participants
   const [participantsDrawerVisible, setParticipantsDrawerVisible] =
@@ -241,6 +242,11 @@ const UpdateProgram = () => {
     // Apply type filter
     if (filterType !== "All") {
       filtered = filtered.filter((program) => program.type === filterType);
+    }
+
+    // Apply status filter
+    if (filterStatus !== "All") {
+      filtered = filtered.filter((program) => program.status === filterStatus);
     }
 
     // Apply search filter
@@ -380,6 +386,14 @@ const UpdateProgram = () => {
           color = "orange";
           icon = <TeamOutlined />;
           text = "Full";
+        } else if (status === "IN_PROGRESS") {
+          color = "blue";
+          icon = <ClockCircleOutlined />;
+          text = "In Progress";
+        } else if (status === "COMPLETED") {
+          color = "purple";
+          icon = <CheckCircleOutlined />;
+          text = "Completed";
         }
 
         return (
@@ -390,6 +404,8 @@ const UpdateProgram = () => {
       },
       filters: [
         { text: "Active", value: "ACTIVE" },
+        { text: "In Progress", value: "IN_PROGRESS" },
+        { text: "Completed", value: "COMPLETED" },
         { text: "Full", value: "FULL" },
         { text: "Closed", value: "CLOSED" },
       ],
@@ -549,6 +565,21 @@ const UpdateProgram = () => {
                   ]}
                   value={filterType}
                   onChange={setFilterType}
+                  className="bg-white"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Text type="secondary">Status:</Text>
+                <Segmented
+                  options={[
+                    { label: "All", value: "All" },
+                    { label: "Active", value: "ACTIVE" },
+                    { label: "In Progress", value: "IN_PROGRESS" },
+                    { label: "Completed", value: "COMPLETED" },
+                  ]}
+                  value={filterStatus}
+                  onChange={setFilterStatus}
                   className="bg-white"
                 />
               </div>
@@ -752,12 +783,24 @@ const UpdateProgram = () => {
                       color={
                         selectedProgram?.status === "ACTIVE"
                           ? "green"
+                          : selectedProgram?.status === "IN_PROGRESS"
+                          ? "blue"
+                          : selectedProgram?.status === "COMPLETED"
+                          ? "purple"
                           : selectedProgram?.status === "FULL"
                           ? "orange"
                           : "red"
                       }
                     >
-                      {selectedProgram?.status}
+                      {selectedProgram?.status === "ACTIVE"
+                        ? "Active"
+                        : selectedProgram?.status === "IN_PROGRESS"
+                        ? "In Progress"
+                        : selectedProgram?.status === "COMPLETED"
+                        ? "Completed"
+                        : selectedProgram?.status === "FULL"
+                        ? "Full"
+                        : "Closed"}
                     </Tag>
                   </div>
                 </div>
