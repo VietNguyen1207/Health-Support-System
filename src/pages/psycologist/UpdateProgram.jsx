@@ -13,6 +13,12 @@ import {
   Typography,
   Segmented,
   Empty,
+  Spin,
+  Progress,
+  Drawer,
+  Avatar,
+  Divider,
+  Space,
 } from "antd";
 import {
   EditOutlined,
@@ -26,14 +32,26 @@ import {
   CloseCircleOutlined,
   SortAscendingOutlined,
   SortDescendingOutlined,
+  ExclamationCircleOutlined,
+  UserOutlined,
+  EnvironmentOutlined,
+  BulbOutlined,
+  EyeOutlined,
+  RightOutlined,
+  PhoneOutlined,
+  MailOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 import { useProgramStore } from "../../stores/programStore";
 import UpdateProgramModal from "../../components/UpdateProgramModal";
+import { useNavigate } from "react-router-dom";
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
 
 const UpdateProgram = () => {
-  const { fetchPrograms, loading } = useProgramStore();
+  const navigate = useNavigate();
+  const { fetchPrograms, loading, fetchProgramParticipants } =
+    useProgramStore();
   const [programs, setPrograms] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -41,6 +59,12 @@ const UpdateProgram = () => {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [filterType, setFilterType] = useState("All");
   const [sortOrder, setSortOrder] = useState("newest");
+
+  // New states for participants
+  const [participantsDrawerVisible, setParticipantsDrawerVisible] =
+    useState(false);
+  const [participants, setParticipants] = useState([]);
+  const [loadingParticipants, setLoadingParticipants] = useState(false);
 
   // Fetch programs on component mount
   useEffect(() => {
@@ -60,33 +84,6 @@ const UpdateProgram = () => {
     }
   };
 
-  // Handle program deletion
-  // const handleDelete = (programId) => {
-  //   Modal.confirm({
-  //     title: "Delete Program",
-  //     icon: <ExclamationCircleOutlined className="text-red-500" />,
-  //     content: (
-  //       <div>
-  //         <p className="text-gray-700 mb-2">
-  //           Are you sure you want to delete this program?
-  //         </p>
-  //         <p className="text-red-500 text-sm">
-  //           This action cannot be undone and will remove all participant data.
-  //         </p>
-  //       </div>
-  //     ),
-  //     okText: "Yes, Delete",
-  //     okType: "danger",
-  //     okButtonProps: { className: "bg-red-500 hover:bg-red-600" },
-  //     cancelText: "Cancel",
-  //     className: "delete-confirmation-modal",
-  //     onOk: async () => {
-  //       message.info("Delete functionality will be implemented");
-  //       // TODO: Implement delete API call
-  //     },
-  //   });
-  // };
-
   // Handle program update
   const handleUpdate = (program) => {
     if (!program || !program.programID) {
@@ -95,6 +92,30 @@ const UpdateProgram = () => {
     }
     setSelectedProgram(program);
     setUpdateModalVisible(true);
+  };
+
+  // New function to handle viewing participants
+  const handleViewParticipants = async (program, e) => {
+    e.stopPropagation(); // Prevent row expansion when clicking the button
+
+    if (!program || !program.programID) {
+      message.error("Invalid program selected");
+      return;
+    }
+
+    setSelectedProgram(program);
+    setLoadingParticipants(true);
+    setParticipantsDrawerVisible(true);
+
+    try {
+      const data = await fetchProgramParticipants(program.programID);
+      setParticipants(data);
+    } catch (error) {
+      message.error("Failed to fetch program participants");
+      console.error(error);
+    } finally {
+      setLoadingParticipants(false);
+    }
   };
 
   // Handle successful updates
@@ -123,7 +144,13 @@ const UpdateProgram = () => {
       filtered = filtered.filter(
         (program) =>
           program.title.toLowerCase().includes(searchText.toLowerCase()) ||
-          program.description.toLowerCase().includes(searchText.toLowerCase())
+          program.description
+            .toLowerCase()
+            .includes(searchText.toLowerCase()) ||
+          program.programID.toLowerCase().includes(searchText.toLowerCase()) ||
+          program.departmentName
+            ?.toLowerCase()
+            .includes(searchText.toLowerCase())
       );
     }
 
@@ -144,123 +171,90 @@ const UpdateProgram = () => {
 
   const filteredPrograms = getFilteredPrograms();
 
-  // Stats cards data
-  const stats = [
-    {
-      title: "Total Programs",
-      value: programs.length,
-      icon: <CalendarOutlined className="text-blue-500" />,
-      color: "bg-blue-50",
-    },
-    {
-      title: "Active Programs",
-      value: programs.filter((p) => p.status === "ACTIVE").length,
-      icon: <CheckCircleOutlined className="text-green-500" />,
-      color: "bg-green-50",
-    },
-    {
-      title: "Full Programs",
-      value: programs.filter((p) => p.status === "FULL").length,
-      icon: <TeamOutlined className="text-orange-500" />,
-      color: "bg-orange-50",
-    },
-  ];
+  // Format date helper function
+  const formatDate = (dateString) => {
+    return dateString
+      ? new Date(dateString).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "Not specified";
+  };
 
   // Define table columns
   const columns = [
     {
-      title: "Program Title",
+      title: "Title",
       dataIndex: "title",
       key: "title",
       width: "25%",
       render: (text, record) => (
-        <div className="py-2">
-          <div className="font-medium text-gray-800 flex items-center">
-            {text}
-            {record.type === "ONLINE" && (
-              <Badge
-                count="Online"
-                style={{ backgroundColor: "#1890ff" }}
-                className="ml-2"
-              />
-            )}
-          </div>
-          <div className="text-sm text-gray-500 mt-1 line-clamp-2">
-            {record.description}
-          </div>
-          <div className="mt-2 flex flex-wrap gap-1">
-            {record.tags &&
-              record.tags.map((tag) => (
-                <Tag key={tag.tagId} color="blue" className="text-xs py-0.5">
-                  {tag.tagName}
-                </Tag>
-              ))}
+        <div>
+          <div className="font-medium">{text}</div>
+          <div className="text-xs text-gray-500 mt-1">
+            ID: {record.programID}
           </div>
         </div>
       ),
+      filteredValue: searchText ? [searchText] : null,
+      onFilter: (value, record) => {
+        return (
+          record.title.toLowerCase().includes(value.toLowerCase()) ||
+          record.programID.toLowerCase().includes(value.toLowerCase()) ||
+          record.description.toLowerCase().includes(value.toLowerCase()) ||
+          record.departmentName?.toLowerCase().includes(value.toLowerCase())
+        );
+      },
     },
     {
-      title: "Schedule",
-      dataIndex: "weeklySchedule",
-      key: "schedule",
-      width: "20%",
-      render: (schedule, record) => (
-        <div className="text-sm">
-          <div className="flex items-center mb-1">
-            <CalendarOutlined className="mr-2 text-blue-500" />
-            <span className="font-medium">{schedule.weeklyAt}s</span>
-          </div>
-          <div className="flex items-center text-gray-500">
-            <ClockCircleOutlined className="mr-2 text-gray-400" />
-            {schedule.startTime.substring(0, 5)} -{" "}
-            {schedule.endTime.substring(0, 5)}
-          </div>
-          <div className="mt-2 text-xs text-gray-500">
-            Starts: {new Date(record.startDate).toLocaleDateString()}
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Department",
-      dataIndex: "departmentName",
-      key: "department",
-      width: "15%",
-      render: (dept) => (
-        <div className="text-sm">
-          <div className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-center">
-            {dept}
-          </div>
-        </div>
-      ),
+      title: "Type",
+      dataIndex: "type",
+      key: "type",
+      render: (type) => {
+        const colorMap = {
+          ONLINE: "blue",
+          OFFLINE: "green",
+        };
+        return <Tag color={colorMap[type] || "default"}>{type}</Tag>;
+      },
+      filters: [
+        { text: "Online", value: "ONLINE" },
+        { text: "Offline", value: "OFFLINE" },
+      ],
+      onFilter: (value, record) => record.type === value,
     },
     {
       title: "Participants",
       key: "participants",
-      width: "15%",
       render: (_, record) => {
         const percentage =
           (record.currentParticipants / record.maxParticipants) * 100;
-        let color = "bg-green-500";
-        if (percentage >= 90) color = "bg-red-500";
-        else if (percentage >= 70) color = "bg-orange-500";
-
         return (
-          <div className="text-sm">
-            <div className="flex items-center justify-between mb-1">
-              <span className="font-medium">
-                {record.currentParticipants}/{record.maxParticipants}
-              </span>
-              <span className="text-xs text-gray-500">
-                {Math.round(percentage)}%
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className={`${color} h-2 rounded-full`}
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
+          <div className="flex items-center gap-2">
+            <Tooltip
+              title={`${record.currentParticipants} out of ${record.maxParticipants} participants`}
+            >
+              <div className="w-32">
+                <Progress
+                  percent={percentage}
+                  size="small"
+                  status={percentage === 100 ? "success" : "active"}
+                  format={() =>
+                    `${record.currentParticipants}/${record.maxParticipants}`
+                  }
+                />
+              </div>
+            </Tooltip>
+            <Button
+              type="text"
+              size="small"
+              icon={<TeamOutlined />}
+              onClick={(e) => handleViewParticipants(record, e)}
+              className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+            >
+              View
+            </Button>
           </div>
         );
       },
@@ -269,201 +263,449 @@ const UpdateProgram = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: "10%",
       render: (status) => {
-        const colorMap = {
-          ACTIVE: { color: "green", icon: <CheckCircleOutlined /> },
-          FULL: { color: "orange", icon: <TeamOutlined /> },
-          CLOSED: { color: "red", icon: <CloseCircleOutlined /> },
-        };
-        const statusInfo = colorMap[status] || { color: "default", icon: null };
+        let color = "green";
+        let icon = <CheckCircleOutlined />;
+        let text = "Active";
+
+        if (status === "CLOSED") {
+          color = "red";
+          icon = <CloseCircleOutlined />;
+          text = "Closed";
+        } else if (status === "FULL") {
+          color = "orange";
+          icon = <TeamOutlined />;
+          text = "Full";
+        }
 
         return (
-          <Tag
-            color={statusInfo.color}
-            icon={statusInfo.icon}
-            className="px-2 py-1 flex items-center w-fit">
-            {status.charAt(0) + status.slice(1).toLowerCase()}
+          <Tag color={color} icon={icon}>
+            {text}
           </Tag>
         );
       },
+      filters: [
+        { text: "Active", value: "ACTIVE" },
+        { text: "Full", value: "FULL" },
+        { text: "Closed", value: "CLOSED" },
+      ],
+      onFilter: (value, record) => record.status === value,
+    },
+    {
+      title: "Schedule",
+      key: "schedule",
+      render: (_, record) => (
+        <div className="text-xs">
+          <div>
+            <CalendarOutlined className="mr-1 text-green-500" />
+            Start: {formatDate(record.startDate)}
+          </div>
+          <div className="mt-1">
+            <ClockCircleOutlined className="mr-1 text-blue-500" />
+            {record.weeklySchedule?.weeklyAt || "N/A"}:{" "}
+            {record.weeklySchedule?.startTime?.substring(0, 5) || "N/A"} -{" "}
+            {record.weeklySchedule?.endTime?.substring(0, 5) || "N/A"}
+          </div>
+        </div>
+      ),
     },
     {
       title: "Actions",
       key: "actions",
-      width: "10%",
       render: (_, record) => (
-        <Dropdown
-          overlay={
-            <Menu>
-              <Menu.Item
-                key="edit"
-                icon={<EditOutlined className="text-blue-500" />}
-                onClick={() => handleUpdate(record)}>
-                Edit Program
-              </Menu.Item>
-              {/* <Menu.Item
-                key="delete"
-                icon={<DeleteOutlined className="text-red-500" />}
-                onClick={() => handleDelete(record.programID)}
-                danger
-              >
-                Delete Program
-              </Menu.Item> */}
-            </Menu>
-          }
-          trigger={["click"]}>
-          <Button
-            icon={<MoreOutlined />}
-            className="border-none shadow-none hover:bg-gray-100 rounded-full"
+        <Button
+          type="primary"
+          icon={<EditOutlined />}
+          onClick={() => handleUpdate(record)}
+          className="bg-custom-green hover:bg-custom-green/90"
+        >
+          Edit
+        </Button>
+      ),
+    },
+  ];
+
+  // Participant table columns for the drawer
+  const participantColumns = [
+    {
+      title: "Student",
+      dataIndex: "fullName",
+      key: "fullName",
+      render: (text, record) => (
+        <div className="flex items-center">
+          <Avatar
+            icon={<UserOutlined />}
+            className="mr-2"
+            style={{
+              backgroundColor: record.gender === "MALE" ? "#1890ff" : "#ff6b81",
+            }}
           />
-        </Dropdown>
+          <div>
+            <div className="font-medium">{text}</div>
+            <div className="text-xs text-gray-500">ID: {record.studentId}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Contact",
+      dataIndex: "email",
+      key: "contact",
+      render: (email, record) => (
+        <div className="text-sm">
+          <div className="flex items-center">
+            <MailOutlined className="mr-2 text-gray-400" />
+            {email || "N/A"}
+          </div>
+          <div className="flex items-center mt-1">
+            <PhoneOutlined className="mr-2 text-gray-400" />
+            {record.phone || "N/A"}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "School",
+      dataIndex: "schoolName",
+      key: "school",
+      render: (text, record) => (
+        <div>
+          <div>{text || "N/A"}</div>
+          <div className="text-xs text-gray-500">
+            Grade {record.grade} - {record.className}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Assessment Scores",
+      key: "scores",
+      render: (_, record) => (
+        <div className="flex flex-wrap gap-1">
+          {record.anxietyScore !== undefined && (
+            <Tooltip title="Anxiety Score">
+              <Tag color="blue">Anxiety: {record.anxietyScore}</Tag>
+            </Tooltip>
+          )}
+          {record.depressionScore !== undefined && (
+            <Tooltip title="Depression Score">
+              <Tag color="purple">Depression: {record.depressionScore}</Tag>
+            </Tooltip>
+          )}
+          {record.stressScore !== undefined && (
+            <Tooltip title="Stress Score">
+              <Tag color="orange">Stress: {record.stressScore}</Tag>
+            </Tooltip>
+          )}
+        </div>
       ),
     },
   ];
 
   return (
-    <div className="p-6">
-      {/* Header Section */}
-      <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center">
-        {/* <div>
-          <Title level={2} className="text-gray-800 m-0">
-            Program Management
-          </Title>
-          <Text className="text-gray-600">
-            Manage and monitor all available programs
-          </Text>
-        </div> */}
-        <Button
-          type="primary"
-          icon={<ReloadOutlined spin={refreshing} />}
-          onClick={fetchProgramsList}
-          loading={loading}
-          className="bg-primary-green hover:bg-primary-green/90 mt-4 md:mt-0">
-          Refresh List
-        </Button>
-      </div>
+    <div className="">
+      <div className="">
+        <div>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div>
+              <Title level={2} className="m-0">
+                Program Management
+              </Title>
+              <Text type="secondary">View and update existing programs</Text>
+            </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        {stats.map((stat, index) => (
-          <Card
-            key={index}
-            className={`${stat.color} border-none shadow-sm hover:shadow-md transition-shadow`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">{stat.title}</p>
-                <p className="text-2xl font-semibold mt-1">{stat.value}</p>
+            <div className="flex gap-3">
+              <Input
+                placeholder="Search programs..."
+                prefix={<SearchOutlined className="text-gray-400" />}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="w-64"
+              />
+              <Button
+                type="primary"
+                onClick={() => navigate("/add-program")}
+                className="bg-custom-green hover:bg-custom-green/90"
+              >
+                Create New Program
+              </Button>
+            </div>
+          </div>
+
+          {/* Filters Row */}
+          <div className="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <div className="flex flex-wrap justify-between items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Text type="secondary">Type:</Text>
+                <Segmented
+                  options={[
+                    { label: "All", value: "All" },
+                    { label: "Online", value: "ONLINE" },
+                    { label: "Offline", value: "OFFLINE" },
+                  ]}
+                  value={filterType}
+                  onChange={setFilterType}
+                  className="bg-white"
+                />
               </div>
-              <div className="p-3 rounded-full bg-white/80 shadow-sm">
-                {stat.icon}
+
+              <div className="flex items-center gap-2">
+                <Text type="secondary">Sort:</Text>
+                <Segmented
+                  options={[
+                    {
+                      label: (
+                        <Tooltip title="Newest First">
+                          <div className="flex items-center">
+                            <SortDescendingOutlined />
+                          </div>
+                        </Tooltip>
+                      ),
+                      value: "newest",
+                    },
+                    {
+                      label: (
+                        <Tooltip title="Oldest First">
+                          <div className="flex items-center">
+                            <SortAscendingOutlined />
+                          </div>
+                        </Tooltip>
+                      ),
+                      value: "oldest",
+                    },
+                    {
+                      label: (
+                        <Tooltip title="Alphabetical">
+                          <div className="flex items-center">A-Z</div>
+                        </Tooltip>
+                      ),
+                      value: "alphabetical",
+                    },
+                  ]}
+                  value={sortOrder}
+                  onChange={setSortOrder}
+                  className="bg-white"
+                />
+
+                <Button
+                  icon={<ReloadOutlined spin={refreshing} />}
+                  onClick={fetchProgramsList}
+                  className="ml-2"
+                >
+                  Refresh
+                </Button>
               </div>
             </div>
-          </Card>
-        ))}
+          </div>
+
+          {loading ? (
+            <div className="text-center py-12">
+              <Spin size="large" />
+              <div className="mt-4 text-gray-500">Loading programs...</div>
+            </div>
+          ) : programs.length === 0 ? (
+            <Empty
+              description="No programs found"
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+          ) : (
+            <Table
+              dataSource={filteredPrograms}
+              columns={columns}
+              rowKey="programID"
+              pagination={{ pageSize: 10 }}
+              className="border rounded-lg overflow-hidden"
+              expandable={{
+                expandedRowRender: (record) => (
+                  <div className="py-3 px-4 bg-gray-50 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+                      <div>
+                        <p className="text-gray-500 mb-1 text-sm">
+                          Description
+                        </p>
+                        <p className="text-gray-800">{record.description}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 mb-1 text-sm">Details</p>
+                        <div className="flex flex-wrap gap-2">
+                          <Tag icon={<ClockCircleOutlined />} color="blue">
+                            {record.duration} Weeks
+                          </Tag>
+                          <Tag icon={<UserOutlined />} color="purple">
+                            {record.facilitatorName}
+                          </Tag>
+                          {record.departmentName && (
+                            <Tag icon={<EnvironmentOutlined />} color="cyan">
+                              {record.departmentName}
+                            </Tag>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 mb-1 text-sm">Tags</p>
+                        <div className="flex flex-wrap gap-2">
+                          {record.tags &&
+                            record.tags.map((tag, index) => (
+                              <Tag key={index} color="gold">
+                                {tag.tagName || tag}
+                              </Tag>
+                            ))}
+                          {(!record.tags || record.tags.length === 0) && (
+                            <Text type="secondary">No tags available</Text>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ),
+              }}
+            />
+          )}
+        </div>
       </div>
 
-      {/* Search and Filters Bar */}
-      <Card className="mb-6 shadow-sm">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-            <Input
-              placeholder="Search programs..."
-              prefix={<SearchOutlined className="text-gray-400" />}
-              className="w-full sm:w-64"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              allowClear
-            />
-            <Segmented
-              options={[
-                { label: "All Types", value: "All" },
-                { label: "Online", value: "ONLINE" },
-                { label: "Offline", value: "OFFLINE" },
-              ]}
-              value={filterType}
-              onChange={setFilterType}
-              className="bg-gray-100 p-1 rounded-lg"
-            />
-          </div>
-
+      {/* Participants Drawer */}
+      <Drawer
+        title={
           <div className="flex items-center gap-2">
-            <Text className="text-gray-500 mr-2">Sort by:</Text>
-            <Segmented
-              options={[
-                {
-                  label: (
-                    <Tooltip title="Newest First">
-                      <div className="flex items-center">
-                        <SortDescendingOutlined />
-                        <span className="ml-1 hidden sm:inline">Newest</span>
-                      </div>
-                    </Tooltip>
-                  ),
-                  value: "newest",
-                },
-                {
-                  label: (
-                    <Tooltip title="Oldest First">
-                      <div className="flex items-center">
-                        <SortAscendingOutlined />
-                        <span className="ml-1 hidden sm:inline">Oldest</span>
-                      </div>
-                    </Tooltip>
-                  ),
-                  value: "oldest",
-                },
-                {
-                  label: (
-                    <Tooltip title="Alphabetical">
-                      <div className="flex items-center">
-                        <span className="font-bold">A-Z</span>
-                      </div>
-                    </Tooltip>
-                  ),
-                  value: "alphabetical",
-                },
-              ]}
-              value={sortOrder}
-              onChange={setSortOrder}
-              className="bg-gray-100 p-1 rounded-lg"
-            />
+            <TeamOutlined className="text-custom-green" />
+            <span>{selectedProgram?.title} - Participants</span>
           </div>
-        </div>
-      </Card>
+        }
+        placement="right"
+        width={900}
+        onClose={() => setParticipantsDrawerVisible(false)}
+        open={participantsDrawerVisible}
+        extra={
+          <Space>
+            <Button onClick={() => setParticipantsDrawerVisible(false)}>
+              Close
+            </Button>
+          </Space>
+        }
+      >
+        {loadingParticipants ? (
+          <div className="flex justify-center py-12">
+            <Spin size="large" />
+          </div>
+        ) : (
+          <div>
+            {/* Program Details Section */}
+            <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Text type="secondary">Start Date</Text>
+                  <div className="font-medium">
+                    {formatDate(selectedProgram?.startDate)}
+                  </div>
+                </div>
+                <div>
+                  <Text type="secondary">Facilitator</Text>
+                  <div className="font-medium">
+                    {selectedProgram?.facilitatorName}
+                  </div>
+                </div>
+                <div>
+                  <Text type="secondary">Department</Text>
+                  <div className="font-medium">
+                    {selectedProgram?.departmentName}
+                  </div>
+                </div>
+              </div>
 
-      {/* Programs Table */}
-      <Card className="shadow-sm">
-        <Table
-          columns={columns}
-          dataSource={filteredPrograms}
-          rowKey="programID"
-          loading={loading}
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: false,
-            showTotal: (total) => `Total ${total} programs`,
-            className: "pagination-custom",
-          }}
-          className="programs-table"
-          rowClassName="hover:bg-blue-50 transition-colors"
-          locale={{
-            emptyText: (
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description={
-                  <span className="text-gray-500">
-                    {searchText
-                      ? "No programs match your search"
-                      : "No programs available"}
-                  </span>
-                }
+              <Divider className="my-4" />
+
+              <div className="flex justify-between items-center">
+                <div>
+                  <Text type="secondary">Schedule</Text>
+                  <div className="font-medium">
+                    {selectedProgram?.weeklySchedule?.weeklyAt}s{" "}
+                    {selectedProgram?.weeklySchedule?.startTime?.substring(
+                      0,
+                      5
+                    )}{" "}
+                    -{" "}
+                    {selectedProgram?.weeklySchedule?.endTime?.substring(0, 5)}
+                  </div>
+                </div>
+                <div>
+                  <Text type="secondary">Duration</Text>
+                  <div className="font-medium">
+                    {selectedProgram?.duration} weeks
+                  </div>
+                </div>
+                <div>
+                  <Text type="secondary">Type</Text>
+                  <div>
+                    <Tag
+                      color={
+                        selectedProgram?.type === "ONLINE" ? "blue" : "green"
+                      }
+                    >
+                      {selectedProgram?.type}
+                    </Tag>
+                  </div>
+                </div>
+                <div>
+                  <Text type="secondary">Status</Text>
+                  <div>
+                    <Tag
+                      color={
+                        selectedProgram?.status === "ACTIVE"
+                          ? "green"
+                          : selectedProgram?.status === "FULL"
+                          ? "orange"
+                          : "red"
+                      }
+                    >
+                      {selectedProgram?.status}
+                    </Tag>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Participants Count Summary */}
+            <div className="mb-4 flex justify-between items-center">
+              <Title level={4} className="m-0">
+                <TeamOutlined className="mr-2" />
+                Participants ({participants?.enrolled?.length || 0})
+              </Title>
+              <Tag color="blue" className="px-3 py-1 text-sm">
+                {selectedProgram?.currentParticipants}/
+                {selectedProgram?.maxParticipants} enrolled
+              </Tag>
+            </div>
+
+            {/* Alert for no participants */}
+            {!participants?.enrolled || participants.enrolled.length === 0 ? (
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="flex items-start">
+                  <InfoCircleOutlined className="text-blue-500 text-lg mt-0.5 mr-3" />
+                  <div>
+                    <Text strong>No participants yet</Text>
+                    <div className="text-gray-600 mt-1">
+                      This program doesn't have any enrolled participants yet.
+                      Participants will appear here once they register.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Participants Table
+              <Table
+                dataSource={participants.enrolled}
+                columns={participantColumns}
+                rowKey="studentId"
+                pagination={{ pageSize: 10 }}
+                className="border rounded-lg overflow-hidden"
               />
-            ),
-          }}
-        />
-      </Card>
+            )}
+          </div>
+        )}
+      </Drawer>
 
+      {/* Update Program Modal using the UpdateProgramModal component */}
       <UpdateProgramModal
         visible={updateModalVisible}
         program={selectedProgram}
@@ -473,34 +715,6 @@ const UpdateProgram = () => {
         }}
         onSuccess={handleUpdateSuccess}
       />
-
-      {/* Add some custom styles */}
-      <style>{`
-        .programs-table .ant-table-thead > tr > th {
-          background-color: #f8fafc;
-          font-weight: 600;
-          color: #4b5563;
-        }
-        .programs-table .ant-table-tbody > tr:hover > td {
-          background-color: #f0f9ff;
-        }
-        .pagination-custom {
-          margin-top: 1rem;
-        }
-        .delete-confirmation-modal .ant-modal-content {
-          border-radius: 8px;
-        }
-        .custom-success-message {
-          display: flex;
-          align-items: center;
-        }
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
     </div>
   );
 };

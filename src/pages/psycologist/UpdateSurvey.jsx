@@ -351,7 +351,9 @@ const UpdateSurvey = () => {
                         </div>
                       </div>
                       <div>
-                        <p className="text-gray-500 mb-1 text-sm">Standard</p>
+                        <p className="text-gray-500 mb-1 text-sm">
+                          Survey Type
+                        </p>
                         <Tag color="gold">{record.standardType}</Tag>
                       </div>
                     </div>
