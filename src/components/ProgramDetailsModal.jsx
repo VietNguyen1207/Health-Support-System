@@ -123,7 +123,7 @@ const ProgramDetailsModal = ({
     try {
       setCancelling(true);
 
-      // Call the API to cancel program participation
+      // Call API to cancel program participation
       await cancelProgramParticipation(program.programID);
 
       // Update local state
@@ -161,7 +161,6 @@ const ProgramDetailsModal = ({
         }
       } catch (error) {
         console.error("Failed to fetch updated program details:", error);
-        // Keep the optimistic update if fetch fails
       }
     } catch (error) {
       console.error("Cancellation error:", error);
