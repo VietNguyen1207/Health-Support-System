@@ -45,6 +45,7 @@ const AddProgram = () => {
   const [psychologists, setPsychologists] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [dayOfWeekWarning, setDayOfWeekWarning] = useState(null);
+  const [selectedStartTime, setSelectedStartTime] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -497,6 +498,13 @@ const AddProgram = () => {
                           .map((_, i) => i)
                           .filter((minute) => minute !== 0 && minute !== 30);
                       }}
+                      onChange={(time) => {
+                        setSelectedStartTime(time);
+                        // Clear end time when start time changes
+                        if (form.getFieldValue("endTime")) {
+                          form.setFieldsValue({ endTime: null });
+                        }
+                      }}
                     />
                   </Form.Item>
 
@@ -545,6 +553,15 @@ const AddProgram = () => {
                             );
                           }
 
+                          // Enforce maximum duration of 2 hours (120 minutes)
+                          if (minutesDiff > 120) {
+                            return Promise.reject(
+                              new Error(
+                                "Program cannot exceed 2 hours in duration"
+                              )
+                            );
+                          }
+
                           return Promise.resolve();
                         },
                       }),
@@ -556,7 +573,52 @@ const AddProgram = () => {
                       placeholder="Select end time"
                       minuteStep={30}
                       hideDisabledOptions={true}
-                      disabledMinutes={() => {
+                      disabled={!selectedStartTime}
+                      disabledHours={() => {
+                        if (!selectedStartTime) return [];
+
+                        const startHour = selectedStartTime.hour();
+                        const allHours = Array.from({ length: 24 }).map(
+                          (_, i) => i
+                        );
+
+                        // Disable hours before start time and more than 2 hours after start time
+                        return allHours.filter(
+                          (hour) => hour < startHour || hour > startHour + 2
+                        );
+                      }}
+                      disabledMinutes={(selectedHour) => {
+                        if (!selectedStartTime) return [];
+
+                        const startHour = selectedStartTime.hour();
+                        const startMinute = selectedStartTime.minute();
+
+                        // If we're at the start hour, disable minutes before or equal to start minute
+                        if (selectedHour === startHour) {
+                          return Array.from({ length: 60 })
+                            .map((_, i) => i)
+                            .filter(
+                              (minute) =>
+                                minute <= startMinute ||
+                                (minute !== 0 && minute !== 30)
+                            );
+                        }
+
+                        // If we're at the hour + 2 (maximum), only allow 0 minute
+                        // (which means exactly 2 hours from start time)
+                        if (selectedHour === startHour + 2) {
+                          if (startMinute === 0) {
+                            return Array.from({ length: 60 })
+                              .map((_, i) => i)
+                              .filter((minute) => minute !== 0);
+                          } else if (startMinute === 30) {
+                            return Array.from({ length: 60 })
+                              .map((_, i) => i)
+                              .filter((minute) => minute !== 30);
+                          }
+                        }
+
+                        // For hours in between, only allow 0 and 30 minute marks
                         return Array.from({ length: 60 })
                           .map((_, i) => i)
                           .filter((minute) => minute !== 0 && minute !== 30);
