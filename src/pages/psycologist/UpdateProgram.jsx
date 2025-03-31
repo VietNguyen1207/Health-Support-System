@@ -122,7 +122,7 @@ const UpdateProgram = () => {
   const handleUpdateSuccess = () => {
     setUpdateModalVisible(false);
     setSelectedProgram(null);
-    fetchProgramsList(); // Refresh the programs list
+    fetchProgramsList();
     message.success({
       content: "Program updated successfully!",
       icon: <CheckCircleOutlined className="text-green-500" />,
