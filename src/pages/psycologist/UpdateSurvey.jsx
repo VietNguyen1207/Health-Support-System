@@ -16,6 +16,10 @@ import {
   Radio,
   Divider,
   Empty,
+  Progress,
+  Tooltip,
+  Space,
+  Badge,
 } from "antd";
 import {
   SearchOutlined,
@@ -25,6 +29,10 @@ import {
   ExclamationCircleOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
+  UserOutlined,
+  CalendarOutlined,
+  FileTextOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useSurveyStore } from "../../stores/surveyStore";
@@ -119,6 +127,20 @@ const UpdateSurvey = () => {
     }
   };
 
+  // Format date helper function
+  const formatDate = (dateString) => {
+    return dateString
+      ? dayjs(dateString).format("MMM DD, YYYY")
+      : "Not specified";
+  };
+
+  // Calculate completion percentage
+  const getCompletionPercentage = (completionString) => {
+    if (!completionString) return 0;
+    const [completed, total] = completionString.split("/").map(Number);
+    return Math.round((completed / total) * 100);
+  };
+
   // Table columns configuration
   const columns = [
     {
@@ -129,8 +151,13 @@ const UpdateSurvey = () => {
       render: (text, record) => (
         <div>
           <div className="font-medium">{text}</div>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 mt-1">
             ID: {record.id || record.surveyId}
+            {record.periodicID && (
+              <span className="ml-2 text-blue-500">
+                Period: {record.periodicID.split("_")[1] || "0"}
+              </span>
+            )}
           </div>
         </div>
       ),
@@ -148,22 +175,45 @@ const UpdateSurvey = () => {
       },
     },
     {
-      title: "Type",
-      dataIndex: "standardType",
-      key: "standardType",
-      render: (text) => {
-        const typeMap = {
-          GAD_7: { color: "blue", label: "Anxiety (GAD-7)" },
-          PHQ_9: { color: "purple", label: "Depression (PHQ-9)" },
-          PSS_10: { color: "orange", label: "Stress (PSS-10)" },
+      title: "Category",
+      dataIndex: "category",
+      key: "category",
+      render: (category) => {
+        const colorMap = {
+          ANXIETY: "blue",
+          DEPRESSION: "purple",
+          STRESS: "orange",
         };
-
-        const typeInfo = typeMap[text] || {
-          color: "default",
-          label: text || "Unknown",
-        };
-
-        return <Tag color={typeInfo.color}>{typeInfo.label}</Tag>;
+        return (
+          <Tag color={colorMap[category] || "default"}>
+            {category || "Unknown"}
+          </Tag>
+        );
+      },
+      filters: [
+        { text: "Anxiety", value: "ANXIETY" },
+        { text: "Depression", value: "DEPRESSION" },
+        { text: "Stress", value: "STRESS" },
+      ],
+      onFilter: (value, record) => record.category === value,
+    },
+    {
+      title: "Progress",
+      key: "studentComplete",
+      render: (_, record) => {
+        const percentage = getCompletionPercentage(record.studentComplete);
+        return (
+          <Tooltip title={`${record.studentComplete} students completed`}>
+            <div className="w-32">
+              <Progress
+                percent={percentage}
+                size="small"
+                status={percentage === 100 ? "success" : "active"}
+                format={() => record.studentComplete}
+              />
+            </div>
+          </Tooltip>
+        );
       },
     },
     {
@@ -191,20 +241,27 @@ const UpdateSurvey = () => {
           </Tag>
         );
       },
+      filters: [
+        { text: "Active", value: "ACTIVE" },
+        { text: "Inactive", value: "INACTIVE" },
+      ],
+      onFilter: (value, record) => record.status === value,
     },
     {
-      title: "Periodic",
-      dataIndex: "periodic",
-      key: "periodic",
-      render: (periodic) => <Tag color="blue">{periodic || 1}</Tag>,
-    },
-    {
-      title: "Questions",
-      key: "questions",
-      render: (_, record) => {
-        const count = record.questionList?.length || "N/A";
-        return <Tag color="cyan">{count} Questions</Tag>;
-      },
+      title: "Time Period",
+      key: "timePeriod",
+      render: (_, record) => (
+        <div className="text-xs">
+          <div>
+            <CalendarOutlined className="mr-1 text-green-500" />
+            Start: {formatDate(record.startDate)}
+          </div>
+          <div className="mt-1">
+            <CalendarOutlined className="mr-1 text-red-500" />
+            End: {formatDate(record.endDate)}
+          </div>
+        </div>
+      ),
     },
     {
       title: "Actions",
@@ -214,7 +271,8 @@ const UpdateSurvey = () => {
           type="primary"
           icon={<EditOutlined />}
           onClick={() => showDrawer(record)}
-          className="bg-custom-green hover:bg-custom-green/90">
+          className="bg-custom-green hover:bg-custom-green/90"
+        >
           Edit
         </Button>
       ),
@@ -228,9 +286,9 @@ const UpdateSurvey = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
               <Title level={2} className="m-0">
-                Manage Surveys
+                Survey Management
               </Title>
-              <Text type="secondary">Update existing surveys</Text>
+              <Text type="secondary">View and update existing surveys</Text>
             </div>
 
             <div className="flex gap-3">
@@ -244,7 +302,8 @@ const UpdateSurvey = () => {
               <Button
                 type="primary"
                 onClick={() => navigate("/create-test")}
-                className="bg-custom-green hover:bg-custom-green/90">
+                className="bg-custom-green hover:bg-custom-green/90"
+              >
                 Create New Survey
               </Button>
             </div>
@@ -267,6 +326,38 @@ const UpdateSurvey = () => {
               rowKey={(record) => record.id || record.surveyId}
               pagination={{ pageSize: 10 }}
               className="border rounded-lg overflow-hidden"
+              expandable={{
+                expandedRowRender: (record) => (
+                  <div className="py-3 px-4 bg-gray-50 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+                      <div>
+                        <p className="text-gray-500 mb-1 text-sm">
+                          Description
+                        </p>
+                        <p className="text-gray-800">{record.description}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 mb-1 text-sm">Details</p>
+                        <div className="flex flex-wrap gap-2">
+                          <Tag icon={<FileTextOutlined />} color="cyan">
+                            {record.numberOfQuestions} Questions
+                          </Tag>
+                          <Tag icon={<ClockCircleOutlined />} color="blue">
+                            {record.periodic} Week Period
+                          </Tag>
+                          <Tag icon={<UserOutlined />} color="purple">
+                            {record.createBy}
+                          </Tag>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 mb-1 text-sm">Standard</p>
+                        <Tag color="gold">{record.standardType}</Tag>
+                      </div>
+                    </div>
+                  </div>
+                ),
+              }}
             />
           )}
         </div>
@@ -287,11 +378,13 @@ const UpdateSurvey = () => {
               onClick={() => form.submit()}
               loading={submitting}
               className="bg-custom-green hover:bg-custom-green/90"
-              icon={<SaveOutlined />}>
+              icon={<SaveOutlined />}
+            >
               Save Changes
             </Button>
           </div>
-        }>
+        }
+      >
         {selectedSurvey && (
           <Form
             form={form}
@@ -306,24 +399,62 @@ const UpdateSurvey = () => {
                 ? dayjs(selectedSurvey.startDate)
                 : null,
               periodic: selectedSurvey.periodic || 1,
-            }}>
-            <div className="mb-4">
-              <Tag color="blue" className="mb-2">
-                Survey ID: {selectedSurvey.id || selectedSurvey.surveyId}
-              </Tag>
-              {selectedSurvey.category && (
-                <Tag color="purple" className="mb-2 ml-2">
-                  Category: {selectedSurvey.category}
+            }}
+          >
+            {/* Survey Details Summary */}
+            <div className="mb-4 bg-gray-50 p-3 rounded-lg">
+              <div className="flex flex-wrap gap-2 mb-3">
+                <Tag color="blue">
+                  ID: {selectedSurvey.id || selectedSurvey.surveyId}
                 </Tag>
+                {selectedSurvey.periodicID && (
+                  <Tag color="purple">
+                    Period ID: {selectedSurvey.periodicID}
+                  </Tag>
+                )}
+                <Tag color="orange">
+                  {selectedSurvey.category || "Unknown Category"}
+                </Tag>
+              </div>
+
+              {/* Student Completion Data */}
+              {selectedSurvey.studentComplete && (
+                <div className="mb-3">
+                  <Text type="secondary" className="block mb-1">
+                    <TeamOutlined className="mr-1" /> Student Completion:
+                  </Text>
+                  <Progress
+                    percent={getCompletionPercentage(
+                      selectedSurvey.studentComplete
+                    )}
+                    size="small"
+                    format={() => selectedSurvey.studentComplete}
+                  />
+                </div>
               )}
+
+              {/* Date Range */}
+              <div className="flex flex-wrap gap-4 text-sm">
+                <div>
+                  <CalendarOutlined className="mr-1 text-green-500" />
+                  Start: {formatDate(selectedSurvey.startDate)}
+                </div>
+                <div>
+                  <CalendarOutlined className="mr-1 text-red-500" />
+                  End: {formatDate(selectedSurvey.endDate)}
+                </div>
+                <div>
+                  <UserOutlined className="mr-1 text-blue-500" />
+                  Created by: {selectedSurvey.createBy || "Unknown"}
+                </div>
+              </div>
             </div>
 
             <Form.Item
               name="title"
               label="Survey Title"
-              rules={[
-                { required: true, message: "Please enter survey title" },
-              ]}>
+              rules={[{ required: true, message: "Please enter survey title" }]}
+            >
               <Input placeholder="Enter survey title" />
             </Form.Item>
 
@@ -332,7 +463,8 @@ const UpdateSurvey = () => {
               label="Description"
               rules={[
                 { required: true, message: "Please enter survey description" },
-              ]}>
+              ]}
+            >
               <TextArea rows={4} placeholder="Enter survey description" />
             </Form.Item>
 
@@ -342,7 +474,8 @@ const UpdateSurvey = () => {
               rules={[
                 { required: true, message: "Please select standard type" },
               ]}
-              tooltip="The type of standardized assessment this survey represents">
+              tooltip="The type of standardized assessment this survey represents"
+            >
               <Select placeholder="Select standard type">
                 {standardTypes.map((type) => (
                   <Option key={type.value} value={type.value}>
@@ -355,7 +488,8 @@ const UpdateSurvey = () => {
             <Form.Item
               name="status"
               label="Status"
-              rules={[{ required: true, message: "Please select status" }]}>
+              rules={[{ required: true, message: "Please select status" }]}
+            >
               <Radio.Group>
                 {statusOptions.map((option) => (
                   <Radio key={option.value} value={option.value}>
@@ -368,17 +502,19 @@ const UpdateSurvey = () => {
             <Form.Item
               name="startDate"
               label="Start Date"
-              rules={[{ required: true, message: "Please select start date" }]}>
+              rules={[{ required: true, message: "Please select start date" }]}
+            >
               <DatePicker className="w-full" />
             </Form.Item>
 
             <Form.Item
               name="periodic"
-              label="Periodic"
+              label="Periodic (weeks)"
               rules={[
                 { required: true, message: "Please enter periodic number" },
               ]}
-              tooltip="Period number for this survey">
+              tooltip="Number of weeks before the survey resets"
+            >
               <InputNumber min={1} className="w-full" />
             </Form.Item>
 
