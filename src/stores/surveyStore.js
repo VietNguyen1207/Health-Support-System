@@ -15,6 +15,8 @@ export const useSurveyStore = create((set, get) => ({
   ...initialState,
   questions: [],
   loadingQuestions: false,
+  surveyRecords: [],
+  loadingRecords: false,
 
   // Fetch all surveys
   fetchSurveys: async () => {
@@ -244,6 +246,73 @@ export const useSurveyStore = create((set, get) => ({
       const errorMessage =
         error.response?.data?.message ||
         "Failed to update survey. Please try again.";
+
+      set({ error: errorMessage, loading: false });
+      throw new Error(errorMessage);
+    }
+  },
+
+  // Fetch survey records 2.0
+  fetchSurveyRecords: async () => {
+    set({ loadingRecords: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+
+      const { data } = await api.get(`${SURVEY_URL}/record`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      set({ surveyRecords: data, loadingRecords: false });
+      return data;
+    } catch (error) {
+      console.error("Survey records fetch error details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      const errorMessage =
+        error.response?.status === 403
+          ? "You don't have permission to access survey records. Please log in again."
+          : error.response?.data?.message ||
+            error.message ||
+            "Failed to fetch survey records";
+
+      set({
+        error: errorMessage,
+        loadingRecords: false,
+        surveyRecords: [],
+      });
+      throw new Error(errorMessage);
+    }
+  },
+
+  // Fetch survey result details by period
+  fetchSurveyReportByPeriod: async (surveyId, periodId) => {
+    set({ loading: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      const { data } = await api.get(
+        `/surveys/results/report?surveyId=${surveyId}&periodID=${periodId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      set({ loading: false });
+      return data;
+    } catch (error) {
+      console.error("Error fetching survey period report:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch survey period report";
 
       set({ error: errorMessage, loading: false });
       throw new Error(errorMessage);
