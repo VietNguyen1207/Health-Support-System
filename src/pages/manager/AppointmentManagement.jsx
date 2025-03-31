@@ -13,6 +13,9 @@ import {
   Spin,
   Empty,
   Tooltip,
+  Skeleton,
+  Row,
+  Col,
 } from "antd";
 import {
   EyeOutlined,
@@ -33,6 +36,57 @@ import dayjs from "dayjs";
 import AppointmentDetail from "./AppointmentDetail";
 
 const { Title, Text } = Typography;
+
+// skeleton loading
+const AppointmentSkeletonLoading = () => (
+  <div>
+    <Card className="mb-6 border rounded-lg">
+      <Row gutter={[16, 16]}>
+        <Col span={24} md={8}>
+          <Skeleton.Input active style={{ width: "100%", height: 32 }} />
+        </Col>
+        <Col span={24} md={8}>
+          <Skeleton.Input active style={{ width: "100%", height: 32 }} />
+        </Col>
+        <Col span={24} md={8}>
+          <Row gutter={8}>
+            <Col span={12}>
+              <Skeleton.Button active style={{ width: "100%", height: 32 }} />
+            </Col>
+            <Col span={12}>
+              <Skeleton.Button active style={{ width: "100%", height: 32 }} />
+            </Col>
+          </Row>
+        </Col>
+      </Row>
+    </Card>
+
+    {[...Array(5)].map((_, i) => (
+      <Card key={i} className="mb-2">
+        <Row gutter={16} align="middle">
+          <Col span={4}>
+            <Skeleton.Input active style={{ width: "90%" }} />
+          </Col>
+          <Col span={5}>
+            <Skeleton paragraph={{ rows: 1 }} title={{ width: "60%" }} active />
+          </Col>
+          <Col span={5}>
+            <Skeleton paragraph={{ rows: 1 }} title={{ width: "60%" }} active />
+          </Col>
+          <Col span={4}>
+            <Skeleton paragraph={{ rows: 1 }} title={{ width: "80%" }} active />
+          </Col>
+          <Col span={3}>
+            <Skeleton.Button active shape="round" style={{ width: "90%" }} />
+          </Col>
+          <Col span={3}>
+            <Skeleton.Input active style={{ width: "90%" }} size="small" />
+          </Col>
+        </Row>
+      </Card>
+    ))}
+  </div>
+);
 
 function AppointmentManagement() {
   const {
@@ -369,10 +423,7 @@ function AppointmentManagement() {
       </Card>
 
       {loading ? (
-        <div className="text-center py-12">
-          <Spin size="large" />
-          <div className="mt-4 text-gray-500">Loading appointments...</div>
-        </div>
+        <AppointmentSkeletonLoading />
       ) : appointments?.length === 0 ? (
         <Empty
           description="No appointments found"

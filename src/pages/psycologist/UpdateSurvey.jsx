@@ -20,6 +20,9 @@ import {
   Tooltip,
   Space,
   Badge,
+  Skeleton,
+  Row,
+  Col,
 } from "antd";
 import {
   SearchOutlined,
@@ -41,6 +44,35 @@ import dayjs from "dayjs";
 const { TextArea } = Input;
 const { Option } = Select;
 const { Title, Text } = Typography;
+
+const SurveySkeletonLoading = () => (
+  <div>
+    <div className="mb-6">
+      <Skeleton.Input style={{ width: 300 }} active size="large" />
+      <Skeleton.Input style={{ width: 200, marginTop: 8 }} active />
+    </div>
+
+    <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-4">
+      <Skeleton.Button active style={{ width: 100, marginRight: 8 }} />
+      <Skeleton.Button active style={{ width: 100, marginRight: 8 }} />
+      <Skeleton.Button active style={{ width: 100 }} />
+    </div>
+
+    <Skeleton active paragraph={{ rows: 1 }} />
+
+    <Row gutter={[16, 16]} className="mt-4">
+      {[...Array(6)].map((_, i) => (
+        <Col span={24} key={i}>
+          <Skeleton.Input style={{ width: "100%", height: 50 }} active />
+          <div className="mt-2">
+            <Skeleton.Button active style={{ width: "40%", marginRight: 8 }} />
+            <Skeleton.Button active style={{ width: "20%" }} />
+          </div>
+        </Col>
+      ))}
+    </Row>
+  </div>
+);
 
 const UpdateSurvey = () => {
   const navigate = useNavigate();
@@ -310,10 +342,7 @@ const UpdateSurvey = () => {
           </div>
 
           {loading ? (
-            <div className="text-center py-12">
-              <Spin size="large" />
-              <div className="mt-4 text-gray-500">Loading surveys...</div>
-            </div>
+            <SurveySkeletonLoading />
           ) : surveys.length === 0 ? (
             <Empty
               description="No surveys found"

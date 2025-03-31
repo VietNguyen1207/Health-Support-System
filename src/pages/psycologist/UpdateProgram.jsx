@@ -19,6 +19,9 @@ import {
   Avatar,
   Divider,
   Space,
+  Skeleton,
+  Row,
+  Col,
 } from "antd";
 import {
   EditOutlined,
@@ -47,6 +50,107 @@ import UpdateProgramModal from "../../components/UpdateProgramModal";
 import { useNavigate } from "react-router-dom";
 
 const { Text, Title } = Typography;
+
+// Add this component inside the file (above the main component)
+const ProgramSkeletonLoading = () => (
+  <div>
+    <div className="mb-6 bg-gray-50 p-3 rounded-lg border border-gray-100">
+      <Row gutter={[16, 16]}>
+        <Col span={24} lg={12}>
+          <Skeleton.Button active style={{ width: 100, marginRight: 8 }} />
+          <Skeleton.Button active style={{ width: 100, marginRight: 8 }} />
+          <Skeleton.Button active style={{ width: 100 }} />
+        </Col>
+        <Col span={24} lg={12} className="flex justify-end">
+          <Skeleton.Button active style={{ width: 120, marginRight: 8 }} />
+          <Skeleton.Button active style={{ width: 120 }} />
+        </Col>
+      </Row>
+    </div>
+
+    <Skeleton active paragraph={{ rows: 0 }} />
+
+    <Row gutter={[16, 16]} className="mt-4">
+      {[...Array(5)].map((_, i) => (
+        <Col span={24} key={i}>
+          <Card bodyStyle={{ padding: 12 }}>
+            <Row gutter={16} align="middle">
+              <Col span={8}>
+                <Skeleton.Input active style={{ width: "100%" }} />
+                <Skeleton.Input
+                  active
+                  style={{ width: "60%", marginTop: 8 }}
+                  size="small"
+                />
+              </Col>
+              <Col span={4}>
+                <Skeleton.Button
+                  active
+                  shape="round"
+                  style={{ width: "80%" }}
+                />
+              </Col>
+              <Col span={4}>
+                <Skeleton.Input active style={{ width: "100%" }} size="small" />
+              </Col>
+              <Col span={4}>
+                <Skeleton.Input active style={{ width: "100%" }} size="small" />
+              </Col>
+              <Col span={4}>
+                <Skeleton.Button active style={{ width: "80%" }} />
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+      ))}
+    </Row>
+  </div>
+);
+
+// Also add a participant skeleton loading component
+const ParticipantsSkeletonLoading = () => (
+  <div>
+    <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+      <Row gutter={[16, 16]}>
+        <Col span={8}>
+          <Skeleton.Input active style={{ width: "80%" }} size="small" />
+          <Skeleton.Input active style={{ width: "60%", marginTop: 8 }} />
+        </Col>
+        <Col span={8}>
+          <Skeleton.Input active style={{ width: "80%" }} size="small" />
+          <Skeleton.Input active style={{ width: "60%", marginTop: 8 }} />
+        </Col>
+        <Col span={8}>
+          <Skeleton.Input active style={{ width: "80%" }} size="small" />
+          <Skeleton.Input active style={{ width: "60%", marginTop: 8 }} />
+        </Col>
+      </Row>
+
+      <Skeleton.Input active style={{ width: "100%", marginTop: 16 }} />
+    </div>
+
+    <Skeleton active paragraph={{ rows: 1 }} />
+
+    {[...Array(3)].map((_, i) => (
+      <Card key={i} className="mb-2">
+        <Row gutter={16}>
+          <Col span={6}>
+            <Skeleton avatar active paragraph={{ rows: 1 }} />
+          </Col>
+          <Col span={6}>
+            <Skeleton active paragraph={{ rows: 1 }} />
+          </Col>
+          <Col span={6}>
+            <Skeleton active paragraph={{ rows: 1 }} />
+          </Col>
+          <Col span={6}>
+            <Skeleton active paragraph={{ rows: 1 }} />
+          </Col>
+        </Row>
+      </Card>
+    ))}
+  </div>
+);
 
 const UpdateProgram = () => {
   const navigate = useNavigate();
@@ -499,10 +603,7 @@ const UpdateProgram = () => {
           </div>
 
           {loading ? (
-            <div className="text-center py-12">
-              <Spin size="large" />
-              <div className="mt-4 text-gray-500">Loading programs...</div>
-            </div>
+            <ProgramSkeletonLoading />
           ) : programs.length === 0 ? (
             <Empty
               description="No programs found"
@@ -585,9 +686,7 @@ const UpdateProgram = () => {
         }
       >
         {loadingParticipants ? (
-          <div className="flex justify-center py-12">
-            <Spin size="large" />
-          </div>
+          <ParticipantsSkeletonLoading />
         ) : (
           <div>
             {/* Program Details Section */}
