@@ -36,6 +36,7 @@ import {
   CalendarOutlined,
   FileTextOutlined,
   TeamOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useSurveyStore } from "../../stores/surveyStore";
@@ -83,6 +84,10 @@ const UpdateSurvey = () => {
   const [selectedSurvey, setSelectedSurvey] = useState(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [standardTypeFilter, setStandardTypeFilter] = useState("all");
+  const [creatorFilter, setCreatorFilter] = useState("all");
 
   // Survey Standard Types
   const standardTypes = [
@@ -173,6 +178,62 @@ const UpdateSurvey = () => {
     return Math.round((completed / total) * 100);
   };
 
+  // Filter surveys based on all criteria
+  const filterSurveys = () => {
+    if (!surveys || surveys.length === 0) return [];
+
+    return surveys.filter((survey) => {
+      // Apply category filter
+      if (categoryFilter !== "all" && survey.category !== categoryFilter) {
+        return false;
+      }
+
+      // Apply status filter
+      if (statusFilter !== "all" && survey.status !== statusFilter) {
+        return false;
+      }
+
+      // Apply standard type filter
+      if (
+        standardTypeFilter !== "all" &&
+        survey.standardType !== standardTypeFilter
+      ) {
+        return false;
+      }
+
+      // Apply creator filter
+      if (creatorFilter !== "all" && survey.createBy !== creatorFilter) {
+        return false;
+      }
+
+      // Apply search text filter
+      if (searchText) {
+        const searchLower = searchText.toLowerCase();
+        return (
+          survey.title.toLowerCase().includes(searchLower) ||
+          (survey.id || survey.surveyId).toLowerCase().includes(searchLower) ||
+          (survey.standardType || "").toLowerCase().includes(searchLower) ||
+          (survey.createBy || "").toLowerCase().includes(searchLower)
+        );
+      }
+
+      return true;
+    });
+  };
+
+  // Get unique creators for the filter
+  const getUniqueCreators = () => {
+    if (!surveys || surveys.length === 0) return [];
+
+    const creators = new Set(
+      surveys.map((survey) => survey.createBy).filter(Boolean)
+    );
+    return Array.from(creators);
+  };
+
+  // List of standard types from your data
+  const surveyStandardTypes = ["PSS_10", "GAD_7", "PHQ_9"];
+
   // Table columns configuration
   const columns = [
     {
@@ -193,18 +254,6 @@ const UpdateSurvey = () => {
           </div>
         </div>
       ),
-      filteredValue: searchText ? [searchText] : null,
-      onFilter: (value, record) => {
-        return (
-          record.title.toLowerCase().includes(value.toLowerCase()) ||
-          (record.id || record.surveyId)
-            .toLowerCase()
-            .includes(value.toLowerCase()) ||
-          (record.standardType || record.standType || "")
-            .toLowerCase()
-            .includes(value.toLowerCase())
-        );
-      },
     },
     {
       title: "Category",
@@ -222,12 +271,6 @@ const UpdateSurvey = () => {
           </Tag>
         );
       },
-      filters: [
-        { text: "Anxiety", value: "ANXIETY" },
-        { text: "Depression", value: "DEPRESSION" },
-        { text: "Stress", value: "STRESS" },
-      ],
-      onFilter: (value, record) => record.category === value,
     },
     {
       title: "Progress",
@@ -273,11 +316,6 @@ const UpdateSurvey = () => {
           </Tag>
         );
       },
-      filters: [
-        { text: "Active", value: "ACTIVE" },
-        { text: "Inactive", value: "INACTIVE" },
-      ],
-      onFilter: (value, record) => record.status === value,
     },
     {
       title: "Time Period",
@@ -330,6 +368,7 @@ const UpdateSurvey = () => {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 className="w-64"
+                allowClear
               />
               {/* <Button
                 type="primary"
@@ -338,6 +377,90 @@ const UpdateSurvey = () => {
               >
                 Create New Survey
               </Button> */}
+            </div>
+          </div>
+
+          {/* Filter bar */}
+          <div className="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex items-center gap-2">
+                <Text type="secondary">Category:</Text>
+                <Select
+                  defaultValue="all"
+                  value={categoryFilter}
+                  style={{ width: 140 }}
+                  onChange={(value) => setCategoryFilter(value)}
+                  options={[
+                    { value: "all", label: "All Categories" },
+                    { value: "ANXIETY", label: "Anxiety" },
+                    { value: "DEPRESSION", label: "Depression" },
+                    { value: "STRESS", label: "Stress" },
+                  ]}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Text type="secondary">Status:</Text>
+                <Select
+                  defaultValue="all"
+                  value={statusFilter}
+                  style={{ width: 120 }}
+                  onChange={(value) => setStatusFilter(value)}
+                  options={[
+                    { value: "all", label: "All Status" },
+                    { value: "ACTIVE", label: "Active" },
+                    { value: "INACTIVE", label: "Inactive" },
+                  ]}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Text type="secondary">Type:</Text>
+                <Select
+                  defaultValue="all"
+                  value={standardTypeFilter}
+                  style={{ width: 120 }}
+                  onChange={(value) => setStandardTypeFilter(value)}
+                  options={[
+                    { value: "all", label: "All Types" },
+                    ...surveyStandardTypes.map((type) => ({
+                      value: type,
+                      label: type.replace("_", "-"),
+                    })),
+                  ]}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Text type="secondary">Creator:</Text>
+                <Select
+                  defaultValue="all"
+                  value={creatorFilter}
+                  style={{ width: 150 }}
+                  onChange={(value) => setCreatorFilter(value)}
+                  options={[
+                    { value: "all", label: "All Creators" },
+                    ...getUniqueCreators().map((creator) => ({
+                      value: creator,
+                      label: creator,
+                    })),
+                  ]}
+                />
+              </div>
+
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() => {
+                  setCategoryFilter("all");
+                  setStatusFilter("all");
+                  setStandardTypeFilter("all");
+                  setCreatorFilter("all");
+                  setSearchText("");
+                  fetchSurveys();
+                }}
+              >
+                Reset
+              </Button>
             </div>
           </div>
 
@@ -350,7 +473,7 @@ const UpdateSurvey = () => {
             />
           ) : (
             <Table
-              dataSource={surveys}
+              dataSource={filterSurveys()}
               columns={columns}
               rowKey={(record) => record.id || record.surveyId}
               pagination={{ pageSize: 10 }}
