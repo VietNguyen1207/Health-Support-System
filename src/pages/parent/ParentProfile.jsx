@@ -102,7 +102,8 @@ const ParentProfile = () => {
             <Button
               onClick={() => fetchParentDetails()}
               type="primary"
-              className="bg-blue-500 hover:bg-blue-600">
+              className="bg-blue-500 hover:bg-blue-600"
+            >
               Try Again
             </Button>
           </div>
@@ -123,7 +124,8 @@ const ParentProfile = () => {
             <Button
               onClick={() => navigate("/")}
               type="primary"
-              className="bg-blue-500 hover:bg-blue-600">
+              className="bg-blue-500 hover:bg-blue-600"
+            >
               Go to Home
             </Button>
           </div>
@@ -215,7 +217,8 @@ const ParentProfile = () => {
                   : "border-gray-200 hover:border-custom-green/50"
               }`}
               onClick={() => setSelectedChild(child)}
-              bodyStyle={{ padding: "20px" }}>
+              bodyStyle={{ padding: "20px" }}
+            >
               <div className="flex items-center">
                 <Avatar
                   size={64}
@@ -236,7 +239,8 @@ const ParentProfile = () => {
                   <div className="flex flex-wrap gap-2">
                     <Tag
                       color={child.gender === "MALE" ? "blue" : "magenta"}
-                      className="rounded-full">
+                      className="rounded-full"
+                    >
                       {child.gender.charAt(0) +
                         child.gender.slice(1).toLowerCase()}
                     </Tag>
@@ -273,14 +277,17 @@ const ParentProfile = () => {
         <Card className="rounded-xl shadow-lg mb-8 overflow-hidden border-0">
           <div
             className="bg-gradient-to-r from-custom-green to-custom-green/80 p-8 text-white"
-            style={{ position: "relative", overflow: "hidden" }}>
+            style={{ position: "relative", overflow: "hidden" }}
+          >
             {/* Decorative circles */}
             <div
               className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10 bg-white"
-              style={{ transform: "translate(30%, -30%)" }}></div>
+              style={{ transform: "translate(30%, -30%)" }}
+            ></div>
             <div
               className="absolute bottom-0 left-0 w-40 h-40 rounded-full opacity-10 bg-white"
-              style={{ transform: "translate(-30%, 30%)" }}></div>
+              style={{ transform: "translate(-30%, 30%)" }}
+            ></div>
 
             <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6">
               <div className="w-28 h-28 bg-white rounded-full flex items-center justify-center shadow-md border-4 border-white">
@@ -289,7 +296,8 @@ const ParentProfile = () => {
                   style={{
                     color: "#3a6a49",
                     textShadow: "0 1px 2px rgba(255,255,255,0.2)",
-                  }}>
+                  }}
+                >
                   {selectedChild.fullName
                     .split(" ")
                     .map((name) => name[0])
@@ -330,7 +338,8 @@ const ParentProfile = () => {
               <Col xs={24} md={8}>
                 <Card
                   bordered={false}
-                  className="bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-all">
+                  className="bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-all"
+                >
                   <Statistic
                     title={
                       <div className="flex items-center">
@@ -373,7 +382,8 @@ const ParentProfile = () => {
               <Col xs={24} md={8}>
                 <Card
                   bordered={false}
-                  className="bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-all">
+                  className="bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-all"
+                >
                   <Statistic
                     title={
                       <div className="flex items-center">
@@ -416,7 +426,8 @@ const ParentProfile = () => {
               <Col xs={24} md={8}>
                 <Card
                   bordered={false}
-                  className="bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-all">
+                  className="bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-all"
+                >
                   <Statistic
                     title={
                       <div className="flex items-center">
@@ -557,7 +568,8 @@ const ParentProfile = () => {
           activeKey={activeTab}
           onChange={setActiveTab}
           type="card"
-          className="bg-white rounded-xl shadow-md p-6">
+          className="bg-white rounded-xl shadow-md p-6"
+        >
           <TabPane
             tab={
               <span className="flex items-center gap-2">
@@ -565,7 +577,8 @@ const ParentProfile = () => {
                 <span>Appointments</span>
               </span>
             }
-            key="1">
+            key="1"
+          >
             {renderAppointmentsTab()}
           </TabPane>
 
@@ -576,7 +589,8 @@ const ParentProfile = () => {
                 <span>Programs</span>
               </span>
             }
-            key="2">
+            key="2"
+          >
             {renderProgramsTab()}
           </TabPane>
 
@@ -587,7 +601,8 @@ const ParentProfile = () => {
                 <span>Assessments</span>
               </span>
             }
-            key="3">
+            key="3"
+          >
             {renderAssessmentsTab()}
           </TabPane>
         </Tabs>
@@ -604,13 +619,15 @@ const ParentProfile = () => {
         <div className="min-h-[300px] flex items-center justify-center">
           <Empty
             description="No appointments scheduled"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}>
-            <Button
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          >
+            {/* <Button
               type="primary"
               className="bg-custom-green hover:bg-custom-green/90 mt-4"
-              onClick={() => navigate("/book-appointment")}>
+              onClick={() => navigate("/book-appointment")}
+            >
               Book an Appointment
-            </Button>
+            </Button> */}
           </Empty>
         </div>
       );
@@ -647,7 +664,8 @@ const ParentProfile = () => {
               <Card
                 className="mb-4 hover:shadow-md transition-all"
                 bodyStyle={{ padding: "16px" }}
-                key={appointment.appointmentID}>
+                key={appointment.appointmentID}
+              >
                 <div className="flex flex-col space-y-4">
                   {/* Header with appointment ID and status */}
                   <div className="flex justify-between items-center border-b pb-3">
@@ -664,7 +682,8 @@ const ParentProfile = () => {
                     </div>
                     <Tag
                       color={getAppointmentStatusColor(appointment.status)}
-                      className="rounded-full px-3 py-1">
+                      className="rounded-full px-3 py-1"
+                    >
                       {appointment.status}
                     </Tag>
                   </div>
@@ -783,13 +802,15 @@ const ParentProfile = () => {
         <div className="min-h-[300px] flex items-center justify-center">
           <Empty
             description="No programs joined"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}>
-            <Button
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          >
+            {/* <Button
               type="primary"
               className="bg-custom-green hover:bg-custom-green/90 mt-4"
-              onClick={() => navigate("/program")}>
+              onClick={() => navigate("/program")}
+            >
               Browse Programs
-            </Button>
+            </Button> */}
           </Empty>
         </div>
       );
@@ -801,13 +822,14 @@ const ParentProfile = () => {
           <h2 className="text-xl font-semibold text-gray-900">
             Enrolled Programs
           </h2>
-          <Button
+          {/* <Button
             type="primary"
             className="bg-custom-green hover:bg-custom-green/90"
             icon={<BulbOutlined />}
-            onClick={() => navigate("/program")}>
+            onClick={() => navigate("/program")}
+          >
             Browse Programs
-          </Button>
+          </Button> */}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -824,7 +846,8 @@ const ParentProfile = () => {
               <Card
                 key={program.programID}
                 className="hover:shadow-lg transition-all border border-gray-100 rounded-xl overflow-hidden"
-                bodyStyle={{ padding: 0 }}>
+                bodyStyle={{ padding: 0 }}
+              >
                 <div className="p-5">
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="text-lg font-medium text-gray-800">
@@ -833,7 +856,8 @@ const ParentProfile = () => {
                     <div className="flex gap-2">
                       <Tag
                         color={getProgramStatusColor(program.status)}
-                        className="rounded-full">
+                        className="rounded-full"
+                      >
                         {program.status.charAt(0) +
                           program.status.slice(1).toLowerCase()}
                       </Tag>
@@ -843,7 +867,8 @@ const ParentProfile = () => {
                             ? "green"
                             : "default"
                         }
-                        className="rounded-full">
+                        className="rounded-full"
+                      >
                         {program.studentStatus}
                       </Tag>
                     </div>
@@ -912,13 +937,14 @@ const ParentProfile = () => {
         <div className="min-h-[300px] flex items-center justify-center">
           <Empty
             description="No assessments taken yet"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}>
-            <Button
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          >
+            {/* <Button
               type="primary"
               className="bg-custom-green hover:bg-custom-green/90 mt-4"
               onClick={() => navigate("/test")}>
               Take an Assessment
-            </Button>
+            </Button> */}
           </Empty>
         </div>
       );
@@ -934,7 +960,8 @@ const ParentProfile = () => {
             type="primary"
             className="bg-custom-green hover:bg-custom-green/90"
             icon={<FileTextOutlined />}
-            onClick={() => navigate("/test")}>
+            onClick={() => navigate("/test")}
+          >
             Take New Assessment
           </Button>
         </div>
@@ -963,7 +990,8 @@ const ParentProfile = () => {
             return (
               <Card
                 key={survey.surveyId}
-                className="hover:shadow-md transition-all rounded-xl overflow-hidden">
+                className="hover:shadow-md transition-all rounded-xl overflow-hidden"
+              >
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <Title level={4} className="m-0 mb-1">
@@ -1002,7 +1030,8 @@ const ParentProfile = () => {
                   <Button
                     type="primary"
                     className="bg-custom-green hover:bg-custom-green/90"
-                    onClick={() => navigate(`/test-result/${survey.surveyId}`)}>
+                    onClick={() => navigate(`/test-result/${survey.surveyId}`)}
+                  >
                     View Results
                   </Button>
                 </div>
@@ -1020,14 +1049,17 @@ const ParentProfile = () => {
       <Card className="rounded-xl shadow-lg mb-8 overflow-hidden border-0">
         <div
           className="bg-gradient-to-r from-blue-600 to-blue-500 p-8 text-white"
-          style={{ position: "relative", overflow: "hidden" }}>
+          style={{ position: "relative", overflow: "hidden" }}
+        >
           {/* Decorative circles */}
           <div
             className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10 bg-white"
-            style={{ transform: "translate(30%, -30%)" }}></div>
+            style={{ transform: "translate(30%, -30%)" }}
+          ></div>
           <div
             className="absolute bottom-0 left-0 w-40 h-40 rounded-full opacity-10 bg-white"
-            style={{ transform: "translate(-30%, 30%)" }}></div>
+            style={{ transform: "translate(-30%, 30%)" }}
+          ></div>
 
           <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="w-28 h-28 bg-white rounded-full flex items-center justify-center shadow-md border-4 border-white">
@@ -1036,7 +1068,8 @@ const ParentProfile = () => {
                 style={{
                   color: "#3b82f6",
                   textShadow: "0 1px 2px rgba(255,255,255,0.2)",
-                }}>
+                }}
+              >
                 {parentData.fullName
                   .split(" ")
                   .map((name) => name[0])
