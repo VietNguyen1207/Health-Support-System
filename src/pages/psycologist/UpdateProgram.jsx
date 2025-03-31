@@ -528,7 +528,7 @@ const UpdateProgram = () => {
               />
               <Button
                 type="primary"
-                onClick={() => navigate("/add-program")}
+                onClick={() => navigate("/manager/add-program")}
                 className="bg-custom-green hover:bg-custom-green/90"
               >
                 Create New Program

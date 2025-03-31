@@ -331,13 +331,13 @@ const UpdateSurvey = () => {
                 onChange={(e) => setSearchText(e.target.value)}
                 className="w-64"
               />
-              <Button
+              {/* <Button
                 type="primary"
-                onClick={() => navigate("/create-test")}
+                onClick={() => navigate("/manager/create-test")}
                 className="bg-custom-green hover:bg-custom-green/90"
               >
                 Create New Survey
-              </Button>
+              </Button> */}
             </div>
           </div>
 
