@@ -130,6 +130,18 @@ export const useUserStore = create((set, get) => {
       }
     },
 
+    updateUser:async (profileData, userId) => {
+      set({ loading: true, error: null });
+      try {
+        const endpoint = buildEndpoint(USER_URL + "update", userId);
+        const { data } = await api.put(endpoint, profileData);
+
+        return data;
+      } catch (error) {
+        return handleError(error, "Failed to update profile");
+      }
+    },
+
     // Update user role (only for Manager role)
     updateUserRole: async (userId, roleData) => {
       set({ loading: true, error: null });
